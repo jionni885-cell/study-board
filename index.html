@@ -974,7 +974,7 @@ function avance(ok){
   if(ok) toast('Bien joué ✓');
 }
 function juger(ok){ avance(ok); }
-function modeSet(md){ FQ.mode=md; const p=parse(); FQ.queue=fcQueue(p.mi,p.fi,md==='grid'||FQ.filter==='all'?false:true); if(FQ.mode==='match')FQ.queue=fcQueue(p.mi,p.fi,true); if(!FQ.queue.length)FQ.queue=fcQueue(p.mi,p.fi,true); FQ.pos=0; FQ.flipped=false; paintFC(); }
+function modeSet(md){ FQ.mode=md; const p=parse(); FQ.queue=fcQueue(p.mi,p.fi,FQ.filter==='all'); if(FQ.mode==='match')FQ.queue=fcQueue(p.mi,p.fi,true); if(!FQ.queue.length)FQ.queue=fcQueue(p.mi,p.fi,true); FQ.pos=0; FQ.flipped=false; paintFC(); }
 
 function renderFc(mi,fi){
   const f=D[mi].fiches[fi]; const rem=remain(mi,fi);
