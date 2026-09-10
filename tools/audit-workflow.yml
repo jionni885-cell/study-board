@@ -1,0 +1,29 @@
+# Modèle de CI : copier ce fichier dans .github/workflows/audit.yml
+# (le jeton GitHub App de la session Arena n'a pas la permission « workflows »,
+#  l'ajout doit donc être fait à la main une seule fois).
+name: Audit
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: Structure, contenus et fonctions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Audit dépôt (zéro dépendance)
+        run: python3 tools/audit.py
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Audit fonctionnel (jsdom)
+        working-directory: tools
+        run: |
+          npm install --no-audit --no-fund
+          node audit-dom.mjs
