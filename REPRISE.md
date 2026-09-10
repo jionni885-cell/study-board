@@ -191,8 +191,44 @@ conservant le dossier `media/` à côté.
 
 Répondre toujours en français, simplement et clairement.
 
+## 🧳 Contexte récupéré des sessions précédentes
+
+La branche ancienne demandée dans la reprise, `arena/01a08bd3-study-board`,
+correspond à la **PR #3** et a déjà été fusionnée dans `main` le 10 septembre
+2026. Son commit de contenu est `d7443fb` et le commit de fusion est `793c711`.
+Le checkout de la session actuelle (`arena/01a08c66-study-board`) part de ce
+commit : l'arbre de la branche ancienne et celui-ci sont identiques. Il ne faut
+pas recréer ni utiliser l'ancienne branche.
+
+Résumé complet des trois sessions précédentes :
+
+- **PR #1 — `arena/01a07f86-study-board` (8 septembre 2026)** : relecture et
+  correction des quatre matières, suppression des méta-notes incertaines,
+  enrichissement des fiches, ajout des phrases utiles en anglais, des défis et
+  des cinq récapitulatifs MP3 ; les lecteurs `.m4a` absents sont masqués.
+- **PR #2 — `arena/01a085eb-study-board` (9 septembre 2026)** : création de cette
+  mémoire `REPRISE.md`, bandeau de lecture dans `README.md`, correction du
+  filtrage « À réviser » des quatre modes de cartes et régénération du ZIP sans
+  fichiers `.m4a` privés.
+- **PR #3 — `arena/01a08bd3-study-board` (10 septembre 2026)** : ajout des
+  synthèses finales des fiches 1-1, 2-0 et 3-0, sécurisation des adresses et de
+  l'état local, masquage audio robuste, audits `tools/audit.py` et
+  `tools/audit-dom.mjs`, ainsi que le modèle `tools/audit-workflow.yml`.
+
+La vérification du dépôt et de l'historique confirme qu'aucun fichier source du
+jour (ni `Ses 3.m4a`, ni `Philosophie 1 début.m4a`, ni les six photos) n'est
+présent dans le checkout ou dans la branche ancienne. Les `.m4a` sont privés et
+ne doivent pas être commités ; si ces documents ont été joints dans une
+conversation précédente, ils doivent être joints à nouveau dans cette session
+pour que leur contenu soit accessible. Tant qu'ils ne sont pas disponibles, il
+est interdit d'inventer la suite SES, la fiche Philosophie ou les contenus des
+photos.
+
 ## 🕘 Historique des mises à jour
 
+- **10 septembre 2026 (reprise actuelle)** — Contexte des PR #1, #2 et #3
+  vérifié via l'historique GitHub et ajouté ci-dessus ; la branche ancienne est
+  déjà fusionnée. Aucun document source du jour n'est présent dans le checkout.
 - **10 septembre 2026** — Synthèses finales « Ce qu'il faut retenir » ajoutées
   (1-1 p.3, 2-0 p.6, 3-0 p.4) ; filtrage des cartes corrigé (plus de repli forcé
   sur la liste complète), `parse()` sécurisé sur les adresses invalides,
