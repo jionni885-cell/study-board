@@ -1,7 +1,7 @@
 # PROMPT DE REPRISE — STUDY BOARD
 
 > Document de mémoire permanente du dépôt. À lire avant toute modification.
-> Dernière mise à jour : **9 septembre 2026**.
+> Dernière mise à jour : **10 septembre 2026**.
 
 ## 🎯 Mission
 
@@ -50,11 +50,11 @@ Les données vivent dans `const D` dans `index.html`.
 |---|---|---:|---:|---:|---:|---:|---|
 | 0-0 | SES — Les sources et les défis de la croissance économique | 5 | 9 | 8 | 16 | 16 | `ses-croissance` |
 | 1-0 | HGGSP — Faire la guerre, faire la paix : conflits et modes de résolution | 4 | 3 | 3 | 12 | 10 | `hggsp-guerre` |
-| 1-1 | HGGSP — Cartographier les guerres et les conflits : limites et enjeux | 2 | 0 | 0 | 6 | 4 | `hggsp-cartographier` |
-| 2-0 | Histoire — La crise de 1929 : le krach boursier et ses mécanismes | 5 | 3 | 3 | 11 | 10 | `histoire-1929` |
-| 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 4 | 4 | 0 | 19 | 10 | `anglais-heroes` |
+| 1-1 | HGGSP — Cartographier les guerres et les conflits : limites et enjeux | 3 | 0 | 0 | 6 | 4 | `hggsp-cartographier` |
+| 2-0 | Histoire — La crise de 1929 : le krach boursier et ses mécanismes | 6 | 3 | 3 | 11 | 10 | `histoire-1929` |
+| 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 5 | 4 | 0 | 19 | 10 | `anglais-heroes` |
 
-**Totaux : 4 matières, 5 fiches, 20 parties, 64 cartes, 50 questions et
+**Totaux : 4 matières, 5 fiches, 23 parties, 64 cartes, 50 questions et
 5 fichiers MP3.**
 
 La matière Philosophie n'est pas encore créée : elle attend le fichier source.
@@ -112,10 +112,39 @@ Lire cette structure avant toute édition :
 8. Chaque fiche doit comporter au moins deux astuces/pièges dans `EX6` lorsque
    des défis sont disponibles.
 
+## 🧪 Audits automatiques du dépôt
+
+Deux outils rejouent le GAUNTLET LOOP ; ils sont la référence, pas l'œil :
+
+- `python3 tools/audit.py` — zéro dépendance : structure de `index.html` et des
+  trois blocs `<script>`, syntaxe JavaScript via `node --check`, données `D`,
+  `DF6`, `EX6`, `AUDIOF` (extraction puis `eval`), cohérence des `_nb`, phrases
+  interdites, fichiers `.m4a` suivis par git, fichiers > 30 Mo, tables du
+  `README.md` et de `REPRISE.md`, synchronisation de `StudyBoard-app.zip`.
+  `python3 tools/audit.py --fix-zip` resynchronise l'archive. Code de sortie 1
+  dès qu'un problème est détecté ; les formats de défi absents ne sont que des
+  avertissements (chaque fiche doit garder plusieurs formats, pas les cinq).
+- `cd tools && npm install && node audit-dom.mjs` — audit fonctionnel jsdom :
+  joue **tous** les défis express (5 bonnes réponses + 3 erronées par fiche,
+  transitions animées comprises), les 50 questions de quiz avec reprise, les
+  4 modes de cartes × 2 filtres × 5 fiches, le mode Écrire, la visibilité des
+  boîtes `.m4a`, puis la robustesse (8 états `localStorage` abîmés, 6 adresses
+  invalides, thème). Code de sortie 1 en cas de défaut ou d'erreur JS.
+- `tools/audit-workflow.yml` est le modèle de CI à copier en
+  `.github/workflows/audit.yml` (une seule fois) : il exécute les deux audits à
+  chaque `push` et chaque `pull request`. Le jeton GitHub App des sessions
+  Arena n'a pas la permission « workflows » : créer ce fichier à la main depuis
+  l'interface GitHub si besoin, sans bloquer la livraison.
+- `tools/node_modules/` n'est jamais committé (`tools/.gitignore`).
+
+Les deux audits doivent afficher **0 problème** avant toute livraison.
+
 ## 🧪 GAUNTLET LOOP — obligatoire avant livraison
 
 Avant de livrer une modification :
 
+- lancer `python3 tools/audit.py` puis `node tools/audit-dom.mjs` et corriger
+  chaque problème jusqu'à **0 défaut** ;
 - auditer la structure complète de `D`, `EXTRA`, `DF6` et `EX6` ;
 - vérifier chaque type de bloc et chaque clé de fiche ;
 - vérifier chaque quiz : options, index de réponse valide et explication ;
@@ -164,6 +193,15 @@ Répondre toujours en français, simplement et clairement.
 
 ## 🕘 Historique des mises à jour
 
+- **10 septembre 2026** — Synthèses finales « Ce qu'il faut retenir » ajoutées
+  (1-1 p.3, 2-0 p.6, 3-0 p.4) ; filtrage des cartes corrigé (plus de repli forcé
+  sur la liste complète), `parse()` sécurisé sur les adresses invalides,
+  `normState()` purge les index hors bornes, boîte audio masquée jusqu'au
+  chargement réel, fin de séance sans boutons fantômes (« Revoir »/« Encore »
+  poussés seulement s'il reste des cartes). Création des audits
+  `tools/audit.py` et `tools/audit-dom.mjs` et de la CI
+  `tools/audit-workflow.yml` (modèle de CI) ; compteurs « parties » du `README.md`
+  et de ce fichier alignés sur le contenu réel (23 parties).
 - **8 septembre 2026** — Contenu corrigé et enrichi : définitions, nouveaux
   passages SES/HGGSP/Histoire/Anglais, défis express, lecteurs audio robustes et
   README adapté.

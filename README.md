@@ -62,39 +62,43 @@ Le site en ligne est disponible à l'adresse :
 
 ---
 
-## 📚 Contenu (état au 9 septembre 2026)
+## 📚 Contenu (état au 10 septembre 2026)
 
 | Index | Matière / fiche | Parties | Définitions (dont mot pour mot) | Cartes | Quiz | Défis |
 |---|---|---:|---:|---:|---:|---:|
 | 0-0 | SES — Les sources et les défis de la croissance économique | 5 | 9 (8) | 16 | 16 | 5 formats |
 | 1-0 | HGGSP — Faire la guerre, faire la paix : conflits et modes de résolution | 4 | 3 (3) | 12 | 10 | 4 formats |
-| 1-1 | HGGSP — Cartographier les guerres et les conflits : limites et enjeux | 2 | 0 (0) | 6 | 4 | 4 formats |
-| 2-0 | Histoire — La crise de 1929 : le krach boursier et ses mécanismes | 5 | 3 (3) | 11 | 10 | 4 formats |
-| 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 4 | 4 (0) | 19 | 10 | 4 formats |
+| 1-1 | HGGSP — Cartographier les guerres et les conflits : limites et enjeux | 3 | 0 (0) | 6 | 4 | 4 formats |
+| 2-0 | Histoire — La crise de 1929 : le krach boursier et ses mécanismes | 6 | 3 (3) | 11 | 10 | 4 formats |
+| 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 5 | 4 (0) | 19 | 10 | 4 formats |
 
-**Totaux actuels : 20 parties, 64 cartes, 50 questions, 5 récapitulatifs MP3.**
+**Totaux actuels : 23 parties, 64 cartes, 50 questions, 5 récapitulatifs MP3.**
 
 La matière **Philosophie** (index 4) et les nouveaux contenus du jour seront
 ajoutés uniquement après réception des documents sources. Aucun cours ne doit
 être inventé à partir de suppositions.
 
-Chaque fiche propose des parties détaillées, des définitions « mot pour mot » 🎯,
-des exemples, repères (faits clés, schémas, frises, tableaux, mini-questions),
-des astuces et pièges, des cartes, les modes Étudier/Écrire/Associer/Grille,
-un quiz, des défis express et un récapitulatif audio.
+Chaque fiche propose des parties détaillées, une synthèse finale
+**« Ce qu'il faut retenir »**, des définitions « mot pour mot » 🎯, des exemples,
+repères (faits clés, schémas, frises, tableaux, mini-questions), des astuces et
+pièges, des cartes, les modes Étudier/Écrire/Associer/Grille, un quiz, des défis
+express et un récapitulatif audio.
 
 ---
 
-## 🧪 Vérifications
+## 🧪 Vérifications automatiques
 
-Avant chaque livraison :
+Deux outils vérifient le dépôt et bloquent toute régression :
 
-- vérifier la structure de `index.html` et les trois blocs JavaScript ;
-- vérifier les compteurs par fiche (`_nb`) ;
-- vérifier les questions (options, index `reponse`, explication) ;
-- vérifier les défis (formats, réponses et explications) ;
-- vérifier le responsive mobile/ordinateur ;
-- synchroniser `StudyBoard-app.zip` avec `index.html`, `README.md` et `media/` ;
-- ne jamais inclure de fichier `.m4a`.
+```bash
+python3 tools/audit.py          # structure, compteurs, contenus interdits, audios, ZIP, README/REPRISE
+python3 tools/audit.py --fix-zip  # resynchronise StudyBoard-app.zip
+cd tools && npm install && node audit-dom.mjs   # audit fonctionnel (jsdom) : défis, quiz, cartes, robustesse
+```
+
+`tools/audit.py` ne demande rien à installer. Le fichier `tools/audit-workflow.yml`
+est prêt à être copié en `.github/workflows/audit.yml` pour lancer les deux audits
+automatiquement à chaque `push` / `pull request`.
+Les deux audits doivent afficher **0 défaut** avant toute livraison.
 
 La mémoire de reprise complète et l'historique sont dans [`REPRISE.md`](REPRISE.md).
