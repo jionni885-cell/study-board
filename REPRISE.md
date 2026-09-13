@@ -1,7 +1,7 @@
 # PROMPT DE REPRISE — STUDY BOARD
 
 > Document de mémoire permanente du dépôt. À lire avant toute modification.
-> Dernière mise à jour : **13 septembre 2026 (PR #7)**.
+> Dernière mise à jour : **13 septembre 2026 (PR #8)**.
 
 ## 🎯 Mission
 
@@ -261,6 +261,7 @@ un commentaire ; et vérifier qu'un commit cité existe vraiment
 
 ## 🕘 Historique des mises à jour
 
+- **13 septembre 2026 (PR #8, session `arena/01a09ad4-study-board`)** — Correctif **clic Exposés** : `onclick="go('expose/'+e.id)"` (évalué au clic, `e` indéfini) corrigé en `go('expose/${e.id}')` (interpolé au rendu) ; `exp-part-'+i` corrigé en `exp-part-${i}` pour le sommaire. Le bouton 🇾🇪 ouvre désormais `#/expose/yemen` et le plan scrolle. Vérifications : jsdom `.expo` → `go('expose/yemen')` → `renderExpose()` OK, `python3 tools/audit.py` 0 problème, ZIP resynchronisé.
 - **13 septembre 2026 (PR #7, session `arena/01a09997-study-board`)** — Section **Exposés** et exposé **HGGSP — La guerre au Yémen (5 min)** : `const EXPOSES` (après `AUD`) avec problématique, 3 parties + conclusion, 5 chiffres clés et frise 2011‑2025 ; `renderHome()` affiche la liste des exposés sur l’accueil (après Matières, `EXPOSES.length` = 1, bouton 🇾🇪 + tag duree), `parse()` route `#/expose/yemen`, `renderExpose()` rend l’exposé (crumb, tags, audio `hggsp-yemen.mp3`, chiffres, frise, parties via `blockHTML`, sources) et `paintCrumb()` gère le fil d’Ariane exposé ; CSS `.expo-list/.expo/.e-ic/.tag-duree` ; `media/audio/hggsp-yemen.mp3` (copie de `hggsp-guerre`, 349 Ko) et `StudyBoard-app.zip` resynchronisé (9 fichiers). Vérifications : `python3 tools/audit.py` 0 problème, `node --check` 0 erreur, jsdom `#/expose/yemen` rendu vérifié, ZIP cohérent. PR #7 ouverte depuis `arena/01a09997-study-board` (commit `ccda5d1`) vers `main`.
 - **13 septembre 2026 (PR #6, session `arena/01a09997-study-board`)** — Lisibilité
   des fiches et parcours de révision, dans `index.html` uniquement (+52 / −14) :

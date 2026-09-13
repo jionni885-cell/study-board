@@ -767,7 +767,7 @@ function renderHome(){
     </button>`}).join('')+`</div>
   <div class="sec"><h2>Expos\u00e9s</h2><span class="cnt">${EXPOSES.length}</span><span style="font-size:.76rem;color:var(--ink-3);font-weight:600;margin-left:8px">5 min \u00b7 pr\u00eats pour l\u2019oral</span></div>
   <div class="expo-list">`+
-  EXPOSES.map(e=>`<button class="expo" onclick="go('expose/'+e.id)">
+  EXPOSES.map(e=>`<button class="expo" onclick="go('expose/${e.id}')">
       <span class="e-ic">${e.emoji||'\\uD83C\\uDFA4'}</span>
       <span class="mid"><h3>${esc(e.titre)} <span class="tag-duree">${esc(e.duree)}</span></h3><div class="d">${esc(e.matiere)} \u00b7 ${esc(e.accroche)}</div></span>
       <span class="chev">`+ic('chevR',18)+`</span>
@@ -997,7 +997,7 @@ function renderExpose(id){
     <p style="color:var(--ink-2);margin-top:6px;max-width:62ch">${esc(e.accroche)}</p>
     <div style="margin-top:12px;background:var(--acc-soft);border:1px solid var(--line);border-radius:12px;padding:12px 14px"><b style="color:var(--acc-2)">Probl\u00e9matique :</b> ${esc(e.problematique)}</div>
     ${audioBox}
-    <div class="sommaire" style="margin-top:14px"><div class="som-t">${ic('book2',13)} Plan de l\u2019expos\u00e9 (5 min)</div><nav class="hnav">`+e.parties.map((pt,i)=>`<button type="button" onclick="document.getElementById('exp-part-'+i).scrollIntoView({behavior:'smooth',block:'start'})"><span class="sn">${i+1}</span>${esc(pt.titre)}</button>`).join('')+`</nav></div>
+    <div class="sommaire" style="margin-top:14px"><div class="som-t">${ic('book2',13)} Plan de l\u2019expos\u00e9 (5 min)</div><nav class="hnav">`+e.parties.map((pt,i)=>`<button type="button" onclick="document.getElementById('exp-part-${i}').scrollIntoView({behavior:'smooth',block:'start'})"><span class="sn">${i+1}</span>${esc(pt.titre)}</button>`).join('')+`</nav></div>
   </div>`;
   // chiffres cl\u00e9s
   if(e.chiffres && e.chiffres.length){
