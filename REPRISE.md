@@ -1,7 +1,7 @@
 # PROMPT DE REPRISE — STUDY BOARD
 
 > Document de mémoire permanente du dépôt. À lire avant toute modification.
-> Dernière mise à jour : **13 septembre 2026**.
+> Dernière mise à jour : **13 septembre 2026 (PR #6)**.
 
 ## 🎯 Mission
 
@@ -83,6 +83,13 @@ Lire cette structure avant toute édition :
 - `const DF6 = {...}` contient les défis express propres à chaque fiche.
 - `const EX6 = {...}` contient les encadrés `astro` et `piege`.
 - `const AUDIOF = {...}` associe chaque clé de fiche au slug MP3.
+- `renderLire()` renvoie `sommaire + parties + extra` : le sommaire cliquable
+  `.sommaire > nav.hnav` appelle `goPart(i)`, qui fait défiler jusqu'à la section
+  `#part-i` (`#part-x` pour « Pour aller plus loin »). Ces identifiants doivent
+  rester en place pour toute nouvelle partie.
+- Le parcours de révision est matérialisé en trois étapes **Lire → Mémoriser →
+  Vérifier** : bloc `.steps` sur l'accueil et pastilles `.st` numérotées 1/2/3
+  dans les onglets `Lire / Cartes / Quiz` de la fiche.
 - `flashcards` utilise `{face, verso}`.
 - `quiz` utilise `{q, options, reponse, expl}` ; `reponse` est un index dans
   `options` et `expl` est obligatoire.
@@ -115,6 +122,11 @@ Lire cette structure avant toute édition :
    charge sont : `vf`, `cloze`, `order`, `intrus`, `sort`.
 8. Chaque fiche doit comporter au moins deux astuces/pièges dans `EX6` lorsque
    des défis sont disponibles.
+9. Lisibilité mobile : ne jamais réintroduire `overflow-wrap:anywhere` ni
+   `word-break:break-all` — ces propriétés coupent les mots en deux. Utiliser
+   `overflow-wrap:break-word`, déjà posé sur `body`, `.f-title`, `.pills li`,
+   `.list li`, `.table-w td/th`, `.schema .node`, `.tl span`, `.fact span` et
+   `.probe .popt`.
 
 ## 🧪 Audits automatiques du dépôt
 
@@ -200,7 +212,7 @@ Répondre toujours en français, simplement et clairement.
 La branche ancienne demandée dans la reprise, `arena/01a08bd3-study-board`,
 correspond à la **PR #3** et a déjà été fusionnée dans `main` le 10 septembre
 2026. Son commit de contenu est `d7443fb` et le commit de fusion est `793c711`.
-Le checkout de la session actuelle (`arena/01a08c66-study-board`) part de ce
+Le checkout de la session `arena/01a08c66-study-board` (PR #4) partait de ce
 commit : l'arbre de la branche ancienne et celui-ci sont identiques. Il ne faut
 pas recréer ni utiliser l'ancienne branche.
 
@@ -229,9 +241,42 @@ commités ; seuls leurs contenus (transcriptions locales) alimentent les fiches.
 Deux photos (20260908_210833 et 20260908_210837, tableaux manuscrits) sont
 restées illisibles à l'OCR : leur contenu n'a pas été inventé.
 
+La branche `arena/01a08c9a-study-board` correspond à la **PR #5** (commit de
+contenu `042b33e`, commit de fusion `d68d9a8`) : elle est entièrement dans
+`main`, il ne faut ni la repousser ni rouvrir de PR depuis elle.
+
+**Piège à ne pas reproduire (session PR #6).** Les corrections de lisibilité
+« V7 » — sommaire cliquable, `overflow-wrap:break-word`, parcours Lire →
+Mémoriser → Vérifier, typographie mobile — avaient été faites dans une session
+antérieure **sans jamais être poussées** : `main` contenait encore les 6
+`overflow-wrap:anywhere` qui coupent les mots en deux, et le CSS `.hnav`
+n'était utilisé par aucun HTML (aucun sommaire ne s'affichait, malgré le
+commentaire `renderLire : bannière + sommaire`). Avant d'affirmer qu'une
+fonctionnalité est en ligne, vérifier qu'elle est réellement **rendue** dans le
+DOM (ou dans le code qui le génère), pas seulement présente dans le CSS ou dans
+un commentaire ; et vérifier qu'un commit cité existe vraiment
+(`git cat-file -t <sha>`).
+
 ## 🕘 Historique des mises à jour
 
-- **13 septembre 2026 (session actuelle)** — Documents sources du jour récupérés
+- **13 septembre 2026 (PR #6, session `arena/01a09997-study-board`)** — Lisibilité
+  des fiches et parcours de révision, dans `index.html` uniquement (+52 / −14) :
+  remplacement des 6 `overflow-wrap:anywhere` par `overflow-wrap:break-word`
+  (plus `body` et `.f-title`) — les mots ne sont plus coupés en deux ; sommaire
+  cliquable réellement rendu en tête de l'onglet Lire (le CSS `.hnav` existait
+  mais n'était utilisé par aucun HTML) avec 29 boutons pour les 6 fiches,
+  `goPart(i)` et sections `#part-i` / `#part-x` ; parcours **Lire → Mémoriser →
+  Vérifier** (bloc `.steps` numéroté sur l'accueil, onglets de fiche numérotés
+  1/2/3 via `.st`) ; typographie mobile renforcée sous 560 px (`.part`, `.def`,
+  `.ex`, `.notice2`, `.sommaire`). `StudyBoard-app.zip` resynchronisé. Aucun
+  contenu modifié : `D`, `EXTRA`, `DF6`, `EX6`, `AUDIOF` et les compteurs `_nb`
+  sont inchangés, le tableau ci-dessus reste exact. Vérifications :
+  `python3 tools/audit.py` 0 problème, `node tools/audit-dom.mjs` 0 défaut et
+  0 erreur JS (6 fiches, 9 défis joués, 64 questions), `git diff --check` OK,
+  plus un contrôle jsdom dédié aux nouveautés (29/29 boutons de sommaire,
+  `onclick="goPart(i)"` ↔ `#part-i`, sommaire avant les parties, `goPart(999)`
+  inoffensif, onglets numérotés 123).
+- **13 septembre 2026 (PR #5, session `arena/01a08c9a-study-board`)** — Documents sources du jour récupérés
   via GitHub (`study-board-sources`) ; transcription locale des audios
   (whisper.cpp + modèle ggml-small) et OCR des photos (tesseract.js). Création
   de la matière **Philosophie** (index 4, fiche 4-0 : étymologie, Socrate,
