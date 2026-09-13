@@ -38,7 +38,7 @@ html[data-theme=dark]{
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{font:400 15.5px/1.62 var(--f);background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+body{font:400 15.5px/1.62 var(--f);background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-wrap:break-word;transition:background .25s,color .25s}
 h1,h2,h3,h4{font-family:var(--fd);letter-spacing:-.015em;line-height:1.2;font-weight:700}
 button,input{font-family:inherit;font-size:inherit}
 button{cursor:pointer;background:none;border:none;color:inherit}
@@ -346,7 +346,7 @@ html[data-theme=dark] .probe .ph2{color:#9CC4FF}
 @media(max-width:700px){
   .mode{width:100%}
   .mode button{flex:1;padding:8px 6px;font-size:.8rem;justify-content:center;white-space:nowrap}
-  .f-title{word-break:break-word}
+  .f-title{overflow-wrap:break-word}
   .subj{min-width:0;overflow:hidden}
   .subj .mid,.subj .meta,.subj .g-bar{min-width:0;max-width:100%}
   .subj .meta .m{white-space:normal}
@@ -362,18 +362,18 @@ html[data-theme=dark] .probe .ph2{color:#9CC4FF}
 .mode button:hover{color:var(--ink)}
 /* ============ ANTI-DÉBORDEMENT MOBILE (boucle gauntlet) ============ */
 .pills{grid-template-columns:minmax(0,1fr)}
-.pills li,.list li{min-width:0;overflow-wrap:anywhere}
+.pills li,.list li{min-width:0;overflow-wrap:break-word}
 .table-w{overflow-x:auto;max-width:100%}
 .table-w .tb{width:max-content;min-width:100%}
 @media (max-width:560px){
   .table-w .tb{table-layout:fixed;width:100%}
-  .table-w td,.table-w th{overflow-wrap:anywhere;word-break:break-word}
-  .schema .node{overflow-wrap:anywhere}
-  .tl span{overflow-wrap:anywhere}
+  .table-w td,.table-w th{overflow-wrap:break-word}
+  .schema .node{overflow-wrap:break-word}
+  .tl span{overflow-wrap:break-word}
   .pills li{font-size:.88rem;line-height:1.45}
   .facts{grid-template-columns:1fr}
-  .fact span{overflow-wrap:anywhere}
-  .probe .popt{overflow-wrap:anywhere}
+  .fact span{overflow-wrap:break-word}
+  .probe .popt{overflow-wrap:break-word}
 }
 /* ============ CONTRASTES (boucle gauntlet, 2e passe) ============ */
 .facts .fact span{color:var(--ink-2)}
@@ -527,6 +527,37 @@ html[data-theme=dark] .probe .ph2{color:#9CC4FF}
 .audiobox audio{max-width:100%;height:34px;flex:1;min-width:180px}
 @media (max-width:560px){.audiobox{gap:9px}.audiobox .alab span{display:none}}
 
+/* ============ V7 — lisibilité & parcours ============ */
+/* sommaire cliquable de la fiche */
+.sommaire{margin:2px 0 16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:13px 15px;box-shadow:var(--sh)}
+.som-t{display:flex;align-items:center;gap:7px;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:9px}
+.sommaire .hnav{margin:0;gap:7px}
+.sommaire .hnav button{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:99px;font-size:.82rem;border:1px solid var(--line);background:var(--card-2);color:var(--ink-2);text-align:left;line-height:1.3;transition:.14s}
+.sommaire .hnav button .sn{flex:none;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--acc-soft);color:var(--acc-2);font-weight:800;font-size:.72rem;font-family:var(--fd)}
+.sommaire .hnav button:hover{border-color:var(--acc);color:var(--ink);background:var(--acc-soft)}
+/* parcours 3 étapes (accueil) */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 22px}
+.step{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;box-shadow:var(--sh)}
+.step .sn{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--acc);color:#fff;font-family:var(--fd);font-weight:800;font-size:.82rem}
+.step b{font-size:.88rem;display:block;line-height:1.25}
+.step span{font-size:.74rem;color:var(--ink-3)}
+/* numéros d'étape dans les onglets Lire/Cartes/Quiz */
+.mode .st{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:rgba(127,138,158,.18);font-size:.66rem;font-weight:800;font-family:var(--fd)}
+.mode button.on .st{background:rgba(255,255,255,.28)}
+/* lisibilité mobile : texte plus grand, blocs mieux aérés */
+@media (max-width:560px){
+  .steps{grid-template-columns:1fr;gap:8px}
+  .step{padding:11px 13px}
+  .sommaire{padding:12px 13px;border-radius:12px}
+  .part{padding:18px 16px}
+  .part h2{font-size:1.05rem;line-height:1.3}
+  .part p{font-size:.95rem;line-height:1.62}
+  .def{padding:13px 14px}
+  .def .dt{font-size:.96rem}
+  .def p{font-size:.92rem;line-height:1.55}
+  .ex{font-size:.9rem;line-height:1.5}
+  .notice2{font-size:.88rem;line-height:1.5}
+}
 </style>
 </head>
 <body>
@@ -681,6 +712,11 @@ function renderHome(){
     <h1>Prépare-toi à réussir.</h1>
     <p>${tot.f} fiches construites à partir de tes cours : lis, mémorise les définitions, retourne les cartes et vérifie-toi avec les quiz.</p>
   </div>
+  <div class="steps">
+    <div class="step"><span class="sn">1</span><div><b>Lire</b><span>Comprends la fiche de cours</span></div></div>
+    <div class="step"><span class="sn">2</span><div><b>Mémoriser</b><span>Retourne les cartes</span></div></div>
+    <div class="step"><span class="sn">3</span><div><b>Vérifier</b><span>Quiz et défis express</span></div></div>
+  </div>
   <div class="resume">
     <div class="rev">
       <h3>${ic('target',15)} Progression globale</h3>
@@ -739,9 +775,9 @@ function fh(mi,fi,tab){
     ${m.fiches.map((ff,i)=>`<button class="chip" style="cursor:pointer;${i===fi?'background:var(--ink);color:var(--bg);border-color:var(--ink)':''}" onclick="fiche(${mi},${i},'lire')">${i+1}. ${esc(ff.titre.split(':')[0])}</button>`).join('')}</div>`:'';
   const best=bestS(mi,fi);
   const mode=`<div class="mode">
-    <button class="${tab==='lire'?'on':''}" onclick="fiche(${mi},${fi},'lire')">${ic('book2',14)} Lire</button>
-    <button class="${tab==='fc'?'on':''}" onclick="fiche(${mi},${fi},'fc')">${ic('layers',14)} Cartes <span class="nb">${f.flashcards.length}</span></button>
-    <button class="${tab==='quiz'?'on':''}" onclick="fiche(${mi},${fi},'quiz')">${ic('brain',14)} Quiz <span class="nb">${f.quiz.length}</span></button>
+    <button class="${tab==='lire'?'on':''}" onclick="fiche(${mi},${fi},'lire')"><span class="st">1</span> Lire</button>
+    <button class="${tab==='fc'?'on':''}" onclick="fiche(${mi},${fi},'fc')"><span class="st">2</span> Cartes <span class="nb">${f.flashcards.length}</span></button>
+    <button class="${tab==='quiz'?'on':''}" onclick="fiche(${mi},${fi},'quiz')"><span class="st">3</span> Quiz <span class="nb">${f.quiz.length}</span></button>
   </div>`;
   /* Lecture des prises de notes originales (.m4a) : la boîte reste MASQUÉE tant
      qu'aucun fichier n'est réellement disponible. Elle ne s'affiche que si le
@@ -999,14 +1035,16 @@ function renderLire(mi,fi){
   const f=D[mi].fiches[fi];
   const parts=f.parties.map((p,i)=>{
     const rec=/retenir|essentiel/i.test(p.titre);
-    return '<section class="part'+(rec?' recap':'')+'"><div class="ph"><span class="n">'+(i+1)+'</span><h2>'+esc(p.titre)+'</h2></div>'+
+    return '<section id="part-'+i+'" class="part'+(rec?' recap':'')+'"><div class="ph"><span class="n">'+(i+1)+'</span><h2>'+esc(p.titre)+'</h2></div>'+
       (p.sources?'<div class="psub">'+p.sources.map(esc).join(' · ')+'</div>':'')+
       p.blocs.map(blockHTML).join('')+'</section>';
   }).join('');
+  const sommaire='<div class="sommaire"><div class="som-t">'+ic('book2',13)+' Sommaire de la fiche</div><nav class="hnav">'+f.parties.map((p,i)=>'<button type="button" onclick="goPart('+i+')"><span class="sn">'+(i+1)+'</span>'+esc(p.titre)+'</button>').join('')+'</nav></div>';
   const ex=EXTRA[mi+'-'+fi]||[];
-  const extra=ex.length? '<section class="part recap"><div class="ph"><span class="n">✦</span><h2>Pour aller plus loin & te tester</h2></div><div class="psub">Repères, schémas, frises, tableaux et mini-questions pour ancrer tes révisions.</div>'+ex.map(blockHTML).join('')+'</section>':'';
-  return parts+extra;
+  const extra=ex.length? '<section id="part-x" class="part recap"><div class="ph"><span class="n">✦</span><h2>Pour aller plus loin & te tester</h2></div><div class="psub">Repères, schémas, frises, tableaux et mini-questions pour ancrer tes révisions.</div>'+ex.map(blockHTML).join('')+'</section>':'';
+  return sommaire+parts+extra;
 }
+function goPart(i){const el=document.getElementById('part-'+i);if(el&&el.scrollIntoView)el.scrollIntoView({behavior:'smooth',block:'start'});}
 
 /* ----- modes d'étude supplémentaires ----- */
 function isRev(){ return FQ.filter==='rev'; }
