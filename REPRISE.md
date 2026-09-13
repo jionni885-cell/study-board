@@ -1,7 +1,7 @@
 # PROMPT DE REPRISE — STUDY BOARD
 
 > Document de mémoire permanente du dépôt. À lire avant toute modification.
-> Dernière mise à jour : **10 septembre 2026**.
+> Dernière mise à jour : **13 septembre 2026**.
 
 ## 🎯 Mission
 
@@ -12,7 +12,7 @@ français.
 - Dépôt GitHub : <https://github.com/jionni885-cell/study-board>
 - Site en ligne : <https://jionni885-cell.github.io/study-board/>
 - Application autonome : `index.html` contient le contenu, la logique et le CSS.
-- Les cinq récapitulatifs audio publics sont dans `media/audio/*.mp3`.
+- Les six récapitulatifs audio publics sont dans `media/audio/*.mp3`.
 - Il n'y a rien à installer.
 
 **Ne refonds pas l'application.** Elle est volontairement monolithique et déjà
@@ -22,7 +22,7 @@ nécessaire.
 
 ## 📁 Documents du jour
 
-Les documents du jour prévus par la session de reprise sont :
+Les documents du jour prévus par la session de reprise étaient :
 
 1. **« Ses 3.m4a »** : suite du cours de SES, à transcrire et intégrer dans la
    fiche SES existante `0-0`.
@@ -30,13 +30,14 @@ Les documents du jour prévus par la session de reprise sont :
    l'index `4`, avec sa fiche `4-0`.
 3. **Six photos de cours du jour** : à lire avec soin et à intégrer dans les
    fiches correspondantes.
-4. Si les fichiers ne sont pas accessibles dans Drive ou dans le sandbox,
-   demander à l'utilisateur de les joindre en pièces jointes.
 
-À la date de ce document, ces fichiers sources ne sont **pas présents dans le
-checkout**. Les captures d'écran du prompt ne remplacent ni les vocaux ni les
-photos. Il est donc interdit d'inventer leur contenu : demander les fichiers
-avant de créer la fiche Philosophie ou de compléter les cours concernés.
+**État (13 septembre 2026) :** ces documents ont été récupérés depuis le dépôt
+public temporaire `jionni885-cell/study-board-sources` (créé par l'utilisateur),
+téléchargés via `codeload.github.com` (seul canal réseau autorisé du sandbox,
+avec GitHub/npm/PyPI). Les deux audios ont été transcrits localement
+(whisper.cpp + modèle `ggml-small` multilingue) et les photos lues par OCR
+(tesseract.js + `fra.traineddata`). Les `.m4a` restent privés : ils ne sont
+jamais ajoutés au dépôt.
 
 **Important : ne jamais ajouter les fichiers `.m4a` au dépôt public.** Ils
 restent privés. Les lecteurs de prise de notes originale doivent disparaître
@@ -48,16 +49,19 @@ Les données vivent dans `const D` dans `index.html`.
 
 | Index | Matière / fiche | Parties | Définitions | Mot pour mot | Cartes | Quiz | MP3 |
 |---|---|---:|---:|---:|---:|---:|---|
-| 0-0 | SES — Les sources et les défis de la croissance économique | 5 | 9 | 8 | 16 | 16 | `ses-croissance` |
+| 0-0 | SES — Les sources et les défis de la croissance économique | 6 | 15 | 11 | 21 | 20 | `ses-croissance` |
 | 1-0 | HGGSP — Faire la guerre, faire la paix : conflits et modes de résolution | 4 | 3 | 3 | 12 | 10 | `hggsp-guerre` |
 | 1-1 | HGGSP — Cartographier les guerres et les conflits : limites et enjeux | 3 | 0 | 0 | 6 | 4 | `hggsp-cartographier` |
 | 2-0 | Histoire — La crise de 1929 : le krach boursier et ses mécanismes | 6 | 3 | 3 | 11 | 10 | `histoire-1929` |
 | 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 5 | 4 | 0 | 19 | 10 | `anglais-heroes` |
+| 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 | 9 | 12 | 10 | `philo-intro` |
 
-**Totaux : 4 matières, 5 fiches, 23 parties, 64 cartes, 50 questions et
-5 fichiers MP3.**
+**Totaux : 5 matières, 6 fiches, 29 parties, 81 cartes, 64 questions et
+6 fichiers MP3.**
 
-La matière Philosophie n'est pas encore créée : elle attend le fichier source.
+La matière Philosophie est créée (index 4) à partir de l'audio « Philosophie 1
+début » ; la fiche SES 0-0 est complétée (voix 3, facteurs de production,
+fonction de production, croissance extensive, FBCF, règle des 70, exercices).
 
 ## 🧩 Structure technique de `index.html`
 
@@ -216,16 +220,30 @@ Résumé complet des trois sessions précédentes :
   `tools/audit-dom.mjs`, ainsi que le modèle `tools/audit-workflow.yml`.
 
 La vérification du dépôt et de l'historique confirme qu'aucun fichier source du
-jour (ni `Ses 3.m4a`, ni `Philosophie 1 début.m4a`, ni les six photos) n'est
-présent dans le checkout ou dans la branche ancienne. Les `.m4a` sont privés et
-ne doivent pas être commités ; si ces documents ont été joints dans une
-conversation précédente, ils doivent être joints à nouveau dans cette session
-pour que leur contenu soit accessible. Tant qu'ils ne sont pas disponibles, il
-est interdit d'inventer la suite SES, la fiche Philosophie ou les contenus des
-photos.
+jour n'était présent dans le checkout ni dans la branche ancienne. Ces documents
+ont finalement été récupérés le 13 septembre 2026 depuis le dépôt public
+temporaire `jionni885-cell/study-board-sources` créé par l'utilisateur : les
+8 fichiers (6 photos + `Ses 3.m4a` + `Philosophie 1 début.m4a`) ont été
+téléchargés via `codeload.github.com`. Les `.m4a` restent privés et ne sont pas
+commités ; seuls leurs contenus (transcriptions locales) alimentent les fiches.
+Deux photos (20260908_210833 et 20260908_210837, tableaux manuscrits) sont
+restées illisibles à l'OCR : leur contenu n'a pas été inventé.
 
 ## 🕘 Historique des mises à jour
 
+- **13 septembre 2026 (session actuelle)** — Documents sources du jour récupérés
+  via GitHub (`study-board-sources`) ; transcription locale des audios
+  (whisper.cpp + modèle ggml-small) et OCR des photos (tesseract.js). Création
+  de la matière **Philosophie** (index 4, fiche 4-0 : étymologie, Socrate,
+  ignorance et ironie socratiques, argumenter/convaincre/persuader/conceptualiser,
+  5 parties, 9 définitions mot pour mot, 12 cartes, 10 quiz, 5 formats de défis,
+  MP3 `philo-intro`). Fiche **SES 0-0** complétée : population active,
+  combinaison productive, fonction de production Y = F(K, L), croissance
+  extensive (mot pour mot), accumulation, FBCF, règle des 70, partie
+  « S'entraîner » ; +5 cartes, +4 quiz (21 cartes, 20 quiz, 15 définitions).
+  Icône/couleur de la matière ajoutées (`philosophie` dans `IKEY`/`COL`),
+  `SES_3.m4a` et `Philosophie_1_debut.m4a` ajoutés à `AUD`, clé `4-0` dans
+  `AUDIOF`, `DF6`, `EX6` et `EXTRA`. Tables README/REPRISE et totaux à jour.
 - **10 septembre 2026 (reprise actuelle)** — Contexte des PR #1, #2 et #3
   vérifié via l'historique GitHub et ajouté ci-dessus ; la branche ancienne est
   déjà fusionnée. Aucun document source du jour n'est présent dans le checkout.
