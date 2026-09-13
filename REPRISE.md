@@ -1,7 +1,7 @@
 # PROMPT DE REPRISE — STUDY BOARD
 
 > Document de mémoire permanente du dépôt. À lire avant toute modification.
-> Dernière mise à jour : **13 septembre 2026 (PR #6)**.
+> Dernière mise à jour : **13 septembre 2026 (PR #7)**.
 
 ## 🎯 Mission
 
@@ -12,7 +12,7 @@ français.
 - Dépôt GitHub : <https://github.com/jionni885-cell/study-board>
 - Site en ligne : <https://jionni885-cell.github.io/study-board/>
 - Application autonome : `index.html` contient le contenu, la logique et le CSS.
-- Les six récapitulatifs audio publics sont dans `media/audio/*.mp3`.
+- Les sept récapitulatifs audio publics sont dans `media/audio/*.mp3` (6 fiches + 1 exposé `hggsp-yemen`).
 - Il n'y a rien à installer.
 
 **Ne refonds pas l'application.** Elle est volontairement monolithique et déjà
@@ -56,8 +56,9 @@ Les données vivent dans `const D` dans `index.html`.
 | 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 5 | 4 | 0 | 19 | 10 | `anglais-heroes` |
 | 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 | 9 | 12 | 10 | `philo-intro` |
 
-**Totaux : 5 matières, 6 fiches, 29 parties, 81 cartes, 64 questions et
-6 fichiers MP3.**
+**Totaux : 5 matières, 6 fiches, 29 parties, 81 cartes, 64 questions, 6 fichiers MP3 pour les fiches + 1 MP3 pour l’exposé → 7 fichiers MP3 au total.**
+
+**Nouveau : section Exposés (PR #7).** Un exposé **HGGSP — La guerre au Yémen (5 min)** est disponible depuis l’accueil (après Matières) et à l’adresse `#/expose/yemen` : problématique, 3 parties (origines & acteurs, crise humanitaire, impasse diplomatique) + conclusion, chiffres clés (21 M dans le besoin, 4,5 M déplacés…), frise 2011‑2025, définitions (Houthis, coalition, blocus, crise humanitaire, multilatéralisme) et récapitulatif audio `hggsp-yemen.mp3`. Données dans `const EXPOSES` (après `AUD`), rendues par `renderExpose()` et routées via `parse()`.
 
 La matière Philosophie est créée (index 4) à partir de l'audio « Philosophie 1
 début » ; la fiche SES 0-0 est complétée (voix 3, facteurs de production,
@@ -83,6 +84,7 @@ Lire cette structure avant toute édition :
 - `const DF6 = {...}` contient les défis express propres à chaque fiche.
 - `const EX6 = {...}` contient les encadrés `astro` et `piege`.
 - `const AUDIOF = {...}` associe chaque clé de fiche au slug MP3.
+- `const EXPOSES = [...]` contient les exposés (après `AUD`, pour ne pas casser l’extraction `D→AUD` de `audit.py`) : `id`, `titre`, `matiere`, `duree`, `problematique`, `parties`, `chiffres`, `chronologie`, `audio` ; rendu par `renderExpose()` et routé en `#/expose/:id` via `parse()`.
 - `renderLire()` renvoie `sommaire + parties + extra` : le sommaire cliquable
   `.sommaire > nav.hnav` appelle `goPart(i)`, qui fait défiler jusqu'à la section
   `#part-i` (`#part-x` pour « Pour aller plus loin »). Ces identifiants doivent
@@ -259,6 +261,7 @@ un commentaire ; et vérifier qu'un commit cité existe vraiment
 
 ## 🕘 Historique des mises à jour
 
+- **13 septembre 2026 (PR #7, session `arena/01a09997-study-board`)** — Section **Exposés** et exposé **HGGSP — La guerre au Yémen (5 min)** : `const EXPOSES` (après `AUD`) avec problématique, 3 parties + conclusion, 5 chiffres clés et frise 2011‑2025 ; `renderHome()` affiche la liste des exposés sur l’accueil (après Matières, `EXPOSES.length` = 1, bouton 🇾🇪 + tag duree), `parse()` route `#/expose/yemen`, `renderExpose()` rend l’exposé (crumb, tags, audio `hggsp-yemen.mp3`, chiffres, frise, parties via `blockHTML`, sources) et `paintCrumb()` gère le fil d’Ariane exposé ; CSS `.expo-list/.expo/.e-ic/.tag-duree` ; `media/audio/hggsp-yemen.mp3` (copie de `hggsp-guerre`, 349 Ko) et `StudyBoard-app.zip` resynchronisé (9 fichiers). Vérifications : `python3 tools/audit.py` 0 problème, `node --check` 0 erreur, jsdom `#/expose/yemen` rendu vérifié, ZIP cohérent. PR #7 ouverte depuis `arena/01a09997-study-board` (commit `ccda5d1`) vers `main`.
 - **13 septembre 2026 (PR #6, session `arena/01a09997-study-board`)** — Lisibilité
   des fiches et parcours de révision, dans `index.html` uniquement (+52 / −14) :
   remplacement des 6 `overflow-wrap:anywhere` par `overflow-wrap:break-word`
