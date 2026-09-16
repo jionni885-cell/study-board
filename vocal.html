@@ -249,11 +249,29 @@ const ficheLabels = {
   "yemen":"Exposé — La guerre au Yémen (5 min)"
 };
 
-// support detection
+// support detection — feedback instantané
 let hasMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 let hasSpeech = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
-speechSupport.textContent = hasMedia ? (hasSpeech ? "✅ Micro + reco vocale dispo" : "✅ Micro dispo · reco via collage") : "ℹ️ Micro non détecté · utilise Import ou Coller";
-speechSupport.className = "pill ok";
+let isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+function updateSupportUI(){
+  if(!isSecure){
+    speechSupport.textContent = "⚠️ Page non sécurisée → micro bloqué, utilise https:// ou Colle le texte";
+    speechSupport.className = "pill bad";
+  } else if(!hasMedia){
+    speechSupport.textContent = "ℹ️ Micro non détecté · Import audio ou Coller texte → même résultat parfait";
+    speechSupport.className = "pill warn";
+  } else if(hasSpeech){
+    speechSupport.textContent = "✅ Micro + retranscris direct dispo (Chrome / Edge)";
+    speechSupport.className = "pill ok";
+  } else {
+    speechSupport.textContent = "⚠️ Ton navigateur ne transcrit pas (Firefox/Safari) → J'enregistre, puis colle ton texte";
+    speechSupport.className = "pill warn";
+    // aide visible
+    const h = document.getElementById('micHelp');
+    if(h) h.innerHTML = "🎙 J'enregistre ton audio, mais <b>ce navigateur ne transcrit pas</b>.<br>→ Après STOP, colle ton texte ci-dessous ou clique <b>Exemple 18 min</b> pour tester — même analyse, même envoi.";
+  }
+}
+updateSupportUI();
 
 // tabs
 function switchTab(t){
@@ -311,13 +329,28 @@ async function toggleRec(){
   else startRec();
 }
 async function startRec(){
-  if(!hasMedia){ toast("Micro non dispo ici — passe en Import ou Coller, même résultat"); switchTab('paste'); return; }
+  if(!hasMedia){ toast("Micro non dispo ici — passe en Import ou Coller, même résultat"); switchTab('paste'); paste.focus(); return; }
+  if(!isSecure){
+    toast("⚠️ Micro bloqué : ouvre la page en https:// (GitHub Pages) pour le micro");
+    recStateEl.textContent="🔒 Micro bloqué (http) → utilise Coller texte";
+    recStateEl.className="pill bad";
+    switchTab('paste');
+    return;
+  }
   try{
     stream = await navigator.mediaDevices.getUserMedia({audio:true});
   }catch(e){
-    toast("Micro non autorisé — utilise Import audio ou Coller le texte");
-    switchTab('imp');
-    recStateEl.textContent="Micro non autorisé → fallback prêt";
+    const msg = String(e.name||e.message||"");
+    if(msg.includes("NotAllowed") || msg.includes("Permission")){
+      toast("🚫 Micro refusé — autorise-le (🔒 dans la barre d'adresse) ou colle ton texte");
+      recStateEl.textContent="🚫 Micro refusé → colle ton texte, même résultat";
+      recStateEl.className="pill bad";
+    } else {
+      toast("Micro indisponible ("+msg+") — Import audio ou Coller texte, même résultat");
+      recStateEl.textContent="Micro indisponible → fallback prêt";
+      recStateEl.className="pill warn";
+    }
+    switchTab('paste');
     return;
   }
   chunks=[];
@@ -335,11 +368,19 @@ async function startRec(){
   recState="rec";
   $("#micBtn").classList.add("rec");
   $("#micBtn").textContent="⏹";
-  recStateEl.textContent="● Enregistrement — parle naturellement";
-  recStateEl.className="pill bad";
+  if(hasSpeech && isSecure){
+    recStateEl.textContent="● J'écoute — parle, ton texte s'affiche en direct ci-dessous";
+    recStateEl.className="pill bad";
+  } else {
+    recStateEl.textContent="● J'enregistre — après STOP colle ton texte ci-dessous";
+    recStateEl.className="pill warn";
+  }
   startTimer();
   startSpeech();
-  toast("🎙 Enregistrement lancé — jusqu'à 20 min");
+  if(hasSpeech && isSecure) toast("🎙 Je t'écoute — parle fort, je retranscris en direct");
+  else toast("🎙 J'enregistre — après STOP, colle ton texte (ce navigateur ne transcrit pas)");
+  // focus textarea
+  paste.focus();
 }
 function stopRec(auto){
   if(mediaRec && mediaRec.state!=="inactive") try{mediaRec.stop();}catch{}
@@ -350,23 +391,69 @@ function stopRec(auto){
   recState="idle";
   $("#micBtn").classList.remove("rec");
   $("#micBtn").textContent="🎙";
-  recStateEl.textContent = auto ? "⏱ 20 min — découpé auto, prêt à envoyer" : "⏹ Enregistrement terminé — complète ton texte si besoin";
-  recStateEl.className="pill ok";
+  const w = paste.value.trim().split(/\s+/).filter(Boolean).length;
+  if(auto){
+    recStateEl.textContent = "⏱ 20 min — découpé auto, prêt à envoyer · "+w+" mots";
+    recStateEl.className="pill ok";
+  } else if(w===0){
+    recStateEl.textContent = "⏹ Fini — aucun texte capté → colle ton oral ci-dessous";
+    recStateEl.className="pill warn";
+    paste.focus();
+    paste.placeholder = "Rien n'a été transcrit (Firefox/Safari) → colle ici ton oral, ou clique 'Exemple 18 min' pour tester — même résultat !";
+    paste.style.borderColor="var(--warn)";
+    toast("ℹ️ Aucun texte capté — colle ton oral ci-dessous, j'analyse pareil");
+    // pulse textarea
+    setTimeout(()=>paste.style.borderColor="", 2500);
+  } else {
+    recStateEl.textContent = "⏹ Terminé — "+w+" mots captés, tu peux éditer ci-dessous";
+    recStateEl.className="pill ok";
+    toast("✅ "+w+" mots captés — édite si besoin puis Envoyer");
+  }
   // keep timer at final value
 }
 
-// speech
+// speech — avec feedback instantané très visible
+let speechActive=false, firstWordToast=false;
+function setSpeechBadge(active, msg){
+  speechActive=active;
+  if(active){
+    recPills.innerHTML = '<span class="pill ok">🔴 Transcription en cours — parle...</span>';
+    if(msg) speechSupport.textContent = msg;
+  } else {
+    recPills.innerHTML = '';
+  }
+}
 function startSpeech(){
-  if(!hasSpeech) return;
+  if(!hasSpeech){
+    setSpeechBadge(false);
+    speechSupport.textContent = "⚠️ Pas de reco vocale sur ce navigateur — enregistrement seul, colle ton texte après";
+    speechSupport.className="pill warn";
+    toast("ℹ️ J'enregistre, mais colle ton texte après (Firefox/Safari ne transcrit pas)");
+    return;
+  }
+  if(!isSecure){
+    toast("⚠️ Transcription bloquée : ouvre en https://");
+    return;
+  }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   try{
     recog = new SR();
-  }catch{ return; }
+  }catch(e){
+    toast("Reco vocale indisponible — colle ton texte, même résultat");
+    return;
+  }
   recog.lang="fr-FR";
   recog.continuous=true;
   recog.interimResults=true;
   recog.maxAlternatives=1;
   let finalSoFar = paste.value ? paste.value + " " : "";
+  firstWordToast=false;
+  recog.onstart = ()=>{
+    setSpeechBadge(true, "🔴 Je t'écoute — parle, ton texte s'affiche en dessous");
+    speechSupport.className="pill ok";
+    // focus textarea pour que l'utilisateur voie
+    paste.placeholder = "Je t'écoute — ton oral s'affiche ici en direct...";
+  };
   recog.onresult = e=>{
     let final="", inter="";
     for(let i=e.resultIndex;i<e.results.length;i++){
@@ -378,28 +465,66 @@ function startSpeech(){
       finalSoFar += final;
       paste.value = finalSoFar + inter;
       onPaste();
+      if(!firstWordToast && finalSoFar.trim().split(/\s+/).length>=2){
+        firstWordToast=true;
+        toast("✅ Parfait je retranscris — continue !");
+        setSpeechBadge(true, "✅ Je capte bien — continue jusqu'à 20 min");
+        paste.style.borderColor="var(--ok)";
+        setTimeout(()=>paste.style.borderColor="", 1200);
+      }
     } else if(inter){
-      // show interim without committing
       paste.value = finalSoFar + inter;
       onPaste(true);
+      if(!firstWordToast){
+        // montre que l'interim arrive
+        wordsPill.textContent = (paste.value.trim().split(/\s+/).filter(Boolean).length||0) + " mots · écoute…";
+      }
     }
+    // highlight textarea quand ça arrive
+    paste.style.background="var(--ok-soft)";
+    clearTimeout(paste._hl);
+    paste._hl=setTimeout(()=>paste.style.background="", 600);
   };
   recog.onerror = (e)=>{
-    // no red, just inform
-    if(e.error==='not-allowed') toast("Micro ok, mais reco vocale bloquée — colle ton texte, même résultat");
+    setSpeechBadge(false);
+    const err = e.error || "unknown";
+    if(err==='not-allowed' || err==='service-not-allowed'){
+      speechSupport.textContent="🚫 Micro refusé — autorise le micro ou colle ton texte";
+      speechSupport.className="pill bad";
+      toast("🚫 Micro refusé — clique 🔒 dans la barre d'adresse → Autoriser micro, ou colle ton texte");
+    } else if(err==='no-speech'){
+      speechSupport.textContent="🎤 Je n'entends rien — rapproche-toi du micro";
+      speechSupport.className="pill warn";
+      // no toast spam
+    } else if(err==='audio-capture'){
+      speechSupport.textContent="🎤 Micro introuvable — Import audio ou Coller texte";
+      speechSupport.className="pill warn";
+    } else {
+      speechSupport.textContent="⚠️ Reco en pause ("+err+") — colle ton texte, même résultat";
+      speechSupport.className="pill warn";
+      toast("⚠️ Reco vocale en pause ("+err+") — colle ton texte directement, même analyse");
+    }
   };
   recog.onend = ()=>{
     if(recState==="rec"){
-      try{ recog.start(); }catch{}
+      // relance auto sauf si erreur bloquante
+      if(speechSupport.textContent.includes("refusé") || speechSupport.textContent.includes("non sécurisée")) { setSpeechBadge(false); return; }
+      try{ recog.start(); setSpeechBadge(true); }catch{ setSpeechBadge(false);}
+    } else {
+      setSpeechBadge(false);
     }
   };
-  try{ recog.start(); }catch{}
+  try{ recog.start(); setSpeechBadge(true); }catch(e){
+    toast("Reco non démarrée — colle ton texte, même résultat");
+    setSpeechBadge(false);
+  }
 }
 function stopSpeech(){
   if(recog){
     try{ recog.onend=null; recog.stop(); }catch{}
     recog=null;
   }
+  setSpeechBadge(false);
 }
 
 // file import
