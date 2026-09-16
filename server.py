@@ -12,6 +12,9 @@ Long vocaux 1-20min supportés (payload jusqu'à 20 Mo)
 import json
 import os
 import time
+import base64
+import subprocess
+import threading
 import urllib.parse
 import mimetypes
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
@@ -28,7 +31,7 @@ if not gitkeep.exists():
         gitkeep.write_text("", encoding="utf-8")
     except: pass
 
-MAX_BODY = 20 * 1024 * 1024  # 20 Mo
+MAX_BODY = 30 * 1024 * 1024  # 30 Mo (audio+json 20min ~19Mo webm)
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -191,6 +194,40 @@ class Handler(BaseHTTPRequestHandler):
                 payload[k] = data[k]
         # ajoute id
         payload["id"] = fname.replace(".json", "")
+        # --- audio optionnel (base64) ---
+        audio_b64 = data.get("audioBase64") or data.get("audio") or ""
+        audio_mime = str(data.get("audioMime") or data.get("audioType") or "").strip()
+        audio_ext = "webm"
+        if "mp4" in audio_mime: audio_ext="m4a"
+        elif "ogg" in audio_mime: audio_ext="ogg"
+        elif "wav" in audio_mime: audio_ext="wav"
+        elif "webm" in audio_mime: audio_ext="webm"
+        # si data URL, strip prefix
+        if isinstance(audio_b64, str) and audio_b64.startswith("data:"):
+            try:
+                # data:audio/webm;base64,XXXX
+                header, b64 = audio_b64.split(",",1)
+                audio_b64=b64
+                if "mp4" in header: audio_ext="m4a"
+                elif "ogg" in header: audio_ext="ogg"
+            except: pass
+        audio_fname = None
+        audio_path = None
+        if isinstance(audio_b64, str) and len(audio_b64) > 100:
+            try:
+                # nettoie espaces/newlines
+                b64clean = "".join(audio_b64.split())
+                audio_bytes = base64.b64decode(b64clean)
+                if 100 < len(audio_bytes) < 28*1024*1024:
+                    audio_fname = f"{payload['id']}.{audio_ext}"
+                    audio_path = VOCALS_DIR / audio_fname
+                    audio_path.write_bytes(audio_bytes)
+                    payload["audioFile"] = audio_fname
+                    payload["audioMime"] = audio_mime or f"audio/{audio_ext}"
+                    payload["audioBytes"] = len(audio_bytes)
+                    print(f"[vocal] audio saved {audio_fname} {len(audio_bytes)} bytes")
+            except Exception as e:
+                print(f"[vocal] audio decode fail: {e}")
         out = VOCALS_DIR / fname
         try:
             out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -200,10 +237,36 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({"ok": False, "error": str(e)}).encode())
             return
+        # --- auto git commit+push en arrière-plan (pour GO) ---
+        def _git_push():
+            try:
+                # add json + audio éventuel
+                files = [str(out)]
+                if audio_path and audio_path.exists():
+                    files.append(str(audio_path))
+                # git add
+                subprocess.run(["git","add"]+files, cwd=str(ROOT), timeout=10)
+                # commit seulement si quelque chose à committer
+                st = subprocess.run(["git","status","--porcelain"]+files, cwd=str(ROOT), capture_output=True, text=True, timeout=10)
+                if st.stdout.strip():
+                    msg = f"vocal: {fiche} {words} mots {payload['id']}"
+                    if audio_fname: msg += f" +audio {audio_ext}"
+                    subprocess.run(["git","commit","-m",msg], cwd=str(ROOT), timeout=10)
+                    # push vers main (et arena si besoin)
+                    # tente push main, sinon ignore
+                    subprocess.run(["git","push","origin","HEAD:main"], cwd=str(ROOT), timeout=30)
+                    print(f"[vocal] git push done {payload['id']}")
+                else:
+                    print("[vocal] nothing to commit")
+            except Exception as e:
+                print(f"[vocal] git push fail: {e}")
+        try:
+            threading.Thread(target=_git_push, daemon=True).start()
+        except: pass
         self.send_response(200)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.end_headers()
-        self.wfile.write(json.dumps({"ok": True, "id": payload["id"], "words": words}).encode())
+        self.wfile.write(json.dumps({"ok": True, "id": payload["id"], "words": words, "audio": bool(audio_path)}).encode())
 
 def run():
     # mimetypes

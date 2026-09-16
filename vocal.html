@@ -288,6 +288,9 @@ let isSecure = location.protocol === 'https:' || location.hostname === 'localhos
 let isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 let lastAudioBlob=null, lastAudioUrl=null;
 let recDiag = ""; // debug
+// API fallback pour Pages (qui n'a pas de serveur) → sandbox public
+const SB_FALLBACK = "https://4173-iafgzjtpuqz3fyy9w7kc5.e2b.app";
+function apiUrl(path){ return path; } // relatif par défaut, fallback géré dans sendVocal
 function updateSupportUI(){
   const phoneHelp = document.getElementById('phoneHelp');
   if(!isSecure){
@@ -314,16 +317,12 @@ function updateSupportUI(){
 }
 updateSupportUI();
 function useKeyboardDictation(){
-  paste.focus();
-  // sur mobile, ouvre le clavier + montre aide
-  toast("📱 Touche 🎤 sur ton clavier pour dicter — ton texte s'affiche ici");
-  // scroll vers textarea
-  paste.scrollIntoView({behavior:'smooth', block:'center'});
-  // highlight
+  // ne fait PLUS revenir en bas — focus sans scroll
+  try{ paste.focus({preventScroll:true}); }catch{ paste.focus(); }
+  toast("📱 Touche 🎤 sur ton clavier pour dicter — ton texte s'affiche ici (sans bouger la page)");
   paste.style.borderColor="var(--acc)";
   paste.style.boxShadow="0 0 0 3px rgba(37,99,235,.18)";
   setTimeout(()=>{ paste.style.borderColor=""; paste.style.boxShadow=""; }, 2500);
-  // vibration courte sur mobile si dispo
   try{ navigator.vibrate && navigator.vibrate(30); }catch{}
 }
 
@@ -335,7 +334,7 @@ function switchTab(t){
   $("#panelRec").style.display = t==='rec' ? "" : "none";
   $("#panelImp").style.display = t==='imp' ? "" : "none";
   $("#panelPaste").style.display = t==='paste' ? "block" : "none";
-  if(t==='paste') paste.focus();
+  if(t==='paste') try{ paste.focus({preventScroll:true}); }catch{ paste.focus(); }
 }
 function clearPaste(){ paste.value=""; onPaste(); toast("Zone nettoyée — prête pour ton oral"); }
 function demoLong(){
@@ -574,8 +573,7 @@ async function startRec(){
   startSpeech();
   if(hasSpeech && isSecure) toast("🎙 Je t'écoute — parle fort, je retranscris en direct");
   else toast("🎙 J'enregistre — après STOP, colle ton texte (ce navigateur ne transcrit pas)");
-  // focus textarea
-  paste.focus();
+  try{ paste.focus({preventScroll:true}); }catch{ try{paste.focus();}catch{} }
 }
 function stopRec(auto){
   if(mediaRec && mediaRec.state!=="inactive") try{mediaRec.stop();}catch{}
@@ -604,7 +602,7 @@ function stopRec(auto){
       if(hasAudio) toast("🎧 Audio gardé "+blobInfo+" — clique ▶️ Écouter et monte le volume média; puis dicte avec le clavier pour remplir le texte");
       else toast("ℹ️ Aucun texte — touche 'Dicter maintenant' et parle avec 🎤 du clavier");
       setTimeout(()=>paste.style.borderColor="", 3200);
-      setTimeout(()=>{ try{ paste.focus(); }catch{} }, 400);
+      setTimeout(()=>{ try{ paste.focus({preventScroll:true}); }catch{ try{paste.focus();}catch{} } }, 400);
     } else {
       recStateEl.textContent = "⏹ Terminé — "+w+" mots captés"+(hasAudio?" · audio gardé "+blobInfo:"");
       recStateEl.className="pill ok";
@@ -911,49 +909,91 @@ function saveToLocal(v){
   const gb=document.getElementById('goBox');
   if(gb){ gb.style.display=""; }
 }
+function blobToDataURL(blob){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>res(r.result);
+    r.onerror=()=>rej(r.error);
+    r.readAsDataURL(blob);
+  });
+}
+async function fetchWithFallback(url, opts){
+  // essaie d'abord relatif, sinon fallback sandbox public si on est sur github.io
+  try{
+    const rel = await fetch(url, opts);
+    if(rel.ok) return rel;
+    // si 404 sur Pages, tente fallback
+    if(location.hostname.endsWith("github.io")){
+      console.log("[vocal] rel fail, try fallback", rel.status);
+      return await fetch(SB_FALLBACK+url, opts);
+    }
+    return rel;
+  }catch(e){
+    if(location.hostname.endsWith("github.io")){
+      console.log("[vocal] rel error, try fallback", e);
+      return await fetch(SB_FALLBACK+url, opts);
+    }
+    throw e;
+  }
+}
 async function sendVocal(){
   const v = buildVocal();
   if(!v.transcript){ toast("Ajoute d'abord ton texte"); return; }
   if(v.words < 10){ toast("Ton oral est encore très court — ajoute une phrase"); }
   sendBtn.disabled=true;
   sendStatus.textContent="Envoi…";
+  // prépare audio si dispo (pour que GO mette l'audio dans le repo)
+  let audioBase64=null, audioMime=null;
+  if(lastAudioBlob && lastAudioBlob.size>1000 && lastAudioBlob.size < 25*1024*1024){
+    try{
+      sendStatus.textContent="Encodage audio…";
+      const dataUrl = await blobToDataURL(lastAudioBlob);
+      audioBase64 = dataUrl; // data:audio/webm;base64,...
+      audioMime = lastAudioBlob.type || "audio/webm";
+      console.log("[vocal] audio base64 len", dataUrl.length, audioMime);
+    }catch(e){ console.warn("[vocal] audio encode fail", e); }
+  }
+  sendStatus.textContent = audioBase64 ? "Envoi audio + texte…" : "Envoi…";
   // optimistic local save
   saveToLocal(v);
   renderLocal();
   let ok=false, serverMsg="";
   try{
-    const r = await fetch("/api/vocal", {
+    const payload = {
+      fiche: v.fiche,
+      ficheLabel: v.ficheLabel,
+      transcript: v.transcript,
+      words: v.words,
+      missing: v.missing,
+      date: v.date,
+      hesRatio: v.hesRatio,
+      dureeSec: v.dureeSec
+    };
+    if(audioBase64){ payload.audioBase64 = audioBase64; payload.audioMime = audioMime; }
+    const r = await fetchWithFallback("/api/vocal", {
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({
-        fiche: v.fiche,
-        ficheLabel: v.ficheLabel,
-        transcript: v.transcript,
-        words: v.words,
-        missing: v.missing,
-        date: v.date,
-        hesRatio: v.hesRatio,
-        dureeSec: v.dureeSec
-      })
+      body: JSON.stringify(payload)
     });
     const j = await r.json().catch(()=>({}));
     if(r.ok && j.ok){
       ok=true;
       serverMsg="serveur";
-      // mark patch as serveur
       const key="sb_patch_"+v.fiche;
       let patches=[];
       try{ patches=JSON.parse(localStorage.getItem(key)||"[]"); }catch{}
       if(patches[0] && patches[0].id===v.id) { patches[0].src="serveur"; localStorage.setItem(key, JSON.stringify(patches)); }
-      toast("✅ Envoyé — ta fiche s'enrichit dès le reload");
-      sendStatus.textContent="Envoyé au serveur ✓";
+      if(j.audio) toast("✅ Envoyé + audio dans le repo ✓");
+      else toast("✅ Envoyé — ta fiche s'enrichit dès le reload");
+      sendStatus.textContent = j.audio ? "Envoyé + audio ✓" : "Envoyé au serveur ✓";
     } else {
       serverMsg = j.error || "réponse serveur";
       toast("💾 Gardé en local — le serveur répondra plus tard, ta fiche est déjà enrichie");
       sendStatus.textContent="Gardé en local ✓";
     }
   }catch(e){
-    toast("💾 Gardé en local — même sans serveur, ta fiche s'enrichit");
+    console.error("[vocal] send fail", e);
+    toast("💾 Gardé en local — même sans serveur, ta fiche s'enrichit (dis GO et colle pour que l'agent reçoive)");
     sendStatus.textContent="Gardé en local ✓";
   }
   // also keep server/local badge info
