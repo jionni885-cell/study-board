@@ -219,6 +219,7 @@ textarea#paste{min-height:180px}
 <div class="toast" id="toast"></div>
 <script>
 "use strict";
+// paliers <10 trop court / <60 un peu court / <600 parfait 2-5min / <1500 long 5-12min / >=1500 XXL 15-20min + hesRatio>0.025
 const MAX_MS = 1200000; // 20 min
 const MAX_S = 1200;
 let recState = "idle"; // idle|rec
