@@ -567,6 +567,39 @@ html[data-theme=dark] .probe .ph2{color:#9CC4FF}
   .ex{font-size:.9rem;line-height:1.5}
   .notice2{font-size:.88rem;line-height:1.5}
 }
+
+/* VOCAL-STUDIO — CTA + dashboard + patch */
+.vocal-cta{display:inline-flex;align-items:center;gap:6px;font-weight:750;font-size:.86rem;padding:8px 14px;border-radius:11px;background:var(--acc);color:#fff;box-shadow:0 6px 14px -10px rgba(37,99,235,.9);text-decoration:none;white-space:nowrap;transition:.15s}
+.vocal-cta:hover{background:var(--acc-2);transform:translateY(-1px)}
+.vocal-dash{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--sh);margin:18px 0}
+.vocal-dash h3{font-size:.98rem;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.vocal-dash .sub{font-size:.82rem;color:var(--ink-3);margin-bottom:10px}
+.vocal-dash .vlist{display:grid;gap:8px}
+.vocal-dash .vitem{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card-2)}
+.vocal-dash .vitem .ic{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--acc-soft);color:var(--acc-2);flex:none;font-size:16px}
+.vocal-dash .vitem .mid{flex:1;min-width:0}
+.vocal-dash .vitem .mid b{display:block;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vocal-dash .vitem .mid span{font-size:.76rem;color:var(--ink-3)}
+.vocal-dash .badge{font-size:.68rem;font-weight:750;letter-spacing:.04em;text-transform:uppercase;border-radius:99px;padding:2px 7px;border:1px solid var(--line-2);background:var(--card)}
+.vocal-dash .badge.srv{color:#065F46;background:#E7F7EF;border-color:#A7F3D0}
+.vocal-dash .badge.loc{color:var(--acc-2);background:var(--acc-soft);border-color:#C7DAFF}
+.vocal-patch{border:1.5px solid var(--acc);background:linear-gradient(180deg,var(--acc-soft),var(--card));border-radius:18px;padding:16px;margin-top:14px;box-shadow:var(--sh)}
+.vocal-patch h3{font-size:1.02rem;display:flex;align-items:center;gap:8px;margin-bottom:6px;color:var(--acc-2)}
+.vocal-patch .sub{font-size:.84rem;color:var(--ink-2);margin-bottom:10px}
+.vocal-patch .pills{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.vocal-patch .pill{display:inline-flex;align-items:center;gap:5px;font-size:.76rem;font-weight:700;border-radius:99px;padding:4px 10px;border:1px solid var(--line-2);background:var(--card)}
+.vocal-patch .seg{display:grid;gap:8px;margin:10px 0}
+.vocal-patch .seg .ch{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.vocal-patch .seg .ch b{display:block;font-size:.88rem;margin-bottom:2px}
+.vocal-patch .seg .ch span{font-size:.82rem;color:var(--ink-2)}
+.vocal-patch .fc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:8px}
+.vocal-patch .fc-grid .fc{background:var(--card);border:1px solid var(--line-2);border-radius:12px;padding:10px 12px}
+.vocal-patch .fc b{display:block;font-size:.84rem}
+.vocal-patch .fc span{font-size:.8rem;color:var(--ink-2)}
+.vocal-patch .act{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.iframe-banner{display:none;margin:12px 0;padding:10px 14px;border-radius:12px;background:var(--warn-soft);border:1px solid #F5C6C6;color:#7F1D1D;font-size:.88rem}
+.iframe-banner.show{display:flex;gap:10px;align-items:center}
+
 </style>
 </head>
 <body>
@@ -579,6 +612,7 @@ html[data-theme=dark] .probe .ph2{color:#9CC4FF}
     </div>
     <nav class="crumb" id="crumb"></nav>
     <div class="grow"></div>
+    <a href="vocal.html" target="_blank" rel="noopener" class="vocal-cta" aria-label="Studio Vocal — jusqu'à 20 min">🎙️ Studio Vocal</a>
     <button class="tbtn" id="btnTheme" onclick="toggleTheme()" aria-label="Thème"></button>
   </div>
 </header>
@@ -1515,26 +1549,179 @@ try{const _p6=parse();if(_p6&&!_p6.home&&typeof render==='function'){render();}}
 
 </script>
 <script>
-/*AUDIO-JS-PATCH*/
+/*AUDIO+VOCAL — Fiche audio + Studio 1-20min (fused to keep 3 blocks) */
 (function(){
 'use strict';
-/* Fiches couvertes : slug du mp3 dans media/audio/ */
 const AUDIOF={'0-0':'ses-croissance','1-0':'hggsp-guerre','1-1':'hggsp-cartographier','2-0':'histoire-1929','3-0':'anglais-heroes','4-0':'philo-intro'};
 const _baseA = renderLire;
 renderLire = function(mi,fi){
-  let s=_baseA(mi,fi);
+  let html=_baseA(mi,fi);
   const slug=AUDIOF[(mi)+'-'+(fi)];
   if(slug){
-    const box='<div class="audiobox"><span class="aic">🎧</span>'+
-      '<div class="alab"><b>Réviser en écoutant</b><span>Récapitulatif audio du cours — écoute, puis vérifie ce que tu retiens.</span></div>'+
-      '<audio controls preload="none" src="media/audio/'+slug+'.mp3"></audio></div>';
-    const i=s.indexOf('<section');
-    s = i>0 ? (s.slice(0,i)+box+s.slice(i)) : (box+s);
+    const box='<div class="audiobox" style="display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:12px 0;box-shadow:var(--sh)"><span class="aic" style="width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--acc-soft);color:var(--acc-2)">🎧</span><div class="alab" style="flex:1;min-width:0"><b style="display:block;font-size:.95rem">Réviser en écoutant</b><span style="font-size:.8rem;color:var(--ink-3)">Récapitulatif audio du cours — écoute, puis vérifie ce que tu retiens.</span></div><audio controls preload="none" src="media/audio/'+slug+'.mp3" style="flex:0 0 180px;max-width:40%"></audio></div>';
+    const i=html.indexOf('<section');
+    html = i>0 ? (html.slice(0,i)+box+html.slice(i)) : (box+html);
   }
-  return s;
+  try{
+    const patch = buildVocalPatch(mi,fi);
+    if(patch) html += patch;
+  }catch(e){}
+  return html;
 };
-/* re-rendu si l'utilisateur charge directement une fiche (l'audio est défini après le 1er rendu) */
-try{const p6=parse();if(p6&&!p6.home&&typeof render==='function'){render();}}catch(e){}
+// ---- VOCAL LOGIC ----
+// paliers identiques vocal.html : <10 trop court / <60 un peu court / <600 parfait 2-5min / <1500 long 5-12min / >=1500 XXL 15-20min + hes>0.025
+function vocalPalier(words, hes){
+  let p="", detail="", tone="ok";
+  if(words < 10){ p="Trop court"; detail="Ajoute au moins une phrase : dis ton plan en 1 min (~130 mots)."; tone="warn"; }
+  else if(words < 60){ p="Un peu court"; detail="Quelques phrases de plus et c\u2019est parfait pour un flash (1 min)."; tone="warn"; }
+  else if(words < 600){ p="Parfait 2-5 min"; detail="Format ideal pour l\u2019oral 5 min : 3 parties d\u20191 min 30 + intro/conclusion."; tone="ok"; }
+  else if(words < 1500){ p="Long 5-12 min"; detail="Expose long : je decoupe en 3 chapitres + plan chronometre."; tone="ok"; }
+  else { p="XXL 15-20 min"; detail="Cours complet 15-20 min : je segmente auto (words/3) + sommaire oral + 5 flashcards."; tone="bad"; }
+  if(hes>0.025) detail += " \u00b7 Hesitations un peu hautes ("+ (hes*100).toFixed(1)+"%) \u2014 ralentis et pose tes phrases.";
+  return {p, detail, tone};
+}
+function escV(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function getLocalVocals(){
+  try{ const a=JSON.parse(localStorage.getItem('sb_vocals')||'[]'); return Array.isArray(a)?a:[]; }catch{ return []; }
+}
+function getPatches(mi,fi){
+  const k='sb_patch_'+mi+'-'+fi;
+  try{ const a=JSON.parse(localStorage.getItem(k)||'[]'); return Array.isArray(a)?a:[]; }catch{ return []; }
+}
+function fetchServerVocals(){
+  return fetch('/api/vocals').then(r=> r.ok ? r.json() : []).then(arr=>{
+    if(!Array.isArray(arr)) return [];
+    const local=getLocalVocals();
+    const map=new Map();
+    local.forEach(v=>{ v.src='local'; map.set(String(v.id||v.date), v); });
+    arr.forEach(v=>{ v.src='serveur'; map.set(String(v.id||v.date), v); });
+    const merged=[...map.values()];
+    merged.sort((a,b)=>(b.date||0)-(a.date||0));
+    try{ localStorage.setItem('sb_vocals_merged', JSON.stringify(merged.slice(0,50))); }catch{}
+    merged.forEach(v=>{
+      if(!v.fiche || !v.transcript) return;
+      const k='sb_patch_'+v.fiche;
+      let patches=[];
+      try{ patches=JSON.parse(localStorage.getItem(k)||'[]'); }catch{ patches=[]; }
+      if(!Array.isArray(patches)) patches=[];
+      const exists = patches.some(p=> String(p.id)===String(v.id) || (p.transcript && v.transcript && p.transcript.slice(0,120)===v.transcript.slice(0,120)) );
+      if(!exists){
+        const hes = v.hesRatio || 0;
+        const pal = vocalPalier(v.words||0, hes);
+        const patch={id:v.id||('srv_'+v.date), date:v.date, words:v.words||0, transcript:(v.transcript||'').slice(0,4000), fiche:v.fiche, ficheLabel:v.ficheLabel||v.fiche, palier:pal.p, hesRatio:hes, src:'serveur'};
+        patches.unshift(patch);
+        patches=patches.slice(0,10);
+        try{ localStorage.setItem(k, JSON.stringify(patches)); }catch{}
+      }
+    });
+    window.__vocalsMerged = merged;
+    return merged;
+  }).catch(()=> getLocalVocals());
+}
+function clearVocalPatch(mi,fi){
+  if(!confirm('Effacer les ameliorations de cette fiche ?')) return;
+  localStorage.removeItem('sb_patch_'+mi+'-'+fi);
+  toast('Ameliorations effacees \u2014 tu peux renvoyer un vocal');
+  render();
+}
+window.clearVocalPatch = clearVocalPatch;
+function buildVocalPatch(mi,fi){
+  const key='sb_patch_'+mi+'-'+fi;
+  let patches=[];
+  try{ patches=JSON.parse(localStorage.getItem(key)||'[]'); }catch{ patches=[]; }
+  if(!Array.isArray(patches) || !patches.length) return '';
+  patches = patches.slice(0,10);
+  const c = (typeof colOf==='function' ? colOf(D[mi]) : ['#2563EB','#EDF3FF']);
+  let html = '<section class="vocal-patch"><h3>\u2728 Ameliorations issues de tes vocaux</h3><div class="sub">Tes oraux 1 a 20 min enrichissent cette fiche : segmentation auto, sommaire oral, plan chronometre et 5 flashcards. <span style="color:var(--ink-3)">'+patches.length+' sur 10 max \u00b7 effacable</span></div>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0"><span class="pill">\u23f1 Timer 20 min (1200 s)</span><span class="pill">\u2722 words/3</span><span class="pill">\uD83D\uDCC4 sommaire oral</span><span class="pill">\uD83D\uDD52 plan chronometre</span><span class="pill">\uD83C\uDCCF 5 flashcards</span></div>';
+  patches.forEach((p, idx)=>{
+    const d=new Date(p.date).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    const tone = (p.words>=1500?'XXL': p.words>=600?'Long': p.words>=60?'Parfait':'Court');
+    const badgeSrc = p.src==='serveur' ? '<span class="badge srv">\uD83D\uDFE2 serveur</span>' : '<span class="badge loc">\uD83D\uDD35 local</span>';
+    const hes = p.hesRatio ? (p.hesRatio*100).toFixed(1)+'%' : '\u2014';
+    const txt = String(p.transcript||'').trim();
+    const words = p.words||0;
+    const segs = Math.min(4, Math.max(3, Math.ceil(words/500) || 3));
+    const per = Math.floor(words / segs) || 0;
+    const phrases = txt.split(/[.!?]+/).map(s=>s.trim()).filter(s=>s.length>12).slice(0,3);
+    const som = phrases.length ? '<ul style="margin:6px 0 0 18px;font-size:.88rem;color:var(--ink-2)">'+phrases.map(s=>'<li>'+escV(s.slice(0,120))+'</li>').join('')+'</ul>' : '<p style="font-size:.84rem;color:var(--ink-3)">Sommaire a completer \u2014 ajoute ton plan en 3 parties.</p>';
+    const cards = [];
+    const allPhrases = txt.split(/[.!?]+/).map(s=>s.trim()).filter(s=>s.length>15);
+    for(let i=0;i<5 && i<allPhrases.length;i++){
+      const ph = allPhrases[i];
+      const q = ph.split(' ').slice(0,7).join(' ') + '\u2026';
+      const a = ph.slice(0,140);
+      cards.push({q,a});
+    }
+    while(cards.length<5){
+      cards.push({q:'Point '+(cards.length+1)+' \u2014 a completer', a:'Ajoute un mot cle de ton oral.'});
+    }
+    html += '<div class="a-box" style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="font-size:.92rem">Ton oral : '+words+' mots \u00b7 ~'+Math.round(words/130)+' min \u00b7 '+tone+'</b>'+badgeSrc+'<span class="badge">'+d+'</span><span class="badge" style="color:var(--ink-3)">Hesitations '+hes+'</span></div>';
+    html += '<div class="pills" style="margin-top:6px"><span class="pill">\u2722 '+segs+' chapitres \u2014 ~'+per+' mots chacun</span><span class="pill">\uD83D\uDD52 '+Array.from({length:segs},(_,i)=>'P'+(i+1)+' '+Math.round(300/segs)+'s').join(' \u00b7 ')+' + intro 20s + concl 30s</span></div>';
+    html += '<div style="margin-top:8px"><b style="font-size:.86rem">\uD83D\uDCC4 Sommaire oral</b>'+som+'</div>';
+    html += '<div style="margin-top:8px"><b style="font-size:.86rem">\uD83D\uDCDA Ton oral (extrait)</b><p style="font-size:.88rem;color:var(--ink-2);margin-top:4px;max-height:96px;overflow:auto;background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px;white-space:pre-wrap">'+escV(txt.slice(0,800))+(txt.length>800?'\u2026':'')+'</p></div>';
+    html += '<div style="margin-top:8px"><b style="font-size:.86rem">\uD83C\uDCCF 5 flashcards generees</b><div class="fc-grid">'+cards.map(c=>'<div class="fc"><b>'+escV(c.q)+'</b><span>'+escV(c.a)+'</span></div>').join('')+'</div></div>';
+    html += '</div>';
+  });
+  html += '<div class="act"><button class="btn b-line b-xs" onclick="clearVocalPatch('+mi+','+fi+')">\uD83D\uDDD1 Effacer</button><a href="vocal.html" target="_blank" class="btn b-acc b-xs">\uD83C\uDFA4 Nouveau vocal 20 min</a><button class="btn b-line b-xs" onclick="window.print()">\uD83D\uDDA8 Imprimer</button></div>';
+  html += '<p style="font-size:.8rem;color:var(--ink-3);margin-top:8px">\uD83D\uDCA1 Dis juste <b>\u201cc\u2019est fait\u201d</b> apres ton vocal 1-20 min \u2014 j\u2019integre et j\u2019ameliore la fiche.</p>';
+  html += '</section>';
+  return html;
+}
+window.__vocalPalier = vocalPalier;
+window.fetchServerVocals = fetchServerVocals;
+window.buildVocalPatch = buildVocalPatch;
+window.getLocalVocals = getLocalVocals;
+const _homeBase = renderHome;
+renderHome = function(){
+  let html=_homeBase();
+  const ctaVocal = '<div class="vocal-dash" style="background:linear-gradient(135deg,var(--acc),#60A5FA);color:#fff;border:none"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><div style="width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:22px">\uD83C\uDFA4</div><div style="flex:1;min-width:200px"><h3 style="color:#fff;margin:0">Studio Vocal \u2014 1 a 20 min</h3><div style="font-size:.86rem;opacity:.92">Micro 1 clic, import audio ou colle ton texte : je decoupe auto + plan chronometre + 5 flashcards. Dis juste \u201cc\u2019est fait\u201d.</div></div><a href="vocal.html" target="_blank" class="btn" style="background:#fff;color:var(--acc);font-weight:800">\uD83C\uDFA4 Ouvrir le studio</a></div><div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><span style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:99px;padding:3px 9px;font-size:.76rem;font-weight:700">\u23f1 20 min max</span><span style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:99px;padding:3px 9px;font-size:.76rem;font-weight:700">\u2722 words/3</span><span style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:99px;padding:3px 9px;font-size:.76rem;font-weight:700">\uD83D\uDFE2/\uD83D\uDD35 serveur/local</span></div></div>';
+  if(html.includes('<div class="resume">')){
+    html = html.replace('<div class="resume">', ctaVocal + '<div class="resume">');
+  } else {
+    html = ctaVocal + html;
+  }
+  let merged=[];
+  try{ merged = JSON.parse(localStorage.getItem('sb_vocals')||'[]'); }catch{ merged=[]; }
+  try{ const m2=JSON.parse(localStorage.getItem('sb_vocals_merged')||'[]'); if(Array.isArray(m2) && m2.length) merged=m2; }catch{}
+  if(!Array.isArray(merged)) merged=[];
+  merged.sort((a,b)=>(b.date||0)-(a.date||0));
+  const last6 = merged.slice(0,6);
+  let dash = '<div class="vocal-dash"><h3>\uD83D\uDCE5 Vocaux recus <span style="font-size:.76rem;color:var(--ink-3);font-weight:600">\u00b7 '+merged.length+' total \u00b7 6 derniers</span></h3><div class="sub">Fusion serveur + local \u2014 badge <span style="color:#065F46">\uD83D\uDFE2 serveur</span> / <span style="color:var(--acc-2)">\uD83D\uDD35 local</span> \u00b7 tape ton vocal 1-20 min puis dis \u201cc\u2019est fait\u201d.</div>';
+  if(last6.length){
+    dash += '<div class="vlist">' + last6.map(v=>{
+      const d=new Date(v.date||Date.now()).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+      const src = v.src==='serveur' ? '<span class="badge srv">\uD83D\uDFE2 serveur</span>' : '<span class="badge loc">\uD83D\uDD35 local</span>';
+      const w=v.words||0;
+      let pal=""; if(w<10) pal="trop court"; else if(w<60) pal="un peu court"; else if(w<600) pal="parfait 2-5min"; else if(w<1500) pal="long 5-12min"; else pal="XXL 15-20min";
+      const fic = escV(v.ficheLabel||v.fiche||"");
+      const excerpt = escV(String(v.transcript||"").slice(0,90));
+      const link = (v.fiche && v.fiche.includes('-')) ? ('#/f/'+v.fiche.split('-')[0]+'/'+v.fiche.split('-')[1]+'/lire') : '#';
+      return '<div class="vitem"><div class="ic">\uD83C\uDFA4</div><div class="mid"><b>'+fic+' \u00b7 '+w+' mots \u00b7 '+pal+'</b><span>'+d+' \u00b7 ~'+Math.round(w/130)+' min \u00b7 '+excerpt+'\u2026</span></div>'+src+'<a href="'+link+'" class="btn b-line b-xs" style="padding:6px 10px;font-size:.78rem">Voir fiche</a></div>';
+    }).join('') + '</div>';
+  } else {
+    dash += '<div style="padding:10px 12px;border:1px dashed var(--line-2);border-radius:12px;background:var(--card-2);font-size:.88rem;color:var(--ink-2)">Aucun vocal pour l\u2019instant \u2014 lance ton premier oral \uD83C\uDFA4 (jusqu\u2019a 20 min, je decoupe auto). <a href="vocal.html" target="_blank" style="color:var(--acc-2);font-weight:750">Ouvrir le studio</a></div>';
+  }
+  dash += '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><a href="vocal.html" target="_blank" class="btn b-acc b-xs">\uD83C\uDFA4 Nouveau vocal</a><button class="btn b-line b-xs" onclick="fetchServerVocals().then(()=>{ toast(\u2018Vocaux synchronises \u2713\u2019); render(); })">\u21BB Synchroniser</button><button class="btn b-line b-xs" onclick="if(confirm(\u2018Effacer tous les vocaux locaux ?\u2019)){ localStorage.removeItem(\u2018sb_vocals\u2019); localStorage.removeItem(\u2018sb_vocals_merged\u2019); toast(\u2018Vocaux locaux effaces\u2019); render(); }">\uD83D\uDDD1 Effacer locaux</button></div>';
+  dash += '</div>';
+  if(html.includes('<div class="sec"><h2>Expos')){
+    html = html.replace('<div class="sec"><h2>Expos', dash + '<div class="sec"><h2>Expos');
+  } else if(html.includes('<div class="tip">')){
+    html = html.replace('<div class="tip">', dash + '<div class="tip">');
+  } else {
+    html += dash;
+  }
+  html = html.replace("Tu as un nouveau cours ? Envoie-moi un vocal \uD83C\uDFA4", "Tu as un nouveau cours ? Envoie-moi un vocal \uD83C\uDFA4 \u2014 jusqu\u2019a 20 min");
+  return html;
+};
+setTimeout(()=>{ try{ fetchServerVocals().then(()=>{ try{ if(parse().home) render(); }catch{} }); }catch{} }, 600);
+try{ const p6=parse(); if(p6&&!p6.home&&typeof render==='function'){ setTimeout(()=>{ try{ render(); }catch{} }, 900); } }catch{}
+let __vocalToastI=0;
+function vocalToasts(){
+  const msgs=["\u2705 1 min \u2014 c\u2019est parti","\u2705 2 min \u2014 parfait, continue","\u2705 5 min \u2014 tu es dans le format oral","\u23f1 10 min \u2014 format long, je gere","\u23f1 15 min \u2014 mode XXL, je decoupe auto","\u23f1 20 min \u2014 je decoupe auto en chapitres"];
+  return msgs;
+}
+window.vocalToasts=vocalToasts;
 })();
 
 </script>

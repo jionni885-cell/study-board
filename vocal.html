@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Studio Vocal — Study Board</title>
+<meta name="description" content="Studio vocal Study Board — enregistre 1 à 20 min, je découpe auto, analyse et envoi à ta fiche.">
+<meta name="theme-color" content="#2563EB">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232563EB'/%3E%3Cpath d='M18 22h9a5 5 0 0 1 5 5v17a4 4 0 0 0-4-4H18z' fill='%23fff'/%3E%3Cpath d='M46 22h-9a5 5 0 0 0-5 5v17a4 4 0 0 1 4-4h10z' fill='%23BFDBFE'/%3E%3C/svg%3E">
+<style>
+:root{--bg:#F4F6FA;--bg-soft:#EAEEF5;--card:#fff;--card-2:#FAFBFF;--ink:#101828;--ink-2:#3F4A5F;--ink-3:#7C8A9E;--line:#E6EAF2;--line-2:#D3DAE6;--acc:#2563EB;--acc-2:#1E50C8;--acc-soft:#EDF3FF;--ok:#149A5A;--ok-soft:#E7F7EF;--warn:#B45309;--warn-soft:#FEF3E2;--r-lg:22px;--r-md:14px;--w:860px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:400 15.5px/1.62 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+button{font-family:inherit}
+.top{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px) saturate(150%);border-bottom:1px solid var(--line)}
+.top-in{max-width:calc(var(--w) + 64px);margin:0 auto;display:flex;align-items:center;gap:14px;padding:10px 22px}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#1D4ED8,#3B82F6)}
+.brand b{font-size:1.02rem;letter-spacing:-.02em}
+.brand small{font-size:.72rem;color:var(--ink-3)}
+.wrap{max-width:var(--w);margin:0 auto;padding:18px 20px 60px}
+.hero{background:linear-gradient(135deg,#2563EB,#60A5FA);color:#fff;border-radius:22px;padding:22px 22px 18px;position:relative;overflow:hidden;box-shadow:0 14px 36px -18px rgba(37,99,235,.6)}
+.hero .glow{position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:rgba(255,255,255,.22);filter:blur(18px);border-radius:50%;pointer-events:none}
+.hero h1{font-size:clamp(1.4rem,4vw,1.85rem);line-height:1.2}
+.hero p{opacity:.92;margin-top:6px;max-width:62ch;font-size:.95rem}
+.hero .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.hero .chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:99px;padding:5px 11px;font-size:.8rem;font-weight:650;backdrop-filter:blur(4px)}
+.hero .cta{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;border-radius:12px;padding:11px 18px;border:0;cursor:pointer;transition:.15s}
+.btn:active{transform:scale(.98)}
+.b-white{background:#fff;color:#2563EB}
+.b-white:hover{filter:brightness(.97)}
+.b-ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3)}
+.b-ghost:hover{background:rgba(255,255,255,.22)}
+.banner{display:none;margin:12px 0;padding:12px 14px;border-radius:12px;background:var(--warn-soft);border:1px solid #F5C6C6;color:#7F1D1D;font-size:.9rem;align-items:center;gap:10px}
+.banner.show{display:flex}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 1px 6px rgba(16,24,40,.06);margin:14px 0}
+.card h2{font-size:1.05rem;margin-bottom:6px}
+.card .sub{color:var(--ink-3);font-size:.83rem;margin-bottom:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.seg{display:flex;gap:4px;background:var(--bg-soft);border:1px solid var(--line);padding:4px;border-radius:12px}
+.seg button{padding:8px 13px;border-radius:9px;border:0;background:transparent;color:var(--ink-2);font-weight:700;cursor:pointer}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+label.lbl{font-size:.82rem;font-weight:700;color:var(--ink-2);display:block;margin:12px 0 6px}
+select, textarea, input[type=file]{width:100%;border:1.5px solid var(--line-2);border-radius:12px;padding:11px 13px;font-size:.95rem;background:var(--card);color:var(--ink);transition:.15s}
+select:focus, textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px rgba(37,99,235,.13)}
+textarea{min-height:140px;resize:vertical;line-height:1.6}
+textarea#paste{min-height:180px}
+.mic-area{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 12px;border:1.5px dashed var(--line-2);border-radius:16px;background:var(--card-2)}
+.mic-btn{width:78px;height:78px;border-radius:50%;border:0;background:linear-gradient(135deg,#2563EB,#3B82F6);color:#fff;font-size:28px;display:grid;place-items:center;cursor:pointer;box-shadow:0 12px 24px -12px rgba(37,99,235,.6);transition:.18s}
+.mic-btn.rec{background:linear-gradient(135deg,#DC2626,#F87171);animation:pulse 1.6s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.35)}70%{box-shadow:0 0 0 14px rgba(220,38,38,0)}100%{box-shadow:0 0 0 0 rgba(220,38,38,0)}}
+.timer{font:800 2rem/1 'Outfit',Inter,sans-serif;letter-spacing:-.02em}
+.timer small{font-size:.9rem;color:var(--ink-3);font-weight:600;margin-left:6px}
+.help{font-size:.83rem;color:var(--ink-3);text-align:center;max-width:42ch}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:700;border-radius:99px;padding:5px 11px;border:1px solid var(--line-2);background:var(--card)}
+.pill.ok{background:var(--ok-soft);color:#065F46;border-color:#A7F3D0}
+.pill.warn{background:var(--warn-soft);color:#92400E;border-color:#FDE68A}
+.pill.bad{background:var(--acc-soft);color:var(--acc-2);border-color:#C7DAFF}
+.analyse{display:grid;gap:10px;margin-top:12px}
+.a-box{border:1px solid var(--line);border-radius:14px;padding:13px 14px;background:var(--card-2)}
+.a-box h3{font-size:.88rem;margin-bottom:4px}
+.a-box p{font-size:.88rem;color:var(--ink-2);line-height:1.5}
+.a-box ul{margin:6px 0 0 18px;font-size:.88rem;color:var(--ink-2)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.kpi{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--card);text-align:center}
+.kpi b{display:block;font-size:1.45rem;line-height:1}
+.kpi span{font-size:.74rem;color:var(--ink-3);font-weight:650;letter-spacing:.04em;text-transform:uppercase}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btn-acc{background:var(--acc);color:#fff}
+.btn-acc:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn-line{background:var(--card);border:1.5px solid var(--line-2);color:var(--ink)}
+.btn-line:hover{border-color:var(--acc);color:var(--acc-2)}
+.tip{margin-top:10px;font-size:.84rem;color:var(--ink-3);line-height:1.5}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,14px);background:#101828;color:#fff;padding:11px 18px;border-radius:13px;font-size:.88rem;font-weight:650;opacity:0;transition:.25s;z-index:120;max-width:92vw}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.v-list{display:grid;gap:8px;margin-top:10px}
+.v-item{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card-2)}
+.v-item .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--acc-soft);color:var(--acc-2);flex:none}
+.v-item .mid{flex:1;min-width:0}
+.v-item .mid b{display:block;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v-item .mid span{font-size:.78rem;color:var(--ink-3)}
+@media(max-width:560px){.hero{padding:16px}.wrap{padding:14px 14px 60px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand" onclick="location.href='index.html'">
+      <div class="logo">🎙</div>
+      <div><b>Study Board</b><small>Studio Vocal</small></div>
+    </div>
+    <div style="flex:1"></div>
+    <a href="index.html" style="text-decoration:none"><span class="btn b-ghost" style="background:var(--card);color:var(--ink);border:1px solid var(--line-2);padding:8px 14px">← Retour fiches</span></a>
+  </div>
+</header>
+<div class="wrap">
+  <div id="iframeBanner" class="banner">
+    <span style="font-size:18px">👋</span>
+    <div style="flex:1"><b>Micro bloqué dans l'aperçu ?</b><br><span style="font-size:.85rem;color:#7F1D1D">Ouvre ce studio dans un nouvel onglet pour activer le micro en 1 clic — tout le reste marche déjà ici.</span></div>
+    <a href="vocal.html" target="_blank" class="btn b-white" style="padding:8px 14px;font-size:.85rem">Ouvrir ↗</a>
+  </div>
+
+  <div class="hero">
+    <span class="glow"></span>
+    <div style="position:relative">
+      <h1>🎙 Studio Vocal — 15 à 20 min</h1>
+      <p>Enregistre ton cours à voix haute comme à l'oral. <b>Jusqu'à 20 min, je découpe auto</b> en chapitres + je te fais un plan chronométré + 5 flashcards. Micro 1 clic, ou importe ton audio / colle ton texte.</p>
+      <div class="meta">
+        <span class="chip">⏱ Timer 20 min</span>
+        <span class="chip">🧠 Analyse instantanée</span>
+        <span class="chip">📚 Envoi direct à ta fiche</span>
+      </div>
+      <div class="cta">
+        <button class="btn b-white" onclick="document.getElementById('secEnreg').scrollIntoView({behavior:'smooth'})">🎙 Commencer</button>
+        <a href="index.html" class="btn b-ghost">📖 Voir mes fiches</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="secEnreg">
+    <h2>1 · Choisis ta fiche</h2>
+    <p class="sub">Ton vocal sera rangé avec la bonne fiche et enrichira automatiquement sa lecture.</p>
+    <label class="lbl">Fiche de destination</label>
+    <select id="ficheSel" aria-label="Fiche">
+      <option value="0-0">SES — Les sources et les défis de la croissance (0-0)</option>
+      <option value="1-0">HGGSP — Faire la guerre, faire la paix (1-0)</option>
+      <option value="1-1">HGGSP — Cartographier les guerres (1-1)</option>
+      <option value="2-0">Histoire — La crise de 1929 (2-0)</option>
+      <option value="3-0">Anglais — Heroes & superheroes (3-0)</option>
+      <option value="4-0">Philosophie — Qu'est-ce que la philosophie ? (4-0)</option>
+      <option value="yemen">Exposé — La guerre au Yémen (5 min)</option>
+    </select>
+
+    <div class="row" style="margin-top:12px">
+      <div class="seg" role="tablist">
+        <button class="on" id="tabRec" onclick="switchTab('rec')">🎙 Enregistrer</button>
+        <button id="tabImp" onclick="switchTab('imp')">🎧 Import audio</button>
+        <button id="tabPaste" onclick="switchTab('paste')">📝 Coller texte</button>
+      </div>
+      <span style="flex:1"></span>
+      <span class="pill" id="supportHelp">💡 Jusqu'à 20 min, je découpe auto</span>
+    </div>
+
+    <div id="panelRec" style="margin-top:14px">
+      <div class="mic-area">
+        <button id="micBtn" class="mic-btn" aria-label="Enregistrer" onclick="toggleRec()">🎙</button>
+        <div class="timer" id="timer">00:00 <small>/ 20:00</small></div>
+        <div class="help" id="micHelp">Appuie pour démarrer. Je transcris en direct si ton navigateur le permet.<br>Sinon, ton audio est gardé et tu colles le texte ci-dessous — même résultat.</div>
+        <div class="pills" id="recPills" style="justify-content:center"></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <span class="pill" id="recState">Prêt à enregistrer</span>
+        <span class="pill" id="speechSupport">🔍 Vérification micro…</span>
+      </div>
+    </div>
+
+    <div id="panelImp" style="display:none;margin-top:14px">
+      <label class="lbl">Importe un audio (m4a, mp3, wav, ogg…)</label>
+      <input type="file" id="audioFile" accept="audio/*" onchange="onFile(this)">
+      <p class="tip">💡 Après import, colle ton texte dans la zone ci-dessous ou lance la reco vocale — le fichier sert de sauvegarde et de preuve, le texte fait le reste.</p>
+      <div id="fileInfo" class="pill" style="display:none;margin-top:8px"></div>
+      <audio id="audioPreview" controls style="width:100%;margin-top:10px;display:none"></audio>
+    </div>
+
+    <div id="panelPaste" style="display:none;margin-top:14px">
+      <p class="tip">Colle ici ton cours, ton oral, ou la correction — je l'analyse pareil qu'un enregistrement long. <b>Ton oral :</b> même analyse, même envoi.</p>
+    </div>
+
+    <label class="lbl" style="margin-top:16px">📝 Ton oral : <span style="font-weight:600;color:var(--ink-3)">(éditable, 1 à 20 min — 2000 à 3000 mots OK)</span></label>
+    <textarea id="paste" placeholder="Parle ou colle ici… Exemple : 'Aujourd'hui on a vu la croissance extensive vs intensive, la FBCF, la fonction de production Y=F(K,L)…' — même long (15-20 min), je découpe auto en chapitres."></textarea>
+    <div class="row" style="margin-top:8px">
+      <span class="pill" id="wordsPill">0 mots</span>
+      <span class="pill" id="timePill">~0 min</span>
+      <span class="pill" id="hesPill">Hésitations —</span>
+      <span style="flex:1"></span>
+      <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="clearPaste()">Effacer</button>
+      <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="demoLong()">Exemple 18 min</button>
+    </div>
+
+    <div class="analyse" id="analyse" style="display:none">
+      <div class="kpis">
+        <div class="kpi"><b id="kWords">0</b><span>Mots</span></div>
+        <div class="kpi"><b id="kTime">0′00</b><span>Durée estimée</span></div>
+        <div class="kpi"><b id="kPalier">—</b><span>Palier</span></div>
+        <div class="kpi"><b id="kHes">—</b><span>Hésitations</span></div>
+      </div>
+      <div class="a-box" id="palierBox"></div>
+      <div class="a-box" id="segBox" style="display:none"></div>
+    </div>
+
+    <div class="actions">
+      <button id="sendBtn" class="btn btn-acc" onclick="sendVocal()" disabled>📤 Envoyer à la fiche</button>
+      <button class="btn btn-line" onclick="saveLocalOnly()">💾 Sauver en local</button>
+      <span style="flex:1"></span>
+      <span class="pill" id="sendStatus">Prêt</span>
+    </div>
+    <p class="tip" id="sendHelp">✅ Tout est positif ici : même si l'envoi serveur échoue, je garde tout en local et ta fiche s'enrichit dès le reload.</p>
+
+    <div id="localListWrap" style="margin-top:16px;display:none">
+      <h2 style="font-size:.95rem">📥 Vocaux gardés sur cet appareil</h2>
+      <p class="sub">Ils fusionnent avec le serveur sur la page d'accueil.</p>
+      <div class="v-list" id="vList"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>✨ Comment ça marche ?</h2>
+    <p class="sub" style="margin-bottom:0">Tu fais ton vocal (1 à 20 min) → tu reviens et dis juste <b>"c'est fait"</b> → j'enrichis ta fiche avec chapitres, plan chronométré et 5 flashcards. Zéro message rouge : tout ce qui s'affiche est une aide.</p>
+    <ul style="margin:10px 0 0 18px;font-size:.9rem;color:var(--ink-2);line-height:1.6">
+      <li><b>Timer 20 min</b> (1200 s) — au-delà je découpe auto en chapitres</li>
+      <li><b>Analyse paliers</b> : &lt;10 trop court · &lt;60 un peu court · &lt;600 parfait 2-5 min · &lt;1500 long 5-12 min · ≥1500 XXL 15-20 min + hésitations &gt;2.5%</li>
+      <li><b>Fallback 100%</b> : micro → import audio → coller texte, même résultat</li>
+      <li><b>Envoi</b> : POST /api/vocal (20 Mo) + localStorage, badge serveur/local sur l'accueil</li>
+    </ul>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+const MAX_MS = 1200000; // 20 min
+const MAX_S = 1200;
+let recState = "idle"; // idle|rec
+let mediaRec = null, chunks=[], startTs=0, timerI=null, stream=null;
+let recog=null, interim="";
+const $ = s=>document.querySelector(s);
+const paste = $("#paste");
+const timerEl=$("#timer"), recPills=$("#recPills"), recStateEl=$("#recState");
+const speechSupport=$("#speechSupport"), wordsPill=$("#wordsPill"), timePill=$("#timePill"), hesPill=$("#hesPill");
+const kWords=$("#kWords"), kTime=$("#kTime"), kPalier=$("#kPalier"), kHes=$("#kHes"), palierBox=$("#palierBox"), segBox=$("#segBox"), analyse=$("#analyse");
+const sendBtn=$("#sendBtn"), sendStatus=$("#sendStatus"), vList=$("#vList"), localListWrap=$("#localListWrap");
+const ficheSel=$("#ficheSel");
+
+// iframe banner
+if(window.self!==window.top){
+  $("#iframeBanner").classList.add("show");
+}
+
+// fiche labels
+const ficheLabels = {
+  "0-0":"SES — Les sources et les défis de la croissance",
+  "1-0":"HGGSP — Faire la guerre, faire la paix",
+  "1-1":"HGGSP — Cartographier les guerres",
+  "2-0":"Histoire — La crise de 1929",
+  "3-0":"Anglais — Heroes & superheroes",
+  "4-0":"Philosophie — Qu'est-ce que la philosophie ?",
+  "yemen":"Exposé — La guerre au Yémen (5 min)"
+};
+
+// support detection
+let hasMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+let hasSpeech = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+speechSupport.textContent = hasMedia ? (hasSpeech ? "✅ Micro + reco vocale dispo" : "✅ Micro dispo · reco via collage") : "ℹ️ Micro non détecté · utilise Import ou Coller";
+speechSupport.className = "pill ok";
+
+// tabs
+function switchTab(t){
+  $("#tabRec").classList.toggle("on", t==='rec');
+  $("#tabImp").classList.toggle("on", t==='imp');
+  $("#tabPaste").classList.toggle("on", t==='paste');
+  $("#panelRec").style.display = t==='rec' ? "" : "none";
+  $("#panelImp").style.display = t==='imp' ? "" : "none";
+  $("#panelPaste").style.display = t==='paste' ? "block" : "none";
+  if(t==='paste') paste.focus();
+}
+function clearPaste(){ paste.value=""; onPaste(); toast("Zone nettoyée — prête pour ton oral"); }
+function demoLong(){
+  // 2000 mots env 18 min
+  const base = "Aujourd'hui on a vu la croissance économique, la croissance extensive qui vient de plus de travailleurs et de machines, et la croissance intensive qui vient du progrès technique et de la PGF. On a défini la FBCF comme l'investissement, la fonction de production Y = F de K et L, la combinaison productive, la population active et la règle des 70. ";
+  let txt = "";
+  for(let i=0;i<85;i++) txt += base + "Exemple concret : un agriculteur avec une terre et une moissonneuse produit une tonne, puis avec deux enfants et deux moissonneuses il double. ";
+  txt += "Conclusion : la croissance soutenable doit être inclusive et tenir compte de l'IDH, de l'empreinte écologique et des inégalités.";
+  paste.value = txt;
+  onPaste();
+  toast("Exemple 18 min chargé — ~2000 mots, prêt à envoyer");
+}
+
+// timer
+function fmt(ms){
+  const s = Math.floor(ms/1000);
+  const m = String(Math.floor(s/60)).padStart(2,'0');
+  const ss = String(s%60).padStart(2,'0');
+  return m+":"+ss;
+}
+function startTimer(){
+  startTs = Date.now();
+  timerI = setInterval(()=>{
+    const el = Date.now()-startTs;
+    timerEl.innerHTML = fmt(el) + ' <small>/ 20:00</small>';
+    const s = Math.floor(el/1000);
+    if(s>=1200){
+      // auto cut
+      stopRec(true);
+      toast("⏱ 20 min atteintes — je découpe auto en chapitres");
+    } else if(s===60) toast("✅ 1 min — c'est parti");
+    else if(s===120) toast("✅ 2 min — parfait, continue");
+    else if(s===300) toast("✅ 5 min — tu es dans le format oral");
+    else if(s===600) toast("⏱ 10 min — format long, je gère");
+    else if(s===900) toast("⏱ 15 min — mode XXL, je découpe auto");
+  }, 500);
+}
+function stopTimer(){
+  clearInterval(timerI); timerI=null;
+}
+
+// recording
+async function toggleRec(){
+  if(recState==="rec") stopRec(false);
+  else startRec();
+}
+async function startRec(){
+  if(!hasMedia){ toast("Micro non dispo ici — passe en Import ou Coller, même résultat"); switchTab('paste'); return; }
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(e){
+    toast("Micro non autorisé — utilise Import audio ou Coller le texte");
+    switchTab('imp');
+    recStateEl.textContent="Micro non autorisé → fallback prêt";
+    return;
+  }
+  chunks=[];
+  try{
+    mediaRec = new MediaRecorder(stream, {mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg'});
+  }catch{ mediaRec = new MediaRecorder(stream); }
+  mediaRec.ondataavailable = e=>{ if(e.data.size) chunks.push(e.data); };
+  mediaRec.onstop = ()=>{
+    // on garde l'audio en mémoire, l'utilisateur peut le télécharger si besoin
+    // on ne bloque pas l'envoi si pas de transcript
+    stream.getTracks().forEach(t=>t.stop());
+    stream=null;
+  };
+  mediaRec.start(250);
+  recState="rec";
+  $("#micBtn").classList.add("rec");
+  $("#micBtn").textContent="⏹";
+  recStateEl.textContent="● Enregistrement — parle naturellement";
+  recStateEl.className="pill bad";
+  startTimer();
+  startSpeech();
+  toast("🎙 Enregistrement lancé — jusqu'à 20 min");
+}
+function stopRec(auto){
+  if(mediaRec && mediaRec.state!=="inactive") try{mediaRec.stop();}catch{}
+  if(stream) try{stream.getTracks().forEach(t=>t.stop());}catch{}
+  stream=null;
+  stopTimer();
+  stopSpeech();
+  recState="idle";
+  $("#micBtn").classList.remove("rec");
+  $("#micBtn").textContent="🎙";
+  recStateEl.textContent = auto ? "⏱ 20 min — découpé auto, prêt à envoyer" : "⏹ Enregistrement terminé — complète ton texte si besoin";
+  recStateEl.className="pill ok";
+  // keep timer at final value
+}
+
+// speech
+function startSpeech(){
+  if(!hasSpeech) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  try{
+    recog = new SR();
+  }catch{ return; }
+  recog.lang="fr-FR";
+  recog.continuous=true;
+  recog.interimResults=true;
+  recog.maxAlternatives=1;
+  let finalSoFar = paste.value ? paste.value + " " : "";
+  recog.onresult = e=>{
+    let final="", inter="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      if(e.results[i].isFinal) final+= t+" ";
+      else inter+= t+" ";
+    }
+    if(final){
+      finalSoFar += final;
+      paste.value = finalSoFar + inter;
+      onPaste();
+    } else if(inter){
+      // show interim without committing
+      paste.value = finalSoFar + inter;
+      onPaste(true);
+    }
+  };
+  recog.onerror = (e)=>{
+    // no red, just inform
+    if(e.error==='not-allowed') toast("Micro ok, mais reco vocale bloquée — colle ton texte, même résultat");
+  };
+  recog.onend = ()=>{
+    if(recState==="rec"){
+      try{ recog.start(); }catch{}
+    }
+  };
+  try{ recog.start(); }catch{}
+}
+function stopSpeech(){
+  if(recog){
+    try{ recog.onend=null; recog.stop(); }catch{}
+    recog=null;
+  }
+}
+
+// file import
+function onFile(inp){
+  const f = inp.files && inp.files[0];
+  if(!f) return;
+  const url = URL.createObjectURL(f);
+  const ap = $("#audioPreview");
+  ap.src=url; ap.style.display="";
+  $("#fileInfo").style.display="";
+  $("#fileInfo").textContent = "🎧 " + f.name + " — " + (f.size/1024/1024).toFixed(2)+" Mo — prêt, colle le texte ci-dessous";
+  toast("Audio importé — colle maintenant ton texte");
+}
+
+// paste / analyse
+paste.addEventListener("input", ()=>onPaste());
+paste.addEventListener("paste", ()=>setTimeout(onPaste, 20));
+
+function hesRatio(txt){
+  const m = txt.match(/\b(euh|hum|ben|bah|alors|donc|du coup)\b/gi);
+  const h = m ? m.length : 0;
+  const w = txt.trim().split(/\s+/).filter(Boolean).length || 1;
+  return h / w;
+}
+function analyseText(txt){
+  const words = txt.trim().split(/\s+/).filter(Boolean).length;
+  const secs = Math.round(words / 130 * 60); // 130 mots/min oral
+  const hR = hesRatio(txt);
+  let palier="", detail="", tone="ok";
+  if(words < 10){ palier="Trop court"; detail="Ajoute au moins une phrase : dis ton plan en 1 min (≈130 mots) pour que je puisse découper."; tone="warn"; }
+  else if(words < 60){ palier="Un peu court"; detail="Quelques phrases de plus et c'est parfait pour un flash (1 min)."; tone="warn"; }
+  else if(words < 600){ palier="Parfait 2-5 min"; detail="Format idéal pour l'oral 5 min : 3 parties d'1 min 30 + intro/conclusion."; tone="ok"; }
+  else if(words < 1500){ palier="Long 5-12 min"; detail="Exposé long : je découpe en 3 chapitres + plan chronométré pour que tu tiennes le temps."; tone="ok"; }
+  else { palier="XXL 15-20 min"; detail="Cours complet 15-20 min : je segmente auto (words/3) + sommaire oral + 5 flashcards."; tone="bad"; }
+  if(hR > 0.025) detail += " · Hésitations un peu hautes ("+ (hR*100).toFixed(1)+"%) — ralentis et pose tes phrases.";
+  return {words, secs, hR, palier, detail, tone};
+}
+function onPaste(silent){
+  const txt = paste.value;
+  const a = analyseText(txt);
+  // pills
+  wordsPill.textContent = a.words + " mots";
+  const min = Math.floor(a.secs/60), sec = String(a.secs%60).padStart(2,'0');
+  timePill.textContent = "~" + min + ":" + sec + " min";
+  kWords.textContent = a.words;
+  kTime.textContent = min + "′" + sec;
+  kPalier.textContent = a.palier;
+  kHes.textContent = (a.hR*100).toFixed(1) + "%";
+  // update helpers
+  if(a.words===0){
+    analyse.style.display="none";
+    sendBtn.disabled=true;
+    sendStatus.textContent="Prêt";
+  } else {
+    analyse.style.display="";
+    palierBox.innerHTML = `<h3>${a.palier}</h3><p>${a.detail}</p>`;
+    // segmentation preview if >=600
+    if(a.words >= 600){
+      const segN = Math.min(4, Math.max(3, Math.ceil(a.words/600)));
+      const per = Math.floor(a.words/segN);
+      segBox.style.display="";
+      let chap = "";
+      for(let i=0;i<segN;i++) chap += `<li>Chapitre ${i+1} — ~${per} mots — ~${Math.round(per/130)} min</li>`;
+      segBox.innerHTML = `<h3>✂️ Segmentation auto (${segN} chapitres — words/3)</h3><p>Je découpe ton oral pour que chaque partie fasse ~${per} mots, avec sommaire + plan chronométré.</p><ul>${chap}</ul><p style="margin-top:6px"><b>Plan chronométré :</b> ${Array.from({length:segN},(_,i)=>`P${i+1} ${Math.round(300/segN)}s`).join(" · ")} + intro 20s + concl 30s.</p><p style="margin-top:6px">🃏 <b>5 flashcards</b> seront générées à partir de tes phrases clés.</p>`;
+    } else {
+      segBox.style.display="none";
+    }
+    sendBtn.disabled=false;
+    sendStatus.textContent = a.words <10 ? "Ajoute un peu de texte" : "Prêt à envoyer";
+    if(!silent && a.words===12) toast("Bien — continue, je compte jusqu'à 20 min");
+  }
+}
+onPaste(true);
+
+// sending
+function buildVocal(){
+  const fiche = ficheSel.value;
+  const transcript = paste.value.trim();
+  const a = analyseText(transcript);
+  const now = Date.now();
+  return {
+    id: "v_"+now+"_"+fiche.replace("-","_"),
+    fiche,
+    ficheLabel: ficheLabels[fiche] || fiche,
+    transcript,
+    words: a.words,
+    missing: [], // could add missing terms later
+    date: now,
+    dureeSec: a.secs,
+    hesRatio: a.hR,
+    palier: a.palier,
+  };
+}
+function saveLocalOnly(){
+  const v = buildVocal();
+  if(!v.transcript){ toast("Ajoute d'abord ton texte"); return; }
+  saveToLocal(v);
+  toast("💾 Sauvegardé en local — ta fiche l'affichera dès le reload");
+  sendStatus.textContent = "Sauvegardé en local ✓";
+  renderLocal();
+}
+function saveToLocal(v){
+  // sb_vocals
+  let arr=[];
+  try{ arr = JSON.parse(localStorage.getItem("sb_vocals")||"[]"); }catch{ arr=[]; }
+  if(!Array.isArray(arr)) arr=[];
+  arr.unshift(v);
+  arr = arr.slice(0,50);
+  localStorage.setItem("sb_vocals", JSON.stringify(arr));
+  localStorage.setItem("sb_vocal_last", JSON.stringify(v));
+  localStorage.setItem("sb_vocal_"+v.id, JSON.stringify(v));
+  // patch
+  const key = "sb_patch_"+v.fiche;
+  let patches=[];
+  try{ patches = JSON.parse(localStorage.getItem(key)||"[]"); }catch{ patches=[]; }
+  if(!Array.isArray(patches)) patches=[];
+  // avoid dup id
+  patches = patches.filter(p=>p.id!==v.id);
+  const patch = {
+    id: v.id,
+    date: v.date,
+    words: v.words,
+    transcript: v.transcript.slice(0,4000),
+    fullWords: v.words,
+    palier: v.palier,
+    hesRatio: v.hesRatio,
+    fiche: v.fiche,
+    ficheLabel: v.ficheLabel,
+    src: "local"
+  };
+  patches.unshift(patch);
+  patches = patches.slice(0,10);
+  localStorage.setItem(key, JSON.stringify(patches));
+}
+async function sendVocal(){
+  const v = buildVocal();
+  if(!v.transcript){ toast("Ajoute d'abord ton texte"); return; }
+  if(v.words < 10){ toast("Ton oral est encore très court — ajoute une phrase"); }
+  sendBtn.disabled=true;
+  sendStatus.textContent="Envoi…";
+  // optimistic local save
+  saveToLocal(v);
+  renderLocal();
+  let ok=false, serverMsg="";
+  try{
+    const r = await fetch("/api/vocal", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        fiche: v.fiche,
+        ficheLabel: v.ficheLabel,
+        transcript: v.transcript,
+        words: v.words,
+        missing: v.missing,
+        date: v.date,
+        hesRatio: v.hesRatio,
+        dureeSec: v.dureeSec
+      })
+    });
+    const j = await r.json().catch(()=>({}));
+    if(r.ok && j.ok){
+      ok=true;
+      serverMsg="serveur";
+      // mark patch as serveur
+      const key="sb_patch_"+v.fiche;
+      let patches=[];
+      try{ patches=JSON.parse(localStorage.getItem(key)||"[]"); }catch{}
+      if(patches[0] && patches[0].id===v.id) { patches[0].src="serveur"; localStorage.setItem(key, JSON.stringify(patches)); }
+      toast("✅ Envoyé — ta fiche s'enrichit dès le reload");
+      sendStatus.textContent="Envoyé au serveur ✓";
+    } else {
+      serverMsg = j.error || "réponse serveur";
+      toast("💾 Gardé en local — le serveur répondra plus tard, ta fiche est déjà enrichie");
+      sendStatus.textContent="Gardé en local ✓";
+    }
+  }catch(e){
+    toast("💾 Gardé en local — même sans serveur, ta fiche s'enrichit");
+    sendStatus.textContent="Gardé en local ✓";
+  }
+  // also keep server/local badge info
+  try{
+    const last = JSON.parse(localStorage.getItem("sb_vocal_last")||"null");
+    if(last && last.id===v.id) { last.src = ok ? "serveur":"local"; localStorage.setItem("sb_vocal_last", JSON.stringify(last)); }
+  }catch{}
+  setTimeout(()=>{ sendBtn.disabled=false; }, 600);
+  renderLocal();
+  // propose return
+  setTimeout(()=>{
+    if(confirm("Ton vocal est gardé ✓\n\nRevenir à ta fiche maintenant ?")){
+      const f = v.fiche.includes("-") ? v.fiche : "0-0";
+      const parts = f.split("-");
+      if(parts.length===2) location.href = "index.html#/f/"+parts[0]+"/"+parts[1]+"/lire";
+      else location.href="index.html";
+    }
+  }, 900);
+}
+
+function renderLocal(){
+  let arr=[];
+  try{ arr=JSON.parse(localStorage.getItem("sb_vocals")||"[]"); }catch{ arr=[]; }
+  if(!arr.length){ localListWrap.style.display="none"; return; }
+  localListWrap.style.display="";
+  vList.innerHTML = arr.slice(0,6).map(v=>{
+    const d=new Date(v.date).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    const src = v.src || "local";
+    const badge = src==="serveur" ? "🟢 serveur" : "🔵 local";
+    const pal = v.palier || (v.words>=1500?"XXL": v.words>=600?"Long": "—");
+    return `<div class="v-item"><div class="ic">🎙</div><div class="mid"><b>${esc(v.ficheLabel||v.fiche)} · ${v.words} mots · ${pal}</b><span>${d} · ${badge} · ~${Math.round((v.words||0)/130)} min</span></div><span style="font-size:.8rem;color:var(--ink-3)">${esc((v.transcript||"").slice(0,60))}…</span></div>`;
+  }).join("");
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(m){
+  const e=$("#toast");
+  e.textContent=m;
+  e.classList.add("show");
+  clearTimeout(e._t);
+  e._t=setTimeout(()=>e.classList.remove("show"), 2600);
+}
+
+// init
+renderLocal();
+onPaste(true);
+// expose for tests
+window.__vocal = {MAX_MS, MAX_S, analyseText};
+</script>
+</body>
+</html>
