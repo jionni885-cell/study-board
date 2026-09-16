@@ -1,0 +1,15 @@
+{
+  "fiche": "0-0",
+  "ficheLabel": "Test",
+  "transcript": "test audio go workflow avec son",
+  "words": 6,
+  "missing": [],
+  "date": 1789588829225,
+  "ts": 1789588829225,
+  "dureeSec": 3,
+  "hesRatio": null,
+  "id": "1789588829225_0-0",
+  "audioFile": "1789588829225_0-0.webm",
+  "audioMime": "audio/webm",
+  "audioBytes": 9000
+}
