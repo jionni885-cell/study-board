@@ -149,10 +149,27 @@ textarea#paste{min-height:180px}
         <div class="timer" id="timer">00:00 <small>/ 20:00</small></div>
         <div class="help" id="micHelp">Appuie pour démarrer. Je transcris en direct si ton navigateur le permet.<br>Sinon, ton audio est gardé et tu colles le texte ci-dessous — même résultat.</div>
         <div class="pills" id="recPills" style="justify-content:center"></div>
+        <audio id="recAudio" controls style="width:100%;max-width:420px;display:none;margin-top:8px"></audio>
+        <div id="recActions" style="display:none;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px"></div>
       </div>
       <div class="row" style="margin-top:12px">
         <span class="pill" id="recState">Prêt à enregistrer</span>
         <span class="pill" id="speechSupport">🔍 Vérification micro…</span>
+      </div>
+      <!-- Aide téléphone : dictée clavier universelle -->
+      <div id="phoneHelp" style="display:none;margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--acc-soft);border:1px solid #C7DAFF">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="font-size:22px;flex:none">📱</span>
+          <div style="flex:1">
+            <b style="display:block;font-size:.95rem">Sur téléphone, dicte avec le clavier (marche partout)</b>
+            <span style="font-size:.85rem;color:var(--ink-2)">Touche le champ <b>Ton oral</b> → clavier → <b>🎤</b> (micro du clavier Gboard / iOS) → dicte ton cours → ton texte apparaît ici. Même analyse qu'un micro direct.</span>
+            <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-acc" style="padding:8px 14px;font-size:.86rem" onclick="useKeyboardDictation()">⌨️ Dicter maintenant</button>
+              <button class="btn btn-line" style="padding:8px 14px;font-size:.86rem" onclick="demoLong()">🧪 Tester avec Exemple 18 min</button>
+            </div>
+            <div style="margin-top:6px;font-size:.78rem;color:var(--ink-3)">Astuce : sur iPhone, reste appuyé sur 🌐 puis choisis <b>Dictée</b>. Sur Android, tape 🎤 en haut du clavier.</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -253,25 +270,46 @@ const ficheLabels = {
 let hasMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 let hasSpeech = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 let isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+let isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+let lastAudioBlob=null, lastAudioUrl=null;
 function updateSupportUI(){
+  const phoneHelp = document.getElementById('phoneHelp');
   if(!isSecure){
     speechSupport.textContent = "⚠️ Page non sécurisée → micro bloqué, utilise https:// ou Colle le texte";
     speechSupport.className = "pill bad";
+    if(phoneHelp) phoneHelp.style.display="";
   } else if(!hasMedia){
     speechSupport.textContent = "ℹ️ Micro non détecté · Import audio ou Coller texte → même résultat parfait";
     speechSupport.className = "pill warn";
+    if(phoneHelp) phoneHelp.style.display="";
   } else if(hasSpeech){
-    speechSupport.textContent = "✅ Micro + retranscris direct dispo (Chrome / Edge)";
+    speechSupport.textContent = isMobile ? "✅ Micro + retranscris direct (Chrome Android OK)" : "✅ Micro + retranscris direct dispo (Chrome / Edge)";
     speechSupport.className = "pill ok";
+    if(phoneHelp) phoneHelp.style.display = isMobile ? "" : "none";
+    // sur mobile, aide toujours visible car clavier plus fiable
+    if(isMobile && phoneHelp) phoneHelp.style.display="";
   } else {
-    speechSupport.textContent = "⚠️ Ton navigateur ne transcrit pas (Firefox/Safari) → J'enregistre, puis colle ton texte";
+    speechSupport.textContent = "⚠️ Ton navigateur ne retranscrit pas (Firefox/Safari/iPhone) → J'enregistre, puis dicte avec le clavier";
     speechSupport.className = "pill warn";
-    // aide visible
+    if(phoneHelp) phoneHelp.style.display="";
     const h = document.getElementById('micHelp');
-    if(h) h.innerHTML = "🎙 J'enregistre ton audio, mais <b>ce navigateur ne transcrit pas</b>.<br>→ Après STOP, colle ton texte ci-dessous ou clique <b>Exemple 18 min</b> pour tester — même analyse, même envoi.";
+    if(h) h.innerHTML = "🎙 J'enregistre ton audio, mais <b>ce navigateur ne retranscrit pas tout seul</b>.<br>→ Après STOP, <b>touche \"Dicter maintenant\"</b> ci-dessous et parle avec le <b>🎤 du clavier</b> — même analyse, même envoi.";
   }
 }
 updateSupportUI();
+function useKeyboardDictation(){
+  paste.focus();
+  // sur mobile, ouvre le clavier + montre aide
+  toast("📱 Touche 🎤 sur ton clavier pour dicter — ton texte s'affiche ici");
+  // scroll vers textarea
+  paste.scrollIntoView({behavior:'smooth', block:'center'});
+  // highlight
+  paste.style.borderColor="var(--acc)";
+  paste.style.boxShadow="0 0 0 3px rgba(37,99,235,.18)";
+  setTimeout(()=>{ paste.style.borderColor=""; paste.style.boxShadow=""; }, 2500);
+  // vibration courte sur mobile si dispo
+  try{ navigator.vibrate && navigator.vibrate(30); }catch{}
+}
 
 // tabs
 function switchTab(t){
@@ -354,14 +392,33 @@ async function startRec(){
     return;
   }
   chunks=[];
+  lastAudioBlob=null;
+  // reset preview
   try{
-    mediaRec = new MediaRecorder(stream, {mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg'});
-  }catch{ mediaRec = new MediaRecorder(stream); }
+    const ra=document.getElementById('recAudio'); if(ra){ ra.pause(); ra.style.display="none"; ra.removeAttribute('src'); }
+    const act=document.getElementById('recActions'); if(act){ act.style.display="none"; act.innerHTML=""; }
+    if(lastAudioUrl){ URL.revokeObjectURL(lastAudioUrl); lastAudioUrl=null; }
+  }catch{}
+  try{
+    mediaRec = new MediaRecorder(stream, {mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'});
+  }catch{ try{ mediaRec = new MediaRecorder(stream, {mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg'});}catch{ mediaRec = new MediaRecorder(stream); } }
   mediaRec.ondataavailable = e=>{ if(e.data.size) chunks.push(e.data); };
   mediaRec.onstop = ()=>{
-    // on garde l'audio en mémoire, l'utilisateur peut le télécharger si besoin
-    // on ne bloque pas l'envoi si pas de transcript
-    stream.getTracks().forEach(t=>t.stop());
+    try{
+      if(chunks.length){
+        lastAudioBlob = new Blob(chunks, {type: mediaRec.mimeType || 'audio/webm'});
+        if(lastAudioUrl) URL.revokeObjectURL(lastAudioUrl);
+        lastAudioUrl = URL.createObjectURL(lastAudioBlob);
+        const ra = document.getElementById('recAudio');
+        if(ra){ ra.src = lastAudioUrl; ra.style.display=""; }
+        const act = document.getElementById('recActions');
+        if(act){
+          act.style.display="flex";
+          act.innerHTML = `<a href="${lastAudioUrl}" download="vocal-${Date.now()}.webm" class="btn btn-line" style="padding:7px 12px;font-size:.83rem">⬇️ Télécharger audio</a><button class="btn btn-line" style="padding:7px 12px;font-size:.83rem" onclick="useKeyboardDictation()">⌨️ Dicter avec le clavier</button>`;
+        }
+      }
+    }catch{}
+    try{ stream.getTracks().forEach(t=>t.stop()); }catch{}
     stream=null;
   };
   mediaRec.start(250);
@@ -384,32 +441,38 @@ async function startRec(){
 }
 function stopRec(auto){
   if(mediaRec && mediaRec.state!=="inactive") try{mediaRec.stop();}catch{}
-  if(stream) try{stream.getTracks().forEach(t=>t.stop());}catch{}
-  stream=null;
+  // ne pas couper stream ici, onstop s'en charge
   stopTimer();
   stopSpeech();
   recState="idle";
   $("#micBtn").classList.remove("rec");
   $("#micBtn").textContent="🎙";
-  const w = paste.value.trim().split(/\s+/).filter(Boolean).length;
-  if(auto){
-    recStateEl.textContent = "⏱ 20 min — découpé auto, prêt à envoyer · "+w+" mots";
-    recStateEl.className="pill ok";
-  } else if(w===0){
-    recStateEl.textContent = "⏹ Fini — aucun texte capté → colle ton oral ci-dessous";
-    recStateEl.className="pill warn";
-    paste.focus();
-    paste.placeholder = "Rien n'a été transcrit (Firefox/Safari) → colle ici ton oral, ou clique 'Exemple 18 min' pour tester — même résultat !";
-    paste.style.borderColor="var(--warn)";
-    toast("ℹ️ Aucun texte capté — colle ton oral ci-dessous, j'analyse pareil");
-    // pulse textarea
-    setTimeout(()=>paste.style.borderColor="", 2500);
-  } else {
-    recStateEl.textContent = "⏹ Terminé — "+w+" mots captés, tu peux éditer ci-dessous";
-    recStateEl.className="pill ok";
-    toast("✅ "+w+" mots captés — édite si besoin puis Envoyer");
-  }
-  // keep timer at final value
+  // laisse le temps à onstop de créer le blob
+  setTimeout(()=>{
+    const w = paste.value.trim().split(/\s+/).filter(Boolean).length;
+    const hasAudio = !!lastAudioBlob;
+    if(auto){
+      recStateEl.textContent = "⏱ 20 min — découpé auto, prêt à envoyer · "+w+" mots";
+      recStateEl.className="pill ok";
+      if(hasAudio) toast("✅ Audio gardé "+(lastAudioBlob? (lastAudioBlob.size/1024).toFixed(0)+" Ko":"")+" — édite puis Envoyer");
+    } else if(w===0){
+      recStateEl.textContent = hasAudio ? "⏹ Audio gardé — aucun texte → dicte avec le clavier ci-dessous" : "⏹ Fini — aucun texte capté → dicte avec le clavier";
+      recStateEl.className="pill warn";
+      const ph = document.getElementById('phoneHelp');
+      if(ph) ph.style.display="";
+      paste.placeholder = isMobile ? "Touche 'Dicter maintenant' puis 🎤 du clavier et parle — ton oral s'affiche ici !" : "Rien n'a été retranscrit (Firefox/Safari) → clique 'Dicter maintenant' et parle avec 🎤 du clavier, ou colle ton texte !";
+      paste.style.borderColor="var(--warn)";
+      if(hasAudio) toast("🎧 Audio gardé — maintenant dicte avec le clavier pour remplir le texte");
+      else toast("ℹ️ Aucun texte — touche 'Dicter maintenant' et parle avec 🎤 du clavier");
+      setTimeout(()=>paste.style.borderColor="", 2800);
+      // focus avec délai pour laisser le DOM se stabiliser
+      setTimeout(()=>{ try{ paste.focus(); }catch{} }, 400);
+    } else {
+      recStateEl.textContent = "⏹ Terminé — "+w+" mots captés, tu peux éditer ci-dessous"+(hasAudio?" · audio gardé":"");
+      recStateEl.className="pill ok";
+      toast("✅ "+w+" mots captés — édite si besoin puis Envoyer"+(hasAudio?" (audio gardé)":""));
+    }
+  }, 350);
 }
 
 // speech — avec feedback instantané très visible
