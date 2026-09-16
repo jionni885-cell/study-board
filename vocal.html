@@ -147,9 +147,11 @@ textarea#paste{min-height:180px}
       <div class="mic-area">
         <button id="micBtn" class="mic-btn" aria-label="Enregistrer" onclick="toggleRec()">🎙</button>
         <div class="timer" id="timer">00:00 <small>/ 20:00</small></div>
+        <canvas id="vu" width="300" height="40" style="display:none;width:100%;max-width:320px;height:40px;background:var(--card);border:1px solid var(--line);border-radius:10px"></canvas>
         <div class="help" id="micHelp">Appuie pour démarrer. Je transcris en direct si ton navigateur le permet.<br>Sinon, ton audio est gardé et tu colles le texte ci-dessous — même résultat.</div>
         <div class="pills" id="recPills" style="justify-content:center"></div>
-        <audio id="recAudio" controls style="width:100%;max-width:420px;display:none;margin-top:8px"></audio>
+        <div id="recInfo" class="pill" style="display:none;font-family:monospace;font-size:.75rem;max-width:100%;overflow:auto"></div>
+        <audio id="recAudio" controls playsinline preload="metadata" style="width:100%;max-width:420px;display:none;margin-top:8px"></audio>
         <div id="recActions" style="display:none;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px"></div>
       </div>
       <div class="row" style="margin-top:12px">
@@ -400,19 +402,19 @@ async function startRec(){
     const ph=document.getElementById('phoneHelp'); if(ph) ph.style.display="";
     return;
   }
-  // demande micro avec contraintes compatibles mobile
+  // demande micro — simple pour max compat Android
   try{
     recStateEl.textContent="🎤 Demande micro… autorise";
     recStateEl.className="pill warn";
-    // petite vibration sur mobile pour feedback
     try{ navigator.vibrate && navigator.vibrate(20);}catch{}
-    stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation:true,
-        noiseSuppression:true,
-        autoGainControl:true
-      }
-    });
+    // Android Chrome muet bug : contraintes complexes causent silence sur certains appareils → audio:true le plus robuste
+    try{
+      stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    }catch(e1){
+      // fallback avec contraintes explicites si simple échoue
+      stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true}});
+      console.warn("[vocal] fallback getUserMedia", e1);
+    }
     console.log("[vocal] stream OK", stream.getTracks().map(t=>t.label));
   }catch(e){
     const name = e.name||"";
@@ -461,43 +463,97 @@ async function startRec(){
   else if(MediaRecorder.isTypeSupported('audio/mp4')) mime='audio/mp4';
   else if(MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) mime='audio/ogg;codecs=opus';
   console.log("[vocal] mime choisi", mime || "default");
+  // essaie avec bitrate explicite pour éviter silence Android
+  let recOpts = mime ? {mimeType: mime, audioBitsPerSecond: 128000} : {};
   try{
-    mediaRec = mime ? new MediaRecorder(stream, {mimeType: mime}) : new MediaRecorder(stream);
+    mediaRec = new MediaRecorder(stream, recOpts);
   }catch(err){
-    console.error("[vocal] MediaRecorder create fail", err);
-    try{ mediaRec = new MediaRecorder(stream); }catch(e2){
-      toast("Enregistreur non dispo sur ce navigateur — utilise Import audio ou clavier");
-      recStateEl.textContent="Enregistreur non dispo → clavier";
-      recStateEl.className="pill warn";
-      try{ stream.getTracks().forEach(t=>t.stop()); }catch{}
-      stream=null;
-      const ph=document.getElementById('phoneHelp'); if(ph) ph.style.display="";
-      return;
+    console.warn("[vocal] rec with bitrate fail, retry sans bitrate", err);
+    try{
+      mediaRec = mime ? new MediaRecorder(stream, {mimeType: mime}) : new MediaRecorder(stream);
+    }catch(err2){
+      console.error("[vocal] MediaRecorder create fail", err2);
+      try{
+        mediaRec = new MediaRecorder(stream);
+      }catch(e2){
+        toast("Enregistreur non dispo sur ce navigateur — utilise Import audio ou clavier");
+        recStateEl.textContent="Enregistreur non dispo → clavier";
+        recStateEl.className="pill warn";
+        try{ stream.getTracks().forEach(t=>t.stop()); }catch{}
+        stream=null;
+        const ph=document.getElementById('phoneHelp'); if(ph) ph.style.display="";
+        return;
+      }
     }
   }
-  mediaRec.ondataavailable = e=>{ if(e.data && e.data.size) chunks.push(e.data); };
+  mediaRec.ondataavailable = e=>{ if(e.data && e.data.size>0) chunks.push(e.data); else console.warn("[vocal] empty chunk", e.data?.size); };
   mediaRec.onerror = (e)=>{ console.error("[vocal] MediaRecorder error", e.error||e); toast("Erreur enregistreur : "+(e.error?.message||"inconnue")); };
+  // vu-mètre
+  let audioCtx=null, analyser=null, vuRAF=null;
+  try{
+    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const src = audioCtx.createMediaStreamSource(stream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize=256;
+    src.connect(analyser);
+    const vu=document.getElementById('vu');
+    if(vu){ vu.style.display=""; }
+    const canvas=document.getElementById('vu');
+    const ctx=canvas.getContext('2d');
+    const data=new Uint8Array(analyser.frequencyBinCount);
+    function draw(){
+      if(recState!=="rec" || !analyser) return;
+      analyser.getByteFrequencyData(data);
+      const avg=data.reduce((a,b)=>a+b,0)/data.length;
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      // fond
+      ctx.fillStyle="#EEF2FF"; ctx.fillRect(0,0,canvas.width,canvas.height);
+      // barres
+      const barW=canvas.width/data.length*1.2;
+      for(let i=0;i<data.length;i++){
+        const h=data[i]/255*canvas.height;
+        ctx.fillStyle = avg>40 ? "#2563EB" : avg>10 ? "#60A5FA" : "#C7DAFF";
+        ctx.fillRect(i*barW, canvas.height-h, barW-1, h);
+      }
+      // texte niveau
+      ctx.fillStyle="#1E3A8A"; ctx.font="11px Inter"; ctx.fillText(avg>20?"🎤 Je t'entends":"🎤 Parle plus fort…", 8,14);
+      vuRAF=requestAnimationFrame(draw);
+    }
+    draw();
+    // arrêtera dans stopRec
+    mediaRec._vuCleanup = ()=>{ try{ cancelAnimationFrame(vuRAF); if(audioCtx) audioCtx.close(); }catch{} const vu2=document.getElementById('vu'); if(vu2) vu2.style.display="none"; };
+  }catch(e){ console.warn("[vocal] vu-meter fail", e); }
   mediaRec.onstop = ()=>{
-    console.log("[vocal] onstop chunks", chunks.length);
+    console.log("[vocal] onstop chunks", chunks.length, "sizes", chunks.map(c=>c.size));
+    try{ if(mediaRec._vuCleanup) mediaRec._vuCleanup(); }catch{}
     try{
       if(chunks.length){
         const mt = mediaRec.mimeType || mime || 'audio/webm';
         lastAudioBlob = new Blob(chunks, {type: mt});
-        console.log("[vocal] blob", lastAudioBlob.size, mt);
+        console.log("[vocal] blob", lastAudioBlob.size, mt, "duration el", Date.now()-startTs);
         if(lastAudioUrl) URL.revokeObjectURL(lastAudioUrl);
         lastAudioUrl = URL.createObjectURL(lastAudioBlob);
         const ra = document.getElementById('recAudio');
-        if(ra){ ra.src = lastAudioUrl; ra.style.display=""; ra.load(); }
+        if(ra){
+          ra.src = lastAudioUrl;
+          ra.volume=1; ra.muted=false; ra.style.display="";
+          ra.load();
+          ra.onloadedmetadata=()=>{ console.log("[vocal] audio metadata duration", ra.duration); const inf=document.getElementById('recInfo'); if(inf){ inf.textContent=`🔊 ${ (lastAudioBlob.size/1024).toFixed(1)} Ko · ${ra.duration.toFixed(1)}s · ${mt} · ${chunks.length} bouts — si muet, monte le volume média 📱`; inf.style.display=""; inf.className="pill ok"; if(ra.duration<0.5 || lastAudioBlob.size<3000){ inf.textContent+=" ⚠️ Audio vide — rapproche le micro"; inf.className="pill warn"; } } };
+          ra.onerror=(e)=>{ console.error("[vocal] audio error", e, ra.error); const inf=document.getElementById('recInfo'); if(inf){ inf.textContent=`❌ Erreur lecture (${ra.error?.code||"?"}) ${ra.error?.message||""} — essaie Télécharger puis réécoute`; inf.style.display=""; inf.className="pill bad"; } toast("❌ Erreur lecture audio — télécharge et réécoute, ou dicte avec le clavier"); };
+          // teste si le navigateur peut jouer le mime
+          ra.oncanplay=()=>{ console.log("[vocal] canplay"); };
+        }
         const act = document.getElementById('recActions');
         if(act){
           act.style.display="flex";
           const ext = mt.includes('mp4') ? 'm4a' : mt.includes('ogg') ? 'ogg' : 'webm';
-          act.innerHTML = `<a href="${lastAudioUrl}" download="vocal-${Date.now()}.${ext}" class="btn btn-line" style="padding:7px 12px;font-size:.83rem">⬇️ Télécharger audio</a><button class="btn btn-line" style="padding:7px 12px;font-size:.83rem" onclick="useKeyboardDictation()">⌨️ Dicter avec le clavier</button><button class="btn btn-line" style="padding:7px 12px;font-size:.83rem" onclick="shareForGo()">📤 Partager pour GO</button>`;
+          act.innerHTML = `<button class="btn btn-acc" style="padding:7px 12px;font-size:.83rem" onclick="document.getElementById('recAudio').play().catch(e=>toast('Appuie PLAY sur le lecteur — volume média au max 📱'))">▶️ Écouter</button><a href="${lastAudioUrl}" download="vocal-${Date.now()}.${ext}" class="btn btn-line" style="padding:7px 12px;font-size:.83rem">⬇️ Télécharger</a><button class="btn btn-line" style="padding:7px 12px;font-size:.83rem" onclick="useKeyboardDictation()">⌨️ Dicter</button><button class="btn btn-line" style="padding:7px 12px;font-size:.83rem" onclick="shareForGo()">📤 GO</button>`;
         }
       } else {
         console.warn("[vocal] no chunks");
+        const inf=document.getElementById('recInfo'); if(inf){ inf.textContent="❌ Aucun bout audio capté — réessaie, ou dicte avec le clavier"; inf.style.display=""; inf.className="pill bad"; }
         const act=document.getElementById('recActions');
-        if(act){ act.style.display="flex"; act.innerHTML=`<button class="btn btn-acc" onclick="useKeyboardDictation()">⌨️ Dicter avec le clavier</button>`; }
+        if(act){ act.style.display="flex"; act.innerHTML=`<button class="btn btn-acc" onclick="useKeyboardDictation()">⌨️ Dicter avec le clavier</button><button class="btn btn-line" onclick="testBeep()">🔊 Tester haut-parleur</button>`; }
       }
     }catch(err){ console.error("[vocal] blob fail", err); }
     try{ if(stream) stream.getTracks().forEach(t=>t.stop()); }catch{}
@@ -533,28 +589,38 @@ function stopRec(auto){
   setTimeout(()=>{
     const w = paste.value.trim().split(/\s+/).filter(Boolean).length;
     const hasAudio = !!lastAudioBlob;
+    const blobInfo = hasAudio ? `(${(lastAudioBlob.size/1024).toFixed(1)} Ko)` : "";
     if(auto){
-      recStateEl.textContent = "⏱ 20 min — découpé auto, prêt à envoyer · "+w+" mots";
+      recStateEl.textContent = "⏱ 20 min — découpé auto, prêt à envoyer · "+w+" mots "+blobInfo;
       recStateEl.className="pill ok";
-      if(hasAudio) toast("✅ Audio gardé "+(lastAudioBlob? (lastAudioBlob.size/1024).toFixed(0)+" Ko":"")+" — édite puis Envoyer");
+      if(hasAudio) toast("✅ Audio gardé "+blobInfo+" — écoute puis Envoyer");
     } else if(w===0){
-      recStateEl.textContent = hasAudio ? "⏹ Audio gardé — aucun texte → dicte avec le clavier ci-dessous" : "⏹ Fini — aucun texte capté → dicte avec le clavier";
+      recStateEl.textContent = hasAudio ? "⏹ Audio gardé "+blobInfo+" — aucun texte → dicte avec le clavier ci-dessous" : "⏹ Fini — aucun texte capté → dicte avec le clavier";
       recStateEl.className="pill warn";
       const ph = document.getElementById('phoneHelp');
       if(ph) ph.style.display="";
       paste.placeholder = isMobile ? "Touche 'Dicter maintenant' puis 🎤 du clavier et parle — ton oral s'affiche ici !" : "Rien n'a été retranscrit (Firefox/Safari) → clique 'Dicter maintenant' et parle avec 🎤 du clavier, ou colle ton texte !";
       paste.style.borderColor="var(--warn)";
-      if(hasAudio) toast("🎧 Audio gardé — maintenant dicte avec le clavier pour remplir le texte");
+      if(hasAudio) toast("🎧 Audio gardé "+blobInfo+" — clique ▶️ Écouter et monte le volume média; puis dicte avec le clavier pour remplir le texte");
       else toast("ℹ️ Aucun texte — touche 'Dicter maintenant' et parle avec 🎤 du clavier");
-      setTimeout(()=>paste.style.borderColor="", 2800);
-      // focus avec délai pour laisser le DOM se stabiliser
+      setTimeout(()=>paste.style.borderColor="", 3200);
       setTimeout(()=>{ try{ paste.focus(); }catch{} }, 400);
     } else {
-      recStateEl.textContent = "⏹ Terminé — "+w+" mots captés, tu peux éditer ci-dessous"+(hasAudio?" · audio gardé":"");
+      recStateEl.textContent = "⏹ Terminé — "+w+" mots captés"+(hasAudio?" · audio gardé "+blobInfo:"");
       recStateEl.className="pill ok";
-      toast("✅ "+w+" mots captés — édite si besoin puis Envoyer"+(hasAudio?" (audio gardé)":""));
+      toast("✅ "+w+" mots captés — ▶️ Écoute ton audio puis Envoyer"+(hasAudio?"":""));
     }
-  }, 350);
+  }, 500);
+}
+function testBeep(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(); o.type='sine'; o.frequency.value=880;
+    const g=ctx.createGain(); g.gain.value=0.12;
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); setTimeout(()=>{o.stop(); ctx.close();}, 350);
+    toast("🔊 Bip ! Si tu l'entends, ton haut-parleur marche — monte le volume média");
+  }catch(e){ toast("Test son indisponible"); }
 }
 
 // speech — avec feedback instantané très visible
