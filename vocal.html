@@ -215,9 +215,22 @@ textarea#paste{min-height:180px}
     </div>
     <p class="tip" id="sendHelp">✅ Tout est positif ici : même si l'envoi serveur échoue, je garde tout en local et ta fiche s'enrichit dès le reload.</p>
 
+    <div id="goBox" style="display:none;margin-top:14px;padding:14px;border-radius:14px;background:linear-gradient(135deg,#2563EB,#60A5FA);color:#fff">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:26px">🤖</span>
+        <div style="flex:1;min-width:200px">
+          <b style="display:block">Dis juste “go” à l'agent</b>
+          <span style="font-size:.86rem;opacity:.92">Ton vocal est gardé. Quand tu dis <b>go</b>, je le lis et j'enrichis ta fiche (chapitres + plan + flashcards).</span>
+        </div>
+        <button class="btn" style="background:#fff;color:var(--acc);font-weight:800;padding:10px 16px" onclick="shareForGo()">📋 Copier pour GO</button>
+      </div>
+      <div style="margin-top:8px;font-size:.8rem;opacity:.88">Sur <b>GitHub Pages</b> : clique <b>Copier pour GO</b> puis colle ici et dis <b>go</b> — je reçois tout. Sur le <b>serveur 4173</b> : c'est automatique, dis juste <b>go</b>.</div>
+      <div id="goPreview" style="display:none;margin-top:10px;padding:10px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:10px;font-size:.8rem;white-space:pre-wrap;max-height:160px;overflow:auto"></div>
+    </div>
+
     <div id="localListWrap" style="margin-top:16px;display:none">
       <h2 style="font-size:.95rem">📥 Vocaux gardés sur cet appareil</h2>
-      <p class="sub">Ils fusionnent avec le serveur sur la page d'accueil.</p>
+      <p class="sub">Ils fusionnent avec le serveur sur la page d'accueil. <span style="color:var(--acc);font-weight:700">Pour que l'agent le reçoive : clique “Copier pour GO” puis dis “go”.</span></p>
       <div class="v-list" id="vList"></div>
     </div>
   </div>
@@ -269,9 +282,10 @@ const ficheLabels = {
 // support detection — feedback instantané
 let hasMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 let hasSpeech = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
-let isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+let isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname.endsWith('.e2b.app') || location.hostname.endsWith('.e2b.dev') || location.hostname.endsWith('.github.io');
 let isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 let lastAudioBlob=null, lastAudioUrl=null;
+let recDiag = ""; // debug
 function updateSupportUI(){
   const phoneHelp = document.getElementById('phoneHelp');
   if(!isSecure){
@@ -367,28 +381,69 @@ async function toggleRec(){
   else startRec();
 }
 async function startRec(){
-  if(!hasMedia){ toast("Micro non dispo ici — passe en Import ou Coller, même résultat"); switchTab('paste'); paste.focus(); return; }
-  if(!isSecure){
-    toast("⚠️ Micro bloqué : ouvre la page en https:// (GitHub Pages) pour le micro");
-    recStateEl.textContent="🔒 Micro bloqué (http) → utilise Coller texte";
-    recStateEl.className="pill bad";
-    switchTab('paste');
+  recDiag = `hasMedia=${hasMedia} hasSpeech=${hasSpeech} isSecure=${isSecure} proto=${location.protocol} host=${location.hostname}`;
+  console.log("[vocal] startRec", recDiag);
+  if(!hasMedia){
+    toast("Micro non dispo sur cet appareil — utilise Import audio ou Dicter avec le clavier");
+    recStateEl.textContent="Micro non dispo → clavier";
+    recStateEl.className="pill warn";
+    // n'ouvre pas paste, reste sur rec mais montre aide clavier
+    const ph=document.getElementById('phoneHelp'); if(ph) ph.style.display="";
+    document.getElementById('recActions').style.display="flex";
+    document.getElementById('recActions').innerHTML=`<button class="btn btn-acc" style="padding:8px 14px" onclick="useKeyboardDictation()">⌨️ Dicter avec le clavier</button><button class="btn btn-line" style="padding:8px 14px" onclick="demoLong()">🧪 Exemple 18 min</button>`;
     return;
   }
+  if(!isSecure){
+    toast("⚠️ Micro bloqué : ouvre en https:// (GitHub Pages)");
+    recStateEl.textContent="🔒 Besoin https → clavier";
+    recStateEl.className="pill bad";
+    const ph=document.getElementById('phoneHelp'); if(ph) ph.style.display="";
+    return;
+  }
+  // demande micro avec contraintes compatibles mobile
   try{
-    stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    recStateEl.textContent="🎤 Demande micro… autorise";
+    recStateEl.className="pill warn";
+    // petite vibration sur mobile pour feedback
+    try{ navigator.vibrate && navigator.vibrate(20);}catch{}
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation:true,
+        noiseSuppression:true,
+        autoGainControl:true
+      }
+    });
+    console.log("[vocal] stream OK", stream.getTracks().map(t=>t.label));
   }catch(e){
-    const msg = String(e.name||e.message||"");
-    if(msg.includes("NotAllowed") || msg.includes("Permission")){
-      toast("🚫 Micro refusé — autorise-le (🔒 dans la barre d'adresse) ou colle ton texte");
-      recStateEl.textContent="🚫 Micro refusé → colle ton texte, même résultat";
+    const name = e.name||"";
+    const msg = String(e.message||name||"");
+    console.error("[vocal] getUserMedia fail", name, msg);
+    let txt = "Micro erreur ("+name+": "+msg+")";
+    if(name==="NotAllowedError" || name==="PermissionDeniedError" || msg.includes("Permission")){
+      txt="🚫 Micro refusé — tape 🔒 dans la barre d'adresse → Autoriser";
+      toast("🚫 Micro refusé — autorise-le ou utilise le clavier 🎤");
+      recStateEl.textContent=txt;
       recStateEl.className="pill bad";
+    } else if(name==="NotFoundError" || name==="DevicesNotFoundError"){
+      txt="🎤 Aucun micro trouvé — utilise Import ou clavier";
+      toast(txt);
+      recStateEl.textContent=txt;
+      recStateEl.className="pill warn";
+    } else if(name==="NotReadableError" || name==="AbortError"){
+      txt="🎤 Micro déjà utilisé — ferme l'autre onglet";
+      toast(txt);
+      recStateEl.textContent=txt;
+      recStateEl.className="pill warn";
     } else {
-      toast("Micro indisponible ("+msg+") — Import audio ou Coller texte, même résultat");
-      recStateEl.textContent="Micro indisponible → fallback prêt";
+      txt="🎤 Micro indisponible ("+name+") — clavier dispo";
+      toast(txt+" — dicte avec 🎤 du clavier");
+      recStateEl.textContent=txt;
       recStateEl.className="pill warn";
     }
-    switchTab('paste');
+    // montre fallback clavier immédiatement
+    const ph=document.getElementById('phoneHelp'); if(ph) ph.style.display="";
+    const act=document.getElementById('recActions');
+    if(act){ act.style.display="flex"; act.innerHTML=`<button class="btn btn-acc" onclick="useKeyboardDictation()">⌨️ Dicter avec le clavier</button>`; }
     return;
   }
   chunks=[];
@@ -399,26 +454,53 @@ async function startRec(){
     const act=document.getElementById('recActions'); if(act){ act.style.display="none"; act.innerHTML=""; }
     if(lastAudioUrl){ URL.revokeObjectURL(lastAudioUrl); lastAudioUrl=null; }
   }catch{}
+  // choisit le meilleur mime compatible (Safari = mp4, Chrome = webm)
+  let mime = '';
+  if(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mime='audio/webm;codecs=opus';
+  else if(MediaRecorder.isTypeSupported('audio/webm')) mime='audio/webm';
+  else if(MediaRecorder.isTypeSupported('audio/mp4')) mime='audio/mp4';
+  else if(MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) mime='audio/ogg;codecs=opus';
+  console.log("[vocal] mime choisi", mime || "default");
   try{
-    mediaRec = new MediaRecorder(stream, {mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'});
-  }catch{ try{ mediaRec = new MediaRecorder(stream, {mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg'});}catch{ mediaRec = new MediaRecorder(stream); } }
-  mediaRec.ondataavailable = e=>{ if(e.data.size) chunks.push(e.data); };
+    mediaRec = mime ? new MediaRecorder(stream, {mimeType: mime}) : new MediaRecorder(stream);
+  }catch(err){
+    console.error("[vocal] MediaRecorder create fail", err);
+    try{ mediaRec = new MediaRecorder(stream); }catch(e2){
+      toast("Enregistreur non dispo sur ce navigateur — utilise Import audio ou clavier");
+      recStateEl.textContent="Enregistreur non dispo → clavier";
+      recStateEl.className="pill warn";
+      try{ stream.getTracks().forEach(t=>t.stop()); }catch{}
+      stream=null;
+      const ph=document.getElementById('phoneHelp'); if(ph) ph.style.display="";
+      return;
+    }
+  }
+  mediaRec.ondataavailable = e=>{ if(e.data && e.data.size) chunks.push(e.data); };
+  mediaRec.onerror = (e)=>{ console.error("[vocal] MediaRecorder error", e.error||e); toast("Erreur enregistreur : "+(e.error?.message||"inconnue")); };
   mediaRec.onstop = ()=>{
+    console.log("[vocal] onstop chunks", chunks.length);
     try{
       if(chunks.length){
-        lastAudioBlob = new Blob(chunks, {type: mediaRec.mimeType || 'audio/webm'});
+        const mt = mediaRec.mimeType || mime || 'audio/webm';
+        lastAudioBlob = new Blob(chunks, {type: mt});
+        console.log("[vocal] blob", lastAudioBlob.size, mt);
         if(lastAudioUrl) URL.revokeObjectURL(lastAudioUrl);
         lastAudioUrl = URL.createObjectURL(lastAudioBlob);
         const ra = document.getElementById('recAudio');
-        if(ra){ ra.src = lastAudioUrl; ra.style.display=""; }
+        if(ra){ ra.src = lastAudioUrl; ra.style.display=""; ra.load(); }
         const act = document.getElementById('recActions');
         if(act){
           act.style.display="flex";
-          act.innerHTML = `<a href="${lastAudioUrl}" download="vocal-${Date.now()}.webm" class="btn btn-line" style="padding:7px 12px;font-size:.83rem">⬇️ Télécharger audio</a><button class="btn btn-line" style="padding:7px 12px;font-size:.83rem" onclick="useKeyboardDictation()">⌨️ Dicter avec le clavier</button>`;
+          const ext = mt.includes('mp4') ? 'm4a' : mt.includes('ogg') ? 'ogg' : 'webm';
+          act.innerHTML = `<a href="${lastAudioUrl}" download="vocal-${Date.now()}.${ext}" class="btn btn-line" style="padding:7px 12px;font-size:.83rem">⬇️ Télécharger audio</a><button class="btn btn-line" style="padding:7px 12px;font-size:.83rem" onclick="useKeyboardDictation()">⌨️ Dicter avec le clavier</button><button class="btn btn-line" style="padding:7px 12px;font-size:.83rem" onclick="shareForGo()">📤 Partager pour GO</button>`;
         }
+      } else {
+        console.warn("[vocal] no chunks");
+        const act=document.getElementById('recActions');
+        if(act){ act.style.display="flex"; act.innerHTML=`<button class="btn btn-acc" onclick="useKeyboardDictation()">⌨️ Dicter avec le clavier</button>`; }
       }
-    }catch{}
-    try{ stream.getTracks().forEach(t=>t.stop()); }catch{}
+    }catch(err){ console.error("[vocal] blob fail", err); }
+    try{ if(stream) stream.getTracks().forEach(t=>t.stop()); }catch{}
     stream=null;
   };
   mediaRec.start(250);
@@ -689,6 +771,44 @@ function saveLocalOnly(){
   sendStatus.textContent = "Sauvegardé en local ✓";
   renderLocal();
 }
+function shareForGo(){
+  // copie le dernier vocal pour que l'utilisateur le colle quand il dit GO (Pages = localStorage, agent ne voit pas sinon)
+  let v=null;
+  try{ v = JSON.parse(localStorage.getItem("sb_vocal_last")||"null"); }catch{}
+  if(!v || !v.transcript){
+    // essaie le premier de sb_vocals
+    try{ const arr=JSON.parse(localStorage.getItem("sb_vocals")||"[]"); if(arr.length) v=arr[0]; }catch{}
+  }
+  if(!v || !v.transcript){ toast("Rien à partager — fais d'abord un vocal ou colle ton texte"); return; }
+  const payload = { fiche: v.fiche, ficheLabel: v.ficheLabel, words: v.words, transcript: v.transcript, date: v.date, id: v.id };
+  const txt = JSON.stringify(payload, null, 2);
+  // preview
+  const prev=document.getElementById('goPreview');
+  if(prev){ prev.textContent = txt.slice(0,3000); prev.style.display=""; }
+  // copy
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(()=>{
+      toast("📋 Copié ! Colle-le ici et dis go — je l'analyse");
+    }).catch(()=>{
+      // fallback download
+      downloadGoJson(payload);
+    });
+  } else {
+    downloadGoJson(payload);
+  }
+  // aussi propose téléchargement
+  try{ downloadGoJson(payload, true); }catch{}
+}
+function downloadGoJson(payload, silent){
+  try{
+    const blob=new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=`vocal-${payload.fiche}-${Date.now()}.json`;
+    document.body.appendChild(a); a.click(); setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+    if(!silent) toast("⬇️ JSON téléchargé — envoie-le et dis go");
+  }catch{ if(!silent) toast("Copie manuelle : sélectionne le texte ci-dessus"); }
+}
 function saveToLocal(v){
   // sb_vocals
   let arr=[];
@@ -721,6 +841,9 @@ function saveToLocal(v){
   patches.unshift(patch);
   patches = patches.slice(0,10);
   localStorage.setItem(key, JSON.stringify(patches));
+  // montre goBox
+  const gb=document.getElementById('goBox');
+  if(gb){ gb.style.display=""; }
 }
 async function sendVocal(){
   const v = buildVocal();
@@ -788,14 +911,15 @@ async function sendVocal(){
 function renderLocal(){
   let arr=[];
   try{ arr=JSON.parse(localStorage.getItem("sb_vocals")||"[]"); }catch{ arr=[]; }
-  if(!arr.length){ localListWrap.style.display="none"; return; }
+  if(!arr.length){ localListWrap.style.display="none"; const gb=document.getElementById('goBox'); if(gb && !localStorage.getItem("sb_vocal_last")) gb.style.display="none"; return; }
   localListWrap.style.display="";
+  const gb=document.getElementById('goBox'); if(gb) gb.style.display="";
   vList.innerHTML = arr.slice(0,6).map(v=>{
     const d=new Date(v.date).toLocaleString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
     const src = v.src || "local";
     const badge = src==="serveur" ? "🟢 serveur" : "🔵 local";
     const pal = v.palier || (v.words>=1500?"XXL": v.words>=600?"Long": "—");
-    return `<div class="v-item"><div class="ic">🎙</div><div class="mid"><b>${esc(v.ficheLabel||v.fiche)} · ${v.words} mots · ${pal}</b><span>${d} · ${badge} · ~${Math.round((v.words||0)/130)} min</span></div><span style="font-size:.8rem;color:var(--ink-3)">${esc((v.transcript||"").slice(0,60))}…</span></div>`;
+    return `<div class="v-item"><div class="ic">🎙</div><div class="mid"><b>${esc(v.ficheLabel||v.fiche)} · ${v.words} mots · ${pal}</b><span>${d} · ${badge} · ~${Math.round((v.words||0)/130)} min</span></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:.8rem;color:var(--ink-3)">${esc((v.transcript||"").slice(0,32))}…</span><button class="btn btn-line" style="padding:4px 8px;font-size:.78rem" onclick='try{localStorage.setItem("sb_vocal_last", JSON.stringify(JSON.parse(localStorage.getItem("sb_vocals"))[0])); shareForGo();}catch(e){shareForGo()}'>📋 GO</button></div></div>`;
   }).join("");
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
