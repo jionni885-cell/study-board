@@ -983,16 +983,75 @@ async function fetchWithFallback(url, opts){
     // si 404 sur Pages, tente fallback
     if(location.hostname.endsWith("github.io")){
       console.log("[vocal] rel fail, try fallback", rel.status);
-      return await fetch(SB_FALLBACK+url, opts);
+      try{
+        return await fetch(SB_FALLBACK+url, opts);
+      }catch(e2){
+        console.log("[vocal] fallback fail, try GitHub API direct", e2);
+        // Copié de https://www.freecodecamp.org/news/pushing-a-list-of-files-to-the-github-with-javascript-b724c8c09b66/ et https://paul.kinlan.me/creating-a-commit-with-multiple-files-to-github-with-js-on-the-web/
+        // On tente le push direct via GitHub API si on a un token
+        throw e2;
+      }
     }
     return rel;
   }catch(e){
     if(location.hostname.endsWith("github.io")){
       console.log("[vocal] rel error, try fallback", e);
-      return await fetch(SB_FALLBACK+url, opts);
+      try{
+        return await fetch(SB_FALLBACK+url, opts);
+      }catch(e2){
+        console.log("[vocal] fallback error, try GitHub API", e2);
+        throw e2;
+      }
     }
     throw e;
   }
+}
+// Fallback GitHub API direct (copié des projets freecodecamp / paul.kinlan) — envoi sans serveur, direct dans le repo
+async function pushViaGithubAPI(v, audioBase64, audioMime){
+  let token = localStorage.getItem('gh_token');
+  if(!token){
+    token = prompt("Pour un envoi direct sans téléchargement (même de quelques secondes), colle un token GitHub (ghp_...) avec droit 'repo' — une seule fois, il reste en local :");
+    if(!token) throw new Error("Pas de token");
+    token = token.trim();
+    localStorage.setItem('gh_token', token);
+  }
+  const owner = "jionni885-cell";
+  const repo = "study-board";
+  const branch = "main";
+  const headers = {Authorization: `token ${token}`, Accept: "application/vnd.github.v3+json", "Content-Type": "application/json"};
+  // 1. get current commit SHA
+  let ref = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, {headers});
+  if(!ref.ok) throw new Error("GitHub refs fail "+ref.status);
+  let refJ = await ref.json();
+  let commitSha = refJ.object.sha;
+  // 2. get tree SHA
+  let commit = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits/${commitSha}`, {headers});
+  let commitJ = await commit.json();
+  let treeSha = commitJ.tree.sha;
+  // 3. create blobs
+  let blobs = [];
+  // vocal json
+  let vocalContent = JSON.stringify({...v, audioMime: audioMime||null, hasAudio: !!audioBase64}, null, 2);
+  let b1 = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {method:"POST", headers, body: JSON.stringify({content: btoa(unescape(encodeURIComponent(vocalContent))), encoding:"base64"})});
+  let b1j = await b1.json();
+  blobs.push({path: `vocals/${v.id}.json`, sha: b1j.sha, mode:"100644", type:"blob"});
+  if(audioBase64){
+    let b64 = audioBase64.includes(',') ? audioBase64.split(',')[1] : audioBase64;
+    let ext = (audioMime||"audio/webm").includes("mp4")?"m4a": (audioMime||"").includes("ogg")?"ogg":"webm";
+    let b2 = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {method:"POST", headers, body: JSON.stringify({content: b64, encoding:"base64"})});
+    let b2j = await b2.json();
+    blobs.push({path: `vocals/${v.id}.${ext}`, sha: b2j.sha, mode:"100644", type:"blob"});
+  }
+  // 4. create tree
+  let tree = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {method:"POST", headers, body: JSON.stringify({base_tree: treeSha, tree: blobs})});
+  let treeJ = await tree.json();
+  // 5. create commit
+  let newCommit = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {method:"POST", headers, body: JSON.stringify({message: `vocal: ${v.fiche} ${v.words} mots ${v.id} ${audioBase64?"+audio":""}`, tree: treeJ.sha, parents:[commitSha]})});
+  let newCommitJ = await newCommit.json();
+  // 6. update head
+  let upd = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, {method:"PATCH", headers, body: JSON.stringify({sha: newCommitJ.sha})});
+  if(!upd.ok) throw new Error("updateHead fail");
+  return newCommitJ.sha;
 }
 async function sendVocal(){
   const v = buildVocal();
@@ -1063,18 +1122,31 @@ async function sendVocal(){
       sendStatus.textContent = j.audio ? "Envoyé + audio ✓" : "Envoyé au serveur ✓";
       setTimeout(()=>{ if(notif) notif.style.display='none'; }, 3000);
     } else {
-      serverMsg = j.error || "réponse serveur";
-      toast("💾 Gardé en local — le serveur répondra plus tard, ta fiche est déjà enrichie");
-      sendStatus.textContent="Gardé en local ✓";
-      if(notif) notif.textContent='💾 Gardé en local — dis GO je m en occupe';
-      setTimeout(()=>{ if(notif) notif.style.display='none'; }, 4000);
+      throw new Error("serveur not ok");
     }
   }catch(e){
-    console.error("[vocal] send fail", e);
-    toast("💾 Gardé en local — même sans serveur, ta fiche s'enrichit (dis GO et colle pour que l'agent reçoive)");
-    sendStatus.textContent="Gardé en local ✓";
-    if(notif) notif.textContent='💾 Gardé en local — dis GO';
-    setTimeout(()=>{ if(notif) notif.style.display='none'; }, 4000);
+    console.log("[vocal] serveur fail, tente GitHub API direct", e);
+    if(notif) notif.textContent='⏳ Serveur indisponible — tentative directe GitHub…';
+    try{
+      let sha = await pushViaGithubAPI(v, audioBase64, audioMime);
+      ok=true;
+      toast("✅ Bien reçu dans le repo via GitHub API ✓ — c'est fait !");
+      if(notif) notif.textContent='✅ Bien reçu via GitHub API ✓';
+      sendStatus.textContent="Envoyé via GitHub ✓";
+      setTimeout(()=>{ if(notif) notif.style.display='none'; }, 3000);
+      // marque comme serveur
+      try{
+        const key="sb_patch_"+v.fiche;
+        let patches=JSON.parse(localStorage.getItem(key)||"[]");
+        if(patches[0] && patches[0].id===v.id) { patches[0].src="serveur"; localStorage.setItem(key, JSON.stringify(patches)); }
+      }catch{}
+    }catch(e2){
+      console.error("[vocal] GitHub API fail", e2);
+      toast("💾 Gardé en local — même sans serveur, ta fiche s'enrichit (dis GO et colle pour que l'agent reçoive)");
+      sendStatus.textContent="Gardé en local ✓";
+      if(notif) notif.textContent='💾 Gardé en local — dis GO';
+      setTimeout(()=>{ if(notif) notif.style.display='none'; }, 4000);
+    }
   }
   // also keep server/local badge info
   try{
