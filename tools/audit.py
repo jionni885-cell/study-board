@@ -243,7 +243,10 @@ if r.returncode == 0:
     for f in tracked:
         if f.lower().endswith(".m4a"):
             bad("fichier .m4a suivi par git (privé, interdit dans le dépôt) : %s" % f)
-        if os.path.getsize(os.path.join(ROOT, f)) > 30 * 1024 * 1024:
+        p = os.path.join(ROOT, f)
+        if not os.path.exists(p):
+            continue
+        if os.path.getsize(p) > 30 * 1024 * 1024:
             bad("fichier trop volumineux pour le dépôt : %s" % f)
 
 # --------------------------------------------------------------------------
