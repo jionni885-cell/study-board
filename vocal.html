@@ -291,8 +291,8 @@ let isSecure = location.protocol === 'https:' || location.hostname === 'localhos
 let isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 let lastAudioBlob=null, lastAudioUrl=null;
 let recDiag = ""; // debug
-// API fallback pour Pages (qui n'a pas de serveur) → sandbox public
-const SB_FALLBACK = "https://4173-iafgzjtpuqz3fyy9w7kc5.e2b.app";
+// API fallback pour Pages (qui n'a pas de serveur) → sandbox public (ID mis à jour auto)
+const SB_FALLBACK = "https://4173-i5rkrovtflossagmlbsqz.e2b.app";
 function apiUrl(path){ return path; } // relatif par défaut, fallback géré dans sendVocal
 function updateSupportUI(){
   const phoneHelp = document.getElementById('phoneHelp');
@@ -604,7 +604,7 @@ async function startRec(){
         if(act){
           act.style.display="flex";
           const ext = mt.includes('mp4') ? 'm4a' : mt.includes('ogg') ? 'ogg' : 'webm';
-          act.innerHTML = `<button class="btn btn-acc" style="padding:7px 12px;font-size:.83rem" onclick="document.getElementById('recAudio').play().catch(e=>toast('Appuie PLAY sur le lecteur — volume média au max 📱'))">▶️ Écouter</button><a href="${lastAudioUrl}" download="vocal-${Date.now()}.${ext}" class="btn btn-line" style="padding:7px 12px;font-size:.83rem">⬇️ Télécharger</a><button class="btn btn-line" style="padding:7px 12px;font-size:.83rem" onclick="useKeyboardDictation()">⌨️ Dicter</button><button class="btn btn-line" style="padding:7px 12px;font-size:.83rem" onclick="shareForGo()">📤 GO</button>`;
+          act.innerHTML = `<button class="btn btn-acc" style="padding:7px 12px;font-size:.83rem" onclick="document.getElementById('recAudio').play().catch(e=>toast('Appuie PLAY sur le lecteur — volume média au max 📱'))">▶️ Écouter</button><a href="${lastAudioUrl}" download="vocal-${Date.now()}.${ext}" class="btn btn-line" style="padding:7px 12px;font-size:.83rem">⬇️ Télécharger</a><button class="btn btn-line" style="padding:7px 12px;font-size:.83rem" onclick="useKeyboardDictation()">⌨️ Dicter</button><button class="btn btn-acc" style="padding:7px 12px;font-size:.83rem;background:var(--acc);color:#fff" onclick="sendVocal()">📤 GO direct</button>`;
         }
       } else {
         console.warn("[vocal] no chunks");
@@ -1003,12 +1003,25 @@ async function sendVocal(){
   if(!v.transcript && hasAudioCheck){ v.transcript = `[audio seul ${ (lastAudioBlob.size/1024).toFixed(1)} Ko]`; v.words = 0; }
   if(v.words < 10){ toast("Ton oral est encore très court — ajoute une phrase"); }
   sendBtn.disabled=true;
-  sendStatus.textContent="Envoi…";
+  sendStatus.textContent="Envoi en cours…";
+  // petite notif explicite demandée : c'est bien en train de se faire, direct dans le repo
+  toast("⏳ C'est bien en train de se faire — envoi direct dans le repo…");
+  // notif persistante en haut
+  let notif = document.getElementById('liveNotif');
+  if(!notif){
+    notif=document.createElement('div');
+    notif.id='liveNotif';
+    notif.style.cssText='position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#101828;color:#fff;padding:10px 16px;border-radius:99px;font-size:.86rem;font-weight:700;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.18)';
+    document.body.appendChild(notif);
+  }
+  notif.textContent='⏳ Envoi direct dans le repo en cours…';
+  notif.style.display='';
   // prépare audio si dispo (pour que GO mette l'audio dans le repo)
   let audioBase64=null, audioMime=null;
   if(lastAudioBlob && lastAudioBlob.size>1000 && lastAudioBlob.size < 25*1024*1024){
     try{
       sendStatus.textContent="Encodage audio…";
+      if(notif) notif.textContent='🎧 Encodage audio…';
       const dataUrl = await blobToDataURL(lastAudioBlob);
       audioBase64 = dataUrl; // data:audio/webm;base64,...
       audioMime = lastAudioBlob.type || "audio/webm";
@@ -1016,6 +1029,7 @@ async function sendVocal(){
     }catch(e){ console.warn("[vocal] audio encode fail", e); }
   }
   sendStatus.textContent = audioBase64 ? "Envoi audio + texte…" : "Envoi…";
+  if(notif) notif.textContent = audioBase64 ? '📤 Envoi audio + texte vers le repo…' : '📤 Envoi texte vers le repo…';
   // optimistic local save
   saveToLocal(v);
   renderLocal();
@@ -1045,18 +1059,23 @@ async function sendVocal(){
       let patches=[];
       try{ patches=JSON.parse(localStorage.getItem(key)||"[]"); }catch{}
       if(patches[0] && patches[0].id===v.id) { patches[0].src="serveur"; localStorage.setItem(key, JSON.stringify(patches)); }
-      if(j.audio) toast("✅ Envoyé + audio dans le repo ✓");
-      else toast("✅ Envoyé — ta fiche s'enrichit dès le reload");
+      if(j.audio) { toast("✅ Bien reçu dans le repo + audio ✓ — c'est fait !"); if(notif) notif.textContent='✅ Bien reçu dans le repo + audio ✓'; }
+      else { toast("✅ Bien reçu dans le repo ✓ — c'est fait !"); if(notif) notif.textContent='✅ Bien reçu dans le repo ✓'; }
       sendStatus.textContent = j.audio ? "Envoyé + audio ✓" : "Envoyé au serveur ✓";
+      setTimeout(()=>{ if(notif) notif.style.display='none'; }, 3000);
     } else {
       serverMsg = j.error || "réponse serveur";
       toast("💾 Gardé en local — le serveur répondra plus tard, ta fiche est déjà enrichie");
       sendStatus.textContent="Gardé en local ✓";
+      if(notif) notif.textContent='💾 Gardé en local — dis GO je m en occupe';
+      setTimeout(()=>{ if(notif) notif.style.display='none'; }, 4000);
     }
   }catch(e){
     console.error("[vocal] send fail", e);
     toast("💾 Gardé en local — même sans serveur, ta fiche s'enrichit (dis GO et colle pour que l'agent reçoive)");
     sendStatus.textContent="Gardé en local ✓";
+    if(notif) notif.textContent='💾 Gardé en local — dis GO';
+    setTimeout(()=>{ if(notif) notif.style.display='none'; }, 4000);
   }
   // also keep server/local badge info
   try{
@@ -1087,7 +1106,7 @@ function renderLocal(){
     const src = v.src || "local";
     const badge = src==="serveur" ? "🟢 serveur" : "🔵 local";
     const pal = v.palier || (v.words>=1500?"XXL": v.words>=600?"Long": "—");
-    return `<div class="v-item"><div class="ic">🎙</div><div class="mid"><b>${esc(v.ficheLabel||v.fiche)} · ${v.words} mots · ${pal}</b><span>${d} · ${badge} · ~${Math.round((v.words||0)/130)} min</span></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:.8rem;color:var(--ink-3)">${esc((v.transcript||"").slice(0,32))}…</span><button class="btn btn-line" style="padding:4px 8px;font-size:.78rem" onclick='try{localStorage.setItem("sb_vocal_last", JSON.stringify(JSON.parse(localStorage.getItem("sb_vocals"))[0])); shareForGo();}catch(e){shareForGo()}'>📋 GO</button></div></div>`;
+    return `<div class="v-item"><div class="ic">🎙</div><div class="mid"><b>${esc(v.ficheLabel||v.fiche)} · ${v.words} mots · ${pal}</b><span>${d} · ${badge} · ~${Math.round((v.words||0)/130)} min</span></div><div style="display:flex;gap:6px;align-items:center"><span style="font-size:.8rem;color:var(--ink-3)">${esc((v.transcript||"").slice(0,32))}…</span><button class="btn btn-acc" style="padding:4px 8px;font-size:.78rem" onclick='try{let arr=JSON.parse(localStorage.getItem("sb_vocals")||"[]");let v=arr[0];if(v){document.getElementById("paste").value=v.transcript||""; if(window.onPaste) onPaste(); sendVocal();}else shareForGo();}catch(e){shareForGo()}'>📤 GO direct</button></div></div>`;
   }).join("");
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
