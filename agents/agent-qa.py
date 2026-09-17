@@ -167,7 +167,7 @@ def main():
         except Exception as e:
             log(f"agent crash tour {n}: {e}", "FAIL")
         n+=1
-        time.sleep(45)  # 45s entre tours, critique non-stop
+        time.sleep(15)  # 45s entre tours, critique non-stop
 
 if __name__=="__main__":
     main()

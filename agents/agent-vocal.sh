@@ -10,5 +10,5 @@ while true; do
   grep -q "MAX_MS = 1800000" "$ROOT/vocal.html" || echo "CRITIQUE vocal MAX_MS pas 30min"
   grep -q "SB_FALLBACK" "$ROOT/vocal.html" || echo "CRITIQUE vocal SB_FALLBACK manquant"
   grep -q "restartChoice" "$ROOT/vocal.html" || echo "CRITIQUE restartChoice manquant"
-  sleep 60
+  sleep 15
 done
