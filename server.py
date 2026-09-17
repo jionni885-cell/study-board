@@ -237,27 +237,28 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({"ok": False, "error": str(e)}).encode())
             return
-        # --- auto git commit+push en arrière-plan (pour GO) ---
+        # --- auto git commit+push en arrière-plan (pour GO) — gère le rebase si remote a bougé (ex: push direct GitHub API) ---
         def _git_push():
             try:
-                # add json + audio éventuel
                 files = [str(out)]
                 if audio_path and audio_path.exists():
                     files.append(str(audio_path))
-                # git add
                 subprocess.run(["git","add"]+files, cwd=str(ROOT), timeout=10)
-                # commit seulement si quelque chose à committer
                 st = subprocess.run(["git","status","--porcelain"]+files, cwd=str(ROOT), capture_output=True, text=True, timeout=10)
-                if st.stdout.strip():
-                    msg = f"vocal: {fiche} {words} mots {payload['id']}"
-                    if audio_fname: msg += f" +audio {audio_ext}"
-                    subprocess.run(["git","commit","-m",msg], cwd=str(ROOT), timeout=10)
-                    # push vers main (et arena si besoin)
-                    # tente push main, sinon ignore
-                    subprocess.run(["git","push","origin","HEAD:main"], cwd=str(ROOT), timeout=30)
-                    print(f"[vocal] git push done {payload['id']}")
-                else:
+                if not st.stdout.strip():
                     print("[vocal] nothing to commit")
+                    return
+                msg = f"vocal: {fiche} {words} mots {payload['id']}"
+                if audio_fname: msg += f" +audio {audio_ext}"
+                subprocess.run(["git","commit","-m",msg], cwd=str(ROOT), timeout=10)
+                # tente push, si non-fast-forward → fetch + rebase puis repush
+                r = subprocess.run(["git","push","origin","HEAD:main"], cwd=str(ROOT), capture_output=True, text=True, timeout=30)
+                if r.returncode != 0 and "non-fast-forward" in (r.stderr or "") + (r.stdout or ""):
+                    print("[vocal] push non-fast-forward, fetch+rebase")
+                    subprocess.run(["git","fetch","origin","main"], cwd=str(ROOT), timeout=15)
+                    subprocess.run(["git","rebase","origin/main"], cwd=str(ROOT), timeout=15)
+                    subprocess.run(["git","push","origin","HEAD:main"], cwd=str(ROOT), timeout=30)
+                print(f"[vocal] git push done {payload['id']}")
             except Exception as e:
                 print(f"[vocal] git push fail: {e}")
         try:

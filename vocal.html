@@ -6,7 +6,8 @@
 <title>Studio Vocal — Study Board</title>
 <meta name="description" content="Studio vocal Study Board — enregistre 1 à 30 min, je découpe auto, analyse et envoi à ta fiche.">
 <meta name="theme-color" content="#2563EB">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232563EB'/%3E%3Cpath d='M18 22h9a5 5 0 0 1 5 5v17a4 4 0 0 0-4-4H18z' fill='%23fff'/%3E%3Cpath d='M46 22h-9a5 5 0 0 0-5 5v17a4 4 0 0 1 4-4h10z' fill='%23BFDBFE'/%3E%3C/svg%3E">
+<meta http-equiv="Permissions-Policy" content="microphone=*">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232563EB'/%3E%3Cpath d='M18 22h9a5 5 0 0 1 5 5v17a4 4 0 0 0-4-4H18z' fill='%23fff'/%3E%3Cpath d='M46 22h-9a5 5 0 0 0-5 5v17a4 4 0 0 1 4-4h10z' fill='%23BFDBFE'/%3E%3C/svg%3E\">
 <style>
 :root{--bg:#F4F6FA;--bg-soft:#EAEEF5;--card:#fff;--card-2:#FAFBFF;--ink:#101828;--ink-2:#3F4A5F;--ink-3:#7C8A9E;--line:#E6EAF2;--line-2:#D3DAE6;--acc:#2563EB;--acc-2:#1E50C8;--acc-soft:#EDF3FF;--ok:#149A5A;--ok-soft:#E7F7EF;--warn:#B45309;--warn-soft:#FEF3E2;--r-lg:22px;--r-md:14px;--w:860px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -252,6 +253,19 @@ textarea#paste{min-height:180px}
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<div id="tokenModal" style="display:none;position:fixed;inset:0;background:rgba(16,24,40,.55);backdrop-filter:blur(6px);z-index:300;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;max-width:480px;width:100%;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+    <h3 style="font-size:1.05rem;margin-bottom:6px">🔑 Envoi direct sans téléchargement</h3>
+    <p style="font-size:.88rem;color:var(--ink-2);margin-bottom:10px">Pour envoyer <b>même 3 secondes</b> direct dans le repo (sans serveur), colle un token GitHub <code>ghp_...</code> avec droit <b>repo</b> — une seule fois, il reste en local.</p>
+    <p style="font-size:.82rem;color:var(--ink-3);margin-bottom:12px">Crée-le en 20s : <a href="https://github.com/settings/tokens/new" target="_blank" style="color:#2563EB;font-weight:700">github.com/settings/tokens/new → cocher “repo” → Generate → copier</a></p>
+    <input id="tokenInput" type="password" placeholder="ghp_..." style="width:100%;padding:11px 13px;border:1.5px solid #D3DAE6;border-radius:10px;font-size:.9rem;font-family:monospace">
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-line" style="flex:1" onclick="closeTokenModal()">Annuler (garder en local)</button>
+      <button class="btn btn-acc" style="flex:1" onclick="confirmTokenModal()">✅ Enregistrer & envoyer</button>
+    </div>
+    <p style="font-size:.78rem;color:var(--ink-3);margin-top:8px">Stocké en <code>localStorage gh_token</code>, jamais envoyé ailleurs que api.github.com.</p>
+  </div>
+</div>
 <script>
 "use strict";
 // paliers <10 trop court / <60 un peu court / <600 parfait 2-5min / <1500 long 5-12min / >=1500 XXL 15-30min + hesRatio>0.025
@@ -292,8 +306,10 @@ let isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 let lastAudioBlob=null, lastAudioUrl=null;
 let recDiag = ""; // debug
 // API fallback pour Pages (qui n'a pas de serveur) → sandbox public (ID mis à jour auto)
-const SB_FALLBACK = "https://4173-i5rkrovtflossagmlbsqz.e2b.app";
-function apiUrl(path){ return path; } // relatif par défaut, fallback géré dans sendVocal
+// Fallback sandbox public — ID change au restart, on tente les 2 connus + détection auto
+const SB_FALLBACKS = ["https://4173-iux67yqwyaactww8ctam0.e2b.app", "https://4173-i5rkrovtflossagmlbsqz.e2b.app"];
+const SB_FALLBACK = SB_FALLBACKS[0];
+function apiUrl(path){ return path; } // relatif par défaut, fallback géré dans fetchWithFallback
 function updateSupportUI(){
   const phoneHelp = document.getElementById('phoneHelp');
   if(!isSecure){
@@ -976,44 +992,67 @@ function blobToDataURL(blob){
   });
 }
 async function fetchWithFallback(url, opts){
-  // essaie d'abord relatif, sinon fallback sandbox public si on est sur github.io
+  // 1) relatif d'abord (marche sur le serveur 4173 direct)
   try{
     const rel = await fetch(url, opts);
     if(rel.ok) return rel;
-    // si 404 sur Pages, tente fallback
-    if(location.hostname.endsWith("github.io")){
-      console.log("[vocal] rel fail, try fallback", rel.status);
-      try{
-        return await fetch(SB_FALLBACK+url, opts);
-      }catch(e2){
-        console.log("[vocal] fallback fail, try GitHub API direct", e2);
-        // Copié de https://www.freecodecamp.org/news/pushing-a-list-of-files-to-the-github-with-javascript-b724c8c09b66/ et https://paul.kinlan.me/creating-a-commit-with-multiple-files-to-github-with-js-on-the-web/
-        // On tente le push direct via GitHub API si on a un token
-        throw e2;
-      }
-    }
-    return rel;
+    if(!location.hostname.endsWith("github.io")) return rel;
+    console.log("[vocal] rel fail", rel.status, "→ tente E2B fallbacks");
   }catch(e){
-    if(location.hostname.endsWith("github.io")){
-      console.log("[vocal] rel error, try fallback", e);
-      try{
-        return await fetch(SB_FALLBACK+url, opts);
-      }catch(e2){
-        console.log("[vocal] fallback error, try GitHub API", e2);
-        throw e2;
-      }
-    }
-    throw e;
+    if(!location.hostname.endsWith("github.io")) throw e;
+    console.log("[vocal] rel error", e, "→ tente E2B fallbacks");
   }
+  // 2) sur Pages, tente chaque sandbox connu (le dernier ID change au restart)
+  if(location.hostname.endsWith("github.io")){
+    for(const fb of SB_FALLBACKS){
+      try{
+        const r2 = await fetch(fb+url, opts);
+        if(r2.ok) { console.log("[vocal] fallback OK", fb); return r2; }
+        console.log("[vocal] fallback", fb, "status", r2.status);
+      }catch(e2){ console.log("[vocal] fallback", fb, "error", e2.message); }
+    }
+  }
+  // 3) dernier recours → GitHub API direct (copié freecodecamp / paul.kinlan : blobs base64 → tree → commit → updateHead)
+  throw new Error("E2B indisponible, passage GitHub API");
 }
-// Fallback GitHub API direct (copié des projets freecodecamp / paul.kinlan) — envoi sans serveur, direct dans le repo
+// Fallback GitHub API direct (copié des projets freecodecamp / paul.kinlan : createBlob base64 → createTree → createCommit → updateHead — direct sans serveur)
+function utf8ToB64(str){
+  try{
+    // robuste pour accents/emoji : TextEncoder → btoa
+    const bytes = new TextEncoder().encode(str);
+    let bin=''; for(let i=0;i<bytes.length;i++) bin+=String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }catch{ return btoa(unescape(encodeURIComponent(str))); }
+}
+function showTokenModal(){
+  return new Promise((res,rej)=>{
+    const m=document.getElementById('tokenModal');
+    const inp=document.getElementById('tokenInput');
+    inp.value = localStorage.getItem('gh_token')||'';
+    m.style.display='flex';
+    inp.focus();
+    window._tokenRes=res; window._tokenRej=rej;
+    inp.onkeydown=(e)=>{ if(e.key==='Enter') confirmTokenModal(); if(e.key==='Escape') closeTokenModal(); };
+  });
+}
+function closeTokenModal(){
+  const m=document.getElementById('tokenModal'); m.style.display='none';
+  if(window._tokenRej) { window._tokenRej(new Error("Token annulé — gardé en local")); window._tokenRes=null; window._tokenRej=null; }
+}
+function confirmTokenModal(){
+  const inp=document.getElementById('tokenInput');
+  let t=(inp.value||'').trim();
+  if(!t || !t.startsWith('ghp_')){ toast("Colle un token qui commence par ghp_..."); inp.focus(); return; }
+  localStorage.setItem('gh_token', t);
+  const m=document.getElementById('tokenModal'); m.style.display='none';
+  if(window._tokenRes){ window._tokenRes(t); window._tokenRes=null; window._tokenRej=null; }
+}
 async function pushViaGithubAPI(v, audioBase64, audioMime){
   let token = localStorage.getItem('gh_token');
   if(!token){
-    token = prompt("Pour un envoi direct sans téléchargement (même de quelques secondes), colle un token GitHub (ghp_...) avec droit 'repo' — une seule fois, il reste en local :");
+    try{ token = await showTokenModal(); }catch(e){ throw e; }
     if(!token) throw new Error("Pas de token");
     token = token.trim();
-    localStorage.setItem('gh_token', token);
   }
   const owner = "jionni885-cell";
   const repo = "study-board";
@@ -1032,7 +1071,7 @@ async function pushViaGithubAPI(v, audioBase64, audioMime){
   let blobs = [];
   // vocal json
   let vocalContent = JSON.stringify({...v, audioMime: audioMime||null, hasAudio: !!audioBase64}, null, 2);
-  let b1 = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {method:"POST", headers, body: JSON.stringify({content: btoa(unescape(encodeURIComponent(vocalContent))), encoding:"base64"})});
+  let b1 = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {method:"POST", headers, body: JSON.stringify({content: utf8ToB64(vocalContent), encoding:"base64"})});
   let b1j = await b1.json();
   blobs.push({path: `vocals/${v.id}.json`, sha: b1j.sha, mode:"100644", type:"blob"});
   if(audioBase64){
