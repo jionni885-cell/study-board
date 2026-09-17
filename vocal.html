@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Studio Vocal — Study Board</title>
-<meta name="description" content="Studio vocal Study Board — enregistre 1 à 20 min, je découpe auto, analyse et envoi à ta fiche.">
+<meta name="description" content="Studio vocal Study Board — enregistre 1 à 30 min, je découpe auto, analyse et envoi à ta fiche.">
 <meta name="theme-color" content="#2563EB">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%232563EB'/%3E%3Cpath d='M18 22h9a5 5 0 0 1 5 5v17a4 4 0 0 0-4-4H18z' fill='%23fff'/%3E%3Cpath d='M46 22h-9a5 5 0 0 0-5 5v17a4 4 0 0 1 4-4h10z' fill='%23BFDBFE'/%3E%3C/svg%3E">
 <style>
@@ -105,10 +105,10 @@ textarea#paste{min-height:180px}
   <div class="hero">
     <span class="glow"></span>
     <div style="position:relative">
-      <h1>🎙 Studio Vocal — 15 à 20 min</h1>
-      <p>Enregistre ton cours à voix haute comme à l'oral. <b>Jusqu'à 20 min, je découpe auto</b> en chapitres + je te fais un plan chronométré + 5 flashcards. Micro 1 clic, ou importe ton audio / colle ton texte.</p>
+      <h1>🎙 Studio Vocal — 15 à 30 min</h1>
+      <p>Enregistre ton cours à voix haute comme à l'oral. <b>Jusqu'à 30 min, je découpe auto</b> en chapitres + je te fais un plan chronométré + 5 flashcards. Micro 1 clic, ou importe ton audio / colle ton texte.</p>
       <div class="meta">
-        <span class="chip">⏱ Timer 20 min</span>
+        <span class="chip">⏱ Timer 30 min</span>
         <span class="chip">🧠 Analyse instantanée</span>
         <span class="chip">📚 Envoi direct à ta fiche</span>
       </div>
@@ -140,13 +140,13 @@ textarea#paste{min-height:180px}
         <button id="tabPaste" onclick="switchTab('paste')">📝 Coller texte</button>
       </div>
       <span style="flex:1"></span>
-      <span class="pill" id="supportHelp">💡 Jusqu'à 20 min, je découpe auto</span>
+      <span class="pill" id="supportHelp">💡 Jusqu'à 30 min, je découpe auto</span>
     </div>
 
     <div id="panelRec" style="margin-top:14px">
       <div class="mic-area">
         <button id="micBtn" class="mic-btn" aria-label="Enregistrer" onclick="toggleRec()">🎙</button>
-        <div class="timer" id="timer">00:00 <small>/ 20:00</small></div>
+        <div class="timer" id="timer">00:00 <small>/ 30:00</small></div>
         <canvas id="vu" width="300" height="40" style="display:none;width:100%;max-width:320px;height:40px;background:var(--card);border:1px solid var(--line);border-radius:10px"></canvas>
         <div class="help" id="micHelp">Appuie pour démarrer. Je transcris en direct si ton navigateur le permet.<br>Sinon, ton audio est gardé et tu colles le texte ci-dessous — même résultat.</div>
         <div class="pills" id="recPills" style="justify-content:center"></div>
@@ -187,14 +187,15 @@ textarea#paste{min-height:180px}
       <p class="tip">Colle ici ton cours, ton oral, ou la correction — je l'analyse pareil qu'un enregistrement long. <b>Ton oral :</b> même analyse, même envoi.</p>
     </div>
 
-    <label class="lbl" style="margin-top:16px">📝 Ton oral : <span style="font-weight:600;color:var(--ink-3)">(éditable, 1 à 20 min — 2000 à 3000 mots OK)</span></label>
-    <textarea id="paste" placeholder="Parle ou colle ici… Exemple : 'Aujourd'hui on a vu la croissance extensive vs intensive, la FBCF, la fonction de production Y=F(K,L)…' — même long (15-20 min), je découpe auto en chapitres."></textarea>
+    <label class="lbl" style="margin-top:16px">📝 Ton oral : <span style="font-weight:600;color:var(--ink-3)">(éditable, 1 à 30 min — 2000 à 3000 mots OK)</span></label>
+    <textarea id="paste" placeholder="Parle ou colle ici… Exemple : 'Aujourd'hui on a vu la croissance extensive vs intensive, la FBCF, la fonction de production Y=F(K,L)…' — même long (15-30 min), je découpe auto en chapitres."></textarea>
     <div class="row" style="margin-top:8px">
       <span class="pill" id="wordsPill">0 mots</span>
       <span class="pill" id="timePill">~0 min</span>
       <span class="pill" id="hesPill">Hésitations —</span>
       <span style="flex:1"></span>
-      <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="restartVocal()">🔄 Restart</button>
+      <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="restartVocal()">🔄 Restart tout</button>
+      <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="restartChoice()">🎛️ Choisir</button>
       <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="clearPaste()">Effacer texte</button>
       <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="demoLong()">Exemple 18 min</button>
     </div>
@@ -240,10 +241,10 @@ textarea#paste{min-height:180px}
 
   <div class="card">
     <h2>✨ Comment ça marche ?</h2>
-    <p class="sub" style="margin-bottom:0">Tu fais ton vocal (1 à 20 min) → tu reviens et dis juste <b>"c'est fait"</b> → j'enrichis ta fiche avec chapitres, plan chronométré et 5 flashcards. Zéro message rouge : tout ce qui s'affiche est une aide.</p>
+    <p class="sub" style="margin-bottom:0">Tu fais ton vocal (1 à 30 min) → tu reviens et dis juste <b>"c'est fait"</b> → j'enrichis ta fiche avec chapitres, plan chronométré et 5 flashcards. Zéro message rouge : tout ce qui s'affiche est une aide.</p>
     <ul style="margin:10px 0 0 18px;font-size:.9rem;color:var(--ink-2);line-height:1.6">
-      <li><b>Timer 20 min</b> (1200 s) — au-delà je découpe auto en chapitres</li>
-      <li><b>Analyse paliers</b> : &lt;10 trop court · &lt;60 un peu court · &lt;600 parfait 2-5 min · &lt;1500 long 5-12 min · ≥1500 XXL 15-20 min + hésitations &gt;2.5%</li>
+      <li><b>Timer 30 min</b> (1800 s) — au-delà je découpe auto en chapitres</li>
+      <li><b>Analyse paliers</b> : &lt;10 trop court · &lt;60 un peu court · &lt;600 parfait 2-5 min · &lt;1500 long 5-12 min · ≥1500 XXL 15-30 min + hésitations &gt;2.5%</li>
       <li><b>Fallback 100%</b> : micro → import audio → coller texte, même résultat</li>
       <li><b>Envoi</b> : POST /api/vocal (20 Mo) + localStorage, badge serveur/local sur l'accueil</li>
     </ul>
@@ -253,8 +254,8 @@ textarea#paste{min-height:180px}
 <script>
 "use strict";
 // paliers <10 trop court / <60 un peu court / <600 parfait 2-5min / <1500 long 5-12min / >=1500 XXL 15-20min + hesRatio>0.025
-const MAX_MS = 1200000; // 20 min
-const MAX_S = 1200;
+const MAX_MS = 1800000; // 30 min (était 20, tu peux aller plus loin, je découpe auto)
+const MAX_S = 1800;
 let recState = "idle"; // idle|rec
 let mediaRec = null, chunks=[], startTs=0, timerI=null, stream=null;
 let recog=null, interim="";
@@ -347,7 +348,7 @@ function restartVocal(){
   lastAudioBlob=null; lastAudioUrl=null;
   paste.value="";
   // reset UI
-  timerEl.innerHTML='00:00 <small>/ 20:00</small>';
+  timerEl.innerHTML='00:00 <small>/ 30:00</small>';
   const ra=document.getElementById('recAudio'); if(ra){ try{ra.pause();}catch{} ra.style.display="none"; ra.removeAttribute('src'); }
   const act=document.getElementById('recActions'); if(act){ act.style.display="none"; act.innerHTML=""; }
   const inf=document.getElementById('recInfo'); if(inf){ inf.style.display="none"; inf.textContent=""; }
@@ -358,6 +359,33 @@ function restartVocal(){
   speechSupport.textContent = hasSpeech ? (isMobile?"✅ Micro + retranscris direct (Chrome Android OK)":"✅ Micro + retranscris direct") : "⚠️ Ton navigateur ne retranscrit pas → dicte avec le clavier";
   onPaste();
   toast("🔄 Restart — tout effacé, tu peux refaire ton vocal");
+}
+function restartChoice(){
+  const hasAudio = !!(lastAudioBlob && lastAudioBlob.size>1000);
+  const hasText = !!paste.value.trim();
+  if(!hasAudio && !hasText){ toast("Rien à effacer — fais d'abord un vocal"); return; }
+  const choix = prompt("Que veux-tu recommencer ?\n1 = Tout effacer (audio + texte)\n2 = Juste l'audio (garde le texte)\n3 = Juste le texte (garde l'audio)\nTape 1, 2 ou 3 :");
+  if(choix==="2"){
+    // audio seul
+    try{ if(lastAudioUrl) URL.revokeObjectURL(lastAudioUrl); }catch{}
+    lastAudioBlob=null; lastAudioUrl=null; chunks=[];
+    const ra=document.getElementById('recAudio'); if(ra){ try{ra.pause();}catch{} ra.style.display="none"; ra.removeAttribute('src'); }
+    const act=document.getElementById('recActions'); if(act){ act.style.display="none"; act.innerHTML=""; }
+    const inf=document.getElementById('recInfo'); if(inf){ inf.style.display="none"; }
+    const vu=document.getElementById('vu'); if(vu) vu.style.display="none";
+    timerEl.innerHTML='00:00 <small>/ 30:00</small>';
+    recStateEl.textContent="Audio effacé — garde le texte, refais un vocal si tu veux";
+    onPaste();
+    toast("🎧 Audio effacé — texte gardé");
+  } else if(choix==="3"){
+    paste.value="";
+    onPaste();
+    toast("📝 Texte effacé — audio gardé");
+  } else if(choix==="1"){
+    restartVocal();
+  } else if(choix!==null){
+    toast("Choix annulé");
+  }
 }
 function demoLong(){
   // 2000 mots env 18 min
@@ -381,12 +409,12 @@ function startTimer(){
   startTs = Date.now();
   timerI = setInterval(()=>{
     const el = Date.now()-startTs;
-    timerEl.innerHTML = fmt(el) + ' <small>/ 20:00</small>';
+    timerEl.innerHTML = fmt(el) + ' <small>/ 30:00</small>';
     const s = Math.floor(el/1000);
-    if(s>=1200){
+    if(s>=1800){
       // auto cut
       stopRec(true);
-      toast("⏱ 20 min atteintes — je découpe auto en chapitres");
+      toast("⏱ 30 min atteintes — je découpe auto en chapitres");
     } else if(s===60) toast("✅ 1 min — c'est parti");
     else if(s===120) toast("✅ 2 min — parfait, continue");
     else if(s===300) toast("✅ 5 min — tu es dans le format oral");
@@ -611,7 +639,7 @@ function stopRec(auto){
     const hasAudio = !!lastAudioBlob;
     const blobInfo = hasAudio ? `(${(lastAudioBlob.size/1024).toFixed(1)} Ko)` : "";
     if(auto){
-      recStateEl.textContent = "⏱ 20 min — découpé auto, prêt à envoyer · "+w+" mots "+blobInfo;
+      recStateEl.textContent = "⏱ 30 min — découpé auto, prêt à envoyer · "+w+" mots "+blobInfo;
       recStateEl.className="pill ok";
       if(hasAudio) toast("✅ Audio gardé "+blobInfo+" — écoute puis Envoyer");
     } else if(w===0){
@@ -699,7 +727,7 @@ function startSpeech(){
       if(!firstWordToast && finalSoFar.trim().split(/\s+/).length>=2){
         firstWordToast=true;
         toast("✅ Parfait je retranscris — continue !");
-        setSpeechBadge(true, "✅ Je capte bien — continue jusqu'à 20 min");
+        setSpeechBadge(true, "✅ Je capte bien — continue jusqu'à 30 min");
         paste.style.borderColor="var(--ok)";
         setTimeout(()=>paste.style.borderColor="", 1200);
       }
@@ -789,7 +817,7 @@ function analyseText(txt){
   else if(words < 60){ palier="Un peu court"; detail="Quelques phrases de plus et c'est parfait pour un flash (1 min)."; tone="warn"; }
   else if(words < 600){ palier="Parfait 2-5 min"; detail="Format idéal pour l'oral 5 min : 3 parties d'1 min 30 + intro/conclusion."; tone="ok"; }
   else if(words < 1500){ palier="Long 5-12 min"; detail="Exposé long : je découpe en 3 chapitres + plan chronométré pour que tu tiennes le temps."; tone="ok"; }
-  else { palier="XXL 15-20 min"; detail="Cours complet 15-20 min : je segmente auto (words/3) + sommaire oral + 5 flashcards."; tone="bad"; }
+  else { palier="XXL 15-30 min"; detail="Cours complet 15-30 min : je segmente auto (words/3) + sommaire oral + 5 flashcards."; tone="bad"; }
   if(hR > 0.025) detail += " · Hésitations un peu hautes ("+ (hR*100).toFixed(1)+"%) — ralentis et pose tes phrases.";
   return {words, secs, hR, palier, detail, tone};
 }
@@ -825,7 +853,7 @@ function onPaste(silent){
     sendBtn.disabled=false;
     if(a.words===0 && hasAudio) sendStatus.textContent="Audio prêt à envoyer ✓ (même sans texte)";
     else sendStatus.textContent = a.words <10 ? "Ajoute un peu de texte" : "Prêt à envoyer";
-    if(!silent && a.words===12) toast("Bien — continue, je compte jusqu'à 20 min");
+    if(!silent && a.words===12) toast("Bien — continue, je compte jusqu'à 30 min");
   }
 }
 onPaste(true);
