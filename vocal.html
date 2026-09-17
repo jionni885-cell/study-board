@@ -146,7 +146,7 @@ textarea#paste{min-height:180px}
     <div id="panelRec" style="margin-top:14px">
       <div class="mic-area">
         <button id="micBtn" class="mic-btn" aria-label="Enregistrer" onclick="toggleRec()">🎙</button>
-        <div class="timer" id="timer">00:00 <small>/ 30:00</small></div>
+        <div class="timer" id="timer" aria-live="polite" aria-label="Timer enregistrement">00:00 <small>/ 30:00</small></div>
         <div id="progressWrap" style="width:100%;max-width:320px;height:6px;background:var(--line);border-radius:99px;overflow:hidden;display:none"><div id="progressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#2563EB,#60A5FA);transition:width .5s"></div></div>
         <canvas id="vu" width="300" height="40" style="display:none;width:100%;max-width:320px;height:40px;background:var(--card);border:1px solid var(--line);border-radius:10px"></canvas>
         <div class="help" id="micHelp">Appuie pour démarrer. Je transcris en direct si ton navigateur le permet.<br>Sinon, ton audio est gardé et tu colles le texte ci-dessous — même résultat.</div>
@@ -156,8 +156,8 @@ textarea#paste{min-height:180px}
         <div id="recActions" style="display:none;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px"></div>
       </div>
       <div class="row" style="margin-top:12px">
-        <span class="pill" id="recState">Prêt à enregistrer</span>
-        <span class="pill" id="speechSupport">🔍 Vérification micro…</span>
+        <span class="pill" id="recState" aria-live="polite" role="status">Prêt à enregistrer</span>
+        <span class="pill" id="speechSupport" aria-live="polite" role="status">🔍 Vérification micro…</span>
       </div>
       <!-- Aide téléphone : dictée clavier universelle -->
       <div id="phoneHelp" style="display:none;margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--acc-soft);border:1px solid #C7DAFF">
@@ -195,8 +195,8 @@ textarea#paste{min-height:180px}
       <span class="pill" id="timePill">~0 min</span>
       <span class="pill" id="hesPill">Hésitations —</span>
       <span style="flex:1"></span>
-      <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="restartVocal()">🔄 Restart tout</button>
-      <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="restartChoice()">🎛️ Choisir</button>
+      <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="restartVocal()" aria-label="Recommencer tout">🔄 Restart tout</button>
+      <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="restartChoice()" aria-label="Choisir quoi recommencer">🎛️ Choisir</button>
       <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="clearPaste()">Effacer texte</button>
       <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="demoLong()">Exemple 18 min</button>
     </div>
