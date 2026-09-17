@@ -2,6 +2,7 @@
 <html lang="fr" data-theme="light">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Permissions-Policy" content="microphone=*, camera=*">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Study Board — fiches de révision</title>
 <meta name="description" content="Fiches de révision personnelles : SES, HGGSP, Histoire, Anglais.">
@@ -1555,7 +1556,7 @@ renderLire = function(mi,fi){
   return html;
 };
 // ---- VOCAL LOGIC ----
-// paliers identiques vocal.html : <10 trop court / <60 un peu court / <600 parfait 2-5min / <1500 long 5-12min / >=1500 XXL 15-20min + hes>0.025
+// paliers identiques vocal.html : <10 trop court / <60 un peu court / <600 parfait 2-5min / <1500 long 5-12min / >=1500 XXL 15-30min + hes>0.025
 function vocalPalier(words, hes){
   let p="", detail="", tone="ok";
   if(words < 10){ p="Trop court"; detail="Ajoute au moins une phrase : dis ton plan en 1 min (~130 mots)."; tone="warn"; }
@@ -1577,7 +1578,7 @@ function getPatches(mi,fi){
 function fetchServerVocals(){
   const tryFetch = (url)=> fetch(url, {cache:'no-store'}).then(r=> r.ok ? r.json() : Promise.reject()).catch(()=>[]);
   // tente Pages local puis E2B fallback si dispo, sinon localStorage
-  const e2b = 'https://4173-iux67yqwyaactww8ctam0.e2b.app';
+  const e2b = 'https://4173-ijfnl4sb4hs8z2f74yg2v.e2b.app';
   return Promise.any([tryFetch('/api/vocals'), tryFetch(e2b+'/api/vocals')]).catch(()=>[]).then(arr=>{
     if(!Array.isArray(arr)) return [];
     const local=getLocalVocals();
