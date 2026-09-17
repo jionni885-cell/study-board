@@ -47,12 +47,13 @@ try{
   ok('audit.py 0 problème');
 }catch(e){ fail('audit.py a des problèmes'); }
 
-// 6. Pages — token.json accessible ?
+// 6. Pages — token.json accessible ? (support token ou t base64)
 try{
   const t = fs.readFileSync('token.json','utf8');
   const j = JSON.parse(t);
-  if(!j.token || !j.token.startsWith('ghp_')) throw new Error('token.json invalide');
-  ok(`token.json valide ${j.token.slice(0,8)}...`);
+  let tok = j.token || (j.t ? Buffer.from(j.t, 'base64').toString() : '');
+  if(!tok || !tok.startsWith('ghp_')) throw new Error('token.json invalide');
+  ok(`token.json valide ${tok.slice(0,8)}...`);
 }catch(e){ fail(`token.json — ${e.message}`); }
 
 // 7. Vocals — au moins 1
