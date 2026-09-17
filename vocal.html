@@ -1049,6 +1049,25 @@ function confirmTokenModal(){
 }
 async function pushViaGithubAPI(v, audioBase64, audioMime){
   let token = localStorage.getItem('gh_token');
+  // tente token.json auto (si un jour publié) sinon modal — copié pattern GitHub direct
+  if(!token){
+    try{
+      const tr = await fetch('token.json', {cache:'no-store'});
+      if(tr.ok){
+        const tj = await tr.json();
+        if(tj.token && tj.token.startsWith('g')){ token = tj.token.trim(); localStorage.setItem('gh_token', token); }
+      }
+    }catch{}
+    if(!token){
+      try{
+        const tr2 = await fetch('https://jionni885-cell.github.io/study-board/token.json', {cache:'no-store'});
+        if(tr2.ok){
+          const tj2 = await tr2.json();
+          if(tj2.token && tj2.token.startsWith('g')){ token = tj2.token.trim(); localStorage.setItem('gh_token', token); }
+        }
+      }catch{}
+    }
+  }
   if(!token){
     try{ token = await showTokenModal(); }catch(e){ throw e; }
     if(!token) throw new Error("Pas de token");
