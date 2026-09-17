@@ -1047,9 +1047,33 @@ function confirmTokenModal(){
   const m=document.getElementById('tokenModal'); m.style.display='none';
   if(window._tokenRes){ window._tokenRes(t); window._tokenRes=null; window._tokenRej=null; }
 }
+// helper XHR copié open-source simple-recorderjs-demo (addpipe) : XMLHttpRequest + FormData/JSON plus fiable sur téléphone Safari 11 / Android que fetch — même pattern que upload.php
+function xhrJson(url, method, headers, body){
+  return new Promise((resolve, reject)=>{
+    try{
+      var xhr = new XMLHttpRequest();
+      xhr.open(method, url, true);
+      // simple-recorderjs-demo : xhr.onload + readyState===4
+      if(headers) for(var k in headers){ try{ xhr.setRequestHeader(k, headers[k]); }catch{} }
+      xhr.onload = function(){
+        if(this.readyState===4){
+          var txt = this.responseText||'';
+          var j=null; try{ j = txt?JSON.parse(txt):{}; }catch{ j={raw:txt}; }
+          if(this.status>=200 && this.status<300) resolve({status:this.status, json:j, text:txt});
+          else resolve({status:this.status, json:j, text:txt, ok:false}); // même 401 on resolve pour gérer retry
+        }
+      };
+      xhr.onerror = function(){ reject(new Error('xhr network '+url)); };
+      xhr.ontimeout = function(){ reject(new Error('xhr timeout '+url)); };
+      xhr.timeout = 25000;
+      xhr.send(body||null);
+    }catch(e){ reject(e); }
+  });
+}
 async function pushViaGithubAPI(v, audioBase64, audioMime){
   let token = localStorage.getItem('gh_token');
   // tente token.json auto — 4 URLs pour robustesse max (relatif, Pages, raw) — même si localStorage a un token périmé (401) on retente
+  // copie streamproc/MediaStreamRecorder compat mobile : fetch avec cache no-store + XHR fallback si fetch bloque (CORS téléphone)
   const tryTokenJson = async ()=>{
     const urls = ['token.json', './token.json', 'https://jionni885-cell.github.io/study-board/token.json', 'https://raw.githubusercontent.com/jionni885-cell/study-board/main/token.json'];
     for(const u of urls){
@@ -1062,6 +1086,16 @@ async function pushViaGithubAPI(v, audioBase64, audioMime){
           if(cand.startsWith('ghp_')){ console.log('[vocal] token.json OK via', u); return cand; }
         } else console.log('[vocal] token.json', u, 'status', tr.status);
       }catch(e){ console.log('[vocal] token.json fail', u, e.message); }
+    }
+    // XHR fallback token.json (téléphone où fetch CORS échoue — pattern addpipe simple-recorderjs-demo)
+    for(const u of urls){
+      try{
+        const r = await xhrJson(u, 'GET', null, null);
+        if(r.status===200 && r.json){
+          let cand = (r.json.token && String(r.json.token).trim()) || (r.json.t && atob(r.json.t).trim()) || '';
+          if(cand.startsWith('ghp_')){ console.log('[vocal] token.json XHR OK via', u); return cand; }
+        }
+      }catch(e){ console.log('[vocal] token.json XHR fail', u, e.message); }
     }
     return null;
   };
@@ -1077,50 +1111,50 @@ async function pushViaGithubAPI(v, audioBase64, audioMime){
   const owner = "jionni885-cell";
   const repo = "study-board";
   const branch = "main";
-  let headers = {Authorization: `token ${token}`, Accept: "application/vnd.github.v3+json", "Content-Type": "application/json"};
+  let headers = {Authorization: `Bearer ${token}`, Accept: "application/vnd.github.v3+json", "Content-Type": "application/json"};
   // 1. get current commit SHA — retry avec token.json frais si 401 (token localStorage périmé)
-  let ref = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, {headers});
+  let ref = await xhrJson(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, 'GET', headers, null);
   if(ref.status===401){
     console.log('[vocal] 401 refs, token périmé → clear + refetch token.json');
     localStorage.removeItem('gh_token');
     const fresh = await tryTokenJson();
     if(fresh && fresh!==token){
       token = fresh; localStorage.setItem('gh_token', token);
-      headers.Authorization = `token ${token}`;
-      ref = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, {headers});
+      headers.Authorization = `Bearer ${token}`;
+      ref = await xhrJson(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, 'GET', headers, null);
     }
-    if(!ref.ok) { toast('🔑 Token expiré — recharge la page'); throw new Error("GitHub refs fail 401 — token invalide"); }
+    if(ref.status===401 || ref.status>=400) { toast('🔑 Token expiré — recharge la page'); throw new Error("GitHub refs fail 401 — token invalide"); }
   }
-  if(!ref.ok) throw new Error("GitHub refs fail "+ref.status);
-  let refJ = await ref.json();
+  if(ref.status>=400) throw new Error("GitHub refs fail "+ref.status);
+  let refJ = ref.json;
   let commitSha = refJ.object.sha;
   // 2. get tree SHA
-  let commit = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits/${commitSha}`, {headers});
-  let commitJ = await commit.json();
+  let commit = await xhrJson(`https://api.github.com/repos/${owner}/${repo}/git/commits/${commitSha}`, 'GET', headers, null);
+  let commitJ = commit.json;
   let treeSha = commitJ.tree.sha;
   // 3. create blobs
   let blobs = [];
   // vocal json
   let vocalContent = JSON.stringify({...v, audioMime: audioMime||null, hasAudio: !!audioBase64}, null, 2);
-  let b1 = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {method:"POST", headers, body: JSON.stringify({content: utf8ToB64(vocalContent), encoding:"base64"})});
-  let b1j = await b1.json();
+  let b1 = await xhrJson(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, 'POST', headers, JSON.stringify({content: utf8ToB64(vocalContent), encoding:"base64"}));
+  let b1j = b1.json;
   blobs.push({path: `vocals/${v.id}.json`, sha: b1j.sha, mode:"100644", type:"blob"});
   if(audioBase64){
     let b64 = audioBase64.includes(',') ? audioBase64.split(',')[1] : audioBase64;
     let ext = (audioMime||"audio/webm").includes("mp4")?"m4a": (audioMime||"").includes("ogg")?"ogg":"webm";
-    let b2 = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {method:"POST", headers, body: JSON.stringify({content: b64, encoding:"base64"})});
-    let b2j = await b2.json();
+    let b2 = await xhrJson(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, 'POST', headers, JSON.stringify({content: b64, encoding:"base64"}));
+    let b2j = b2.json;
     blobs.push({path: `vocals/${v.id}.${ext}`, sha: b2j.sha, mode:"100644", type:"blob"});
   }
   // 4. create tree
-  let tree = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {method:"POST", headers, body: JSON.stringify({base_tree: treeSha, tree: blobs})});
-  let treeJ = await tree.json();
+  let tree = await xhrJson(`https://api.github.com/repos/${owner}/${repo}/git/trees`, 'POST', headers, JSON.stringify({base_tree: treeSha, tree: blobs}));
+  let treeJ = tree.json;
   // 5. create commit
-  let newCommit = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {method:"POST", headers, body: JSON.stringify({message: `vocal: ${v.fiche} ${v.words} mots ${v.id} ${audioBase64?"+audio":""}`, tree: treeJ.sha, parents:[commitSha]})});
-  let newCommitJ = await newCommit.json();
+  let newCommit = await xhrJson(`https://api.github.com/repos/${owner}/${repo}/git/commits`, 'POST', headers, JSON.stringify({message: `vocal: ${v.fiche} ${v.words} mots ${v.id} ${audioBase64?"+audio":""}`, tree: treeJ.sha, parents:[commitSha]}));
+  let newCommitJ = newCommit.json;
   // 6. update head
-  let upd = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, {method:"PATCH", headers, body: JSON.stringify({sha: newCommitJ.sha})});
-  if(!upd.ok) throw new Error("updateHead fail");
+  let upd = await xhrJson(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, 'PATCH', headers, JSON.stringify({sha: newCommitJ.sha}));
+  if(upd.status>=400) throw new Error("updateHead fail "+upd.status);
   return newCommitJ.sha;
 }
 async function sendVocal(){
