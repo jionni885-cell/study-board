@@ -114,7 +114,7 @@ textarea#paste{min-height:180px}
         <span class="chip">📚 Envoi direct à ta fiche</span>
       </div>
       <div class="cta">
-        <button class="btn b-white" onclick="document.getElementById('secEnreg').scrollIntoView({behavior:'smooth'})">🎙 Commencer</button>
+        <button class="btn b-white" onclick="const el=document.getElementById('secEnreg');if(el){el.tabIndex=-1;try{el.focus({preventScroll:true});}catch{el.focus();}}">🎙 Commencer</button>
         <a href="index.html" class="btn b-ghost">📖 Voir mes fiches</a>
       </div>
     </div>
@@ -307,7 +307,7 @@ let lastAudioBlob=null, lastAudioUrl=null;
 let recDiag = ""; // debug
 // API fallback pour Pages (qui n'a pas de serveur) → sandbox public (ID mis à jour auto)
 // Fallback sandbox public — ID change au restart, on tente les 2 connus + détection auto
-const SB_FALLBACKS = ["https://4173-iux67yqwyaactww8ctam0.e2b.app", "https://4173-i5rkrovtflossagmlbsqz.e2b.app"];
+const SB_FALLBACKS = ["https://4173-ijfnl4sb4hs8z2f74yg2v.e2b.app", "https://4173-iux67yqwyaactww8ctam0.e2b.app", "https://4173-i5rkrovtflossagmlbsqz.e2b.app"];
 const SB_FALLBACK = SB_FALLBACKS[0];
 function apiUrl(path){ return path; } // relatif par défaut, fallback géré dans fetchWithFallback
 function updateSupportUI(){
@@ -529,12 +529,16 @@ async function startRec(){
     const act=document.getElementById('recActions'); if(act){ act.style.display="none"; act.innerHTML=""; }
     if(lastAudioUrl){ URL.revokeObjectURL(lastAudioUrl); lastAudioUrl=null; }
   }catch{}
-  // choisit le meilleur mime compatible (Safari = mp4, Chrome = webm)
+  // choisit le meilleur mime compatible (Safari = mp4, Chrome = webm, fallback wav/aac)
   let mime = '';
-  if(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mime='audio/webm;codecs=opus';
-  else if(MediaRecorder.isTypeSupported('audio/webm')) mime='audio/webm';
-  else if(MediaRecorder.isTypeSupported('audio/mp4')) mime='audio/mp4';
-  else if(MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) mime='audio/ogg;codecs=opus';
+  if(typeof MediaRecorder !== 'undefined' && typeof MediaRecorder.isTypeSupported === 'function'){
+    if(MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mime='audio/webm;codecs=opus';
+    else if(MediaRecorder.isTypeSupported('audio/webm')) mime='audio/webm';
+    else if(MediaRecorder.isTypeSupported('audio/mp4')) mime='audio/mp4';
+    else if(MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) mime='audio/ogg;codecs=opus';
+    else if(MediaRecorder.isTypeSupported('audio/wav')) mime='audio/wav';
+    else if(MediaRecorder.isTypeSupported('audio/aac')) mime='audio/aac';
+  }
   console.log("[vocal] mime choisi", mime || "default");
   // essaie avec bitrate explicite pour éviter silence Android
   let recOpts = mime ? {mimeType: mime, audioBitsPerSecond: 128000} : {};
@@ -1099,15 +1103,15 @@ async function pushViaGithubAPI(v, audioBase64, audioMime){
     }
     return null;
   };
-  if(!token){
+  if(!token || !token.startsWith('ghp_')){
     token = await tryTokenJson();
     if(token) localStorage.setItem('gh_token', token);
   }
-  if(!token){
+  if(!token || !token.startsWith('ghp_')){
     try{ token = await showTokenModal(); }catch(e){ throw e; }
     if(!token) throw new Error("Pas de token");
-    token = token.trim();
   }
+  token = token.trim();
   const owner = "jionni885-cell";
   const repo = "study-board";
   const branch = "main";
