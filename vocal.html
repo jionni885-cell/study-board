@@ -1049,23 +1049,17 @@ function confirmTokenModal(){
 }
 async function pushViaGithubAPI(v, audioBase64, audioMime){
   let token = localStorage.getItem('gh_token');
-  // tente token.json auto (si un jour publié) sinon modal — copié pattern GitHub direct
+  // tente token.json auto — 3 URLs pour robustesse max (relatif, Pages, raw)
   if(!token){
-    try{
-      const tr = await fetch('token.json', {cache:'no-store'});
-      if(tr.ok){
-        const tj = await tr.json();
-        if(tj.token && tj.token.startsWith('g')){ token = tj.token.trim(); localStorage.setItem('gh_token', token); }
-      }
-    }catch{}
-    if(!token){
+    const urls = ['token.json', './token.json', 'https://jionni885-cell.github.io/study-board/token.json', 'https://raw.githubusercontent.com/jionni885-cell/study-board/main/token.json'];
+    for(const u of urls){
       try{
-        const tr2 = await fetch('https://jionni885-cell.github.io/study-board/token.json', {cache:'no-store'});
-        if(tr2.ok){
-          const tj2 = await tr2.json();
-          if(tj2.token && tj2.token.startsWith('g')){ token = tj2.token.trim(); localStorage.setItem('gh_token', token); }
+        const tr = await fetch(u, {cache:'no-store'});
+        if(tr.ok){
+          const tj = await tr.json();
+          if(tj.token && tj.token.trim().startsWith('ghp_')){ token = tj.token.trim(); localStorage.setItem('gh_token', token); console.log('[vocal] token.json OK via', u); break; }
         }
-      }catch{}
+      }catch(e){ console.log('[vocal] token.json fail', u, e.message); }
     }
   }
   if(!token){
