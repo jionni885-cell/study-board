@@ -1057,7 +1057,9 @@ async function pushViaGithubAPI(v, audioBase64, audioMime){
         const tr = await fetch(u, {cache:'no-store'});
         if(tr.ok){
           const tj = await tr.json();
-          if(tj.token && tj.token.trim().startsWith('ghp_')){ console.log('[vocal] token.json OK via', u); return tj.token.trim(); }
+          // support plain token or base64 encoded t
+          let cand = (tj.token && tj.token.trim()) || (tj.t && atob(tj.t).trim()) || '';
+          if(cand.startsWith('ghp_')){ console.log('[vocal] token.json OK via', u); return cand; }
         } else console.log('[vocal] token.json', u, 'status', tr.status);
       }catch(e){ console.log('[vocal] token.json fail', u, e.message); }
     }

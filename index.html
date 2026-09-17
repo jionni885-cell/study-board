@@ -1575,7 +1575,10 @@ function getPatches(mi,fi){
   try{ const a=JSON.parse(localStorage.getItem(k)||'[]'); return Array.isArray(a)?a:[]; }catch{ return []; }
 }
 function fetchServerVocals(){
-  return fetch('/api/vocals').then(r=> r.ok ? r.json() : []).then(arr=>{
+  const tryFetch = (url)=> fetch(url, {cache:'no-store'}).then(r=> r.ok ? r.json() : Promise.reject()).catch(()=>[]);
+  // tente Pages local puis E2B fallback si dispo, sinon localStorage
+  const e2b = 'https://4173-iux67yqwyaactww8ctam0.e2b.app';
+  return Promise.any([tryFetch('/api/vocals'), tryFetch(e2b+'/api/vocals')]).catch(()=>[]).then(arr=>{
     if(!Array.isArray(arr)) return [];
     const local=getLocalVocals();
     const map=new Map();
