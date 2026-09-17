@@ -194,7 +194,8 @@ textarea#paste{min-height:180px}
       <span class="pill" id="timePill">~0 min</span>
       <span class="pill" id="hesPill">Hésitations —</span>
       <span style="flex:1"></span>
-      <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="clearPaste()">Effacer</button>
+      <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="restartVocal()">🔄 Restart</button>
+      <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="clearPaste()">Effacer texte</button>
       <button class="btn btn-line" style="padding:7px 12px;font-size:.84rem" onclick="demoLong()">Exemple 18 min</button>
     </div>
 
@@ -336,7 +337,28 @@ function switchTab(t){
   $("#panelPaste").style.display = t==='paste' ? "block" : "none";
   if(t==='paste') try{ paste.focus({preventScroll:true}); }catch{ paste.focus(); }
 }
-function clearPaste(){ paste.value=""; onPaste(); toast("Zone nettoyée — prête pour ton oral"); }
+function clearPaste(){ paste.value=""; onPaste(); toast("Texte nettoyé — audio gardé si tu veux recommencer que le texte"); }
+function restartVocal(){
+  if(recState==="rec"){ try{ mediaRec.stop(); }catch{} stopRec(false); }
+  // stop tout
+  try{ if(stream) stream.getTracks().forEach(t=>t.stop()); }catch{}
+  stream=null; chunks=[]; 
+  try{ if(lastAudioUrl) URL.revokeObjectURL(lastAudioUrl); }catch{}
+  lastAudioBlob=null; lastAudioUrl=null;
+  paste.value="";
+  // reset UI
+  timerEl.innerHTML='00:00 <small>/ 20:00</small>';
+  const ra=document.getElementById('recAudio'); if(ra){ try{ra.pause();}catch{} ra.style.display="none"; ra.removeAttribute('src'); }
+  const act=document.getElementById('recActions'); if(act){ act.style.display="none"; act.innerHTML=""; }
+  const inf=document.getElementById('recInfo'); if(inf){ inf.style.display="none"; inf.textContent=""; }
+  const vu=document.getElementById('vu'); if(vu){ vu.style.display="none"; const c=vu.getContext('2d'); if(c) c.clearRect(0,0,vu.width,vu.height); }
+  recState="idle"; $("#micBtn").classList.remove("rec"); $("#micBtn").textContent="🎙";
+  recStateEl.textContent="Prêt à enregistrer — restart fait";
+  recStateEl.className="pill ok";
+  speechSupport.textContent = hasSpeech ? (isMobile?"✅ Micro + retranscris direct (Chrome Android OK)":"✅ Micro + retranscris direct") : "⚠️ Ton navigateur ne retranscrit pas → dicte avec le clavier";
+  onPaste();
+  toast("🔄 Restart — tout effacé, tu peux refaire ton vocal");
+}
 function demoLong(){
   // 2000 mots env 18 min
   const base = "Aujourd'hui on a vu la croissance économique, la croissance extensive qui vient de plus de travailleurs et de machines, et la croissance intensive qui vient du progrès technique et de la PGF. On a défini la FBCF comme l'investissement, la fonction de production Y = F de K et L, la combinaison productive, la population active et la règle des 70. ";
@@ -774,23 +796,22 @@ function analyseText(txt){
 function onPaste(silent){
   const txt = paste.value;
   const a = analyseText(txt);
+  const hasAudio = !!(lastAudioBlob && lastAudioBlob.size>1000);
   // pills
-  wordsPill.textContent = a.words + " mots";
+  wordsPill.textContent = a.words + " mots" + (hasAudio ? ` · 🔊 ${(lastAudioBlob.size/1024).toFixed(1)} Ko` : "");
   const min = Math.floor(a.secs/60), sec = String(a.secs%60).padStart(2,'0');
   timePill.textContent = "~" + min + ":" + sec + " min";
   kWords.textContent = a.words;
   kTime.textContent = min + "′" + sec;
   kPalier.textContent = a.palier;
   kHes.textContent = (a.hR*100).toFixed(1) + "%";
-  // update helpers
-  if(a.words===0){
+  if(a.words===0 && !hasAudio){
     analyse.style.display="none";
     sendBtn.disabled=true;
-    sendStatus.textContent="Prêt";
+    sendStatus.textContent="Prêt — fais un vocal ou dicte";
   } else {
     analyse.style.display="";
-    palierBox.innerHTML = `<h3>${a.palier}</h3><p>${a.detail}</p>`;
-    // segmentation preview if >=600
+    palierBox.innerHTML = `<h3>${a.palier}${hasAudio?` · 🔊 audio ${(lastAudioBlob.size/1024).toFixed(1)} Ko`:``}</h3><p>${a.detail}${hasAudio && a.words===0 ? ` · <b>Audio seul prêt</b> — tu peux envoyer même sans texte, je le mettrai dans le repo.` : ``}</p>`;
     if(a.words >= 600){
       const segN = Math.min(4, Math.max(3, Math.ceil(a.words/600)));
       const per = Math.floor(a.words/segN);
@@ -802,7 +823,8 @@ function onPaste(silent){
       segBox.style.display="none";
     }
     sendBtn.disabled=false;
-    sendStatus.textContent = a.words <10 ? "Ajoute un peu de texte" : "Prêt à envoyer";
+    if(a.words===0 && hasAudio) sendStatus.textContent="Audio prêt à envoyer ✓ (même sans texte)";
+    else sendStatus.textContent = a.words <10 ? "Ajoute un peu de texte" : "Prêt à envoyer";
     if(!silent && a.words===12) toast("Bien — continue, je compte jusqu'à 20 min");
   }
 }
@@ -829,7 +851,8 @@ function buildVocal(){
 }
 function saveLocalOnly(){
   const v = buildVocal();
-  if(!v.transcript){ toast("Ajoute d'abord ton texte"); return; }
+  const hasAudio = !!(lastAudioBlob && lastAudioBlob.size>1000);
+  if(!v.transcript && !hasAudio){ toast("Ajoute d'abord ton texte ou fais un vocal audio"); return; }
   saveToLocal(v);
   toast("💾 Sauvegardé en local — ta fiche l'affichera dès le reload");
   sendStatus.textContent = "Sauvegardé en local ✓";
@@ -938,7 +961,10 @@ async function fetchWithFallback(url, opts){
 }
 async function sendVocal(){
   const v = buildVocal();
-  if(!v.transcript){ toast("Ajoute d'abord ton texte"); return; }
+  const hasAudioCheck = !!(lastAudioBlob && lastAudioBlob.size>1000);
+  if(!v.transcript && !hasAudioCheck){ toast("Ajoute d'abord ton texte ou fais un vocal audio"); return; }
+  // si audio seul, on met un transcript placeholder pour que l'envoi passe
+  if(!v.transcript && hasAudioCheck){ v.transcript = `[audio seul ${ (lastAudioBlob.size/1024).toFixed(1)} Ko]`; v.words = 0; }
   if(v.words < 10){ toast("Ton oral est encore très court — ajoute une phrase"); }
   sendBtn.disabled=true;
   sendStatus.textContent="Envoi…";
