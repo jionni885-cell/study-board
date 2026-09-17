@@ -49,14 +49,14 @@ Les données vivent dans `const D` dans `index.html`.
 
 | Index | Matière / fiche | Parties | Définitions | Mot pour mot | Cartes | Quiz | MP3 |
 |---|---|---:|---:|---:|---:|---:|---|
-| 0-0 | SES — Les sources et les défis de la croissance économique | 6 | 15 | 11 | 21 | 20 | `ses-croissance` |
+| 0-0 | SES — Les sources et les défis de la croissance économique | 6 | 15 | 11 | 23 | 21 | `ses-croissance` |
 | 1-0 | HGGSP — Faire la guerre, faire la paix : conflits et modes de résolution | 4 | 3 | 3 | 12 | 10 | `hggsp-guerre` |
 | 1-1 | HGGSP — Cartographier les guerres et les conflits : limites et enjeux | 3 | 0 | 0 | 6 | 4 | `hggsp-cartographier` |
 | 2-0 | Histoire — La crise de 1929 : le krach boursier et ses mécanismes | 6 | 3 | 3 | 11 | 10 | `histoire-1929` |
 | 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 5 | 4 | 0 | 19 | 10 | `anglais-heroes` |
 | 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 | 9 | 12 | 10 | `philo-intro` |
 
-**Totaux : 5 matières, 6 fiches, 29 parties, 81 cartes, 64 questions, 6 fichiers MP3 pour les fiches + 1 MP3 pour l’exposé → 7 fichiers MP3 au total.**
+**Totaux : 5 matières, 6 fiches, 29 parties, 83 cartes, 65 questions, 6 fichiers MP3 pour les fiches + 1 MP3 pour l’exposé → 7 fichiers MP3 au total.**
 
 **Nouveau : section Exposés (PR #7).** Un exposé **HGGSP — La guerre au Yémen (5 min)** est disponible depuis l’accueil (après Matières) et à l’adresse `#/expose/yemen` : problématique, 3 parties (origines & acteurs, crise humanitaire, impasse diplomatique) + conclusion, chiffres clés (21 M dans le besoin, 4,5 M déplacés…), frise 2011‑2025, définitions (Houthis, coalition, blocus, crise humanitaire, multilatéralisme) et récapitulatif audio `hggsp-yemen.mp3`. Données dans `const EXPOSES` (après `AUD`), rendues par `renderExpose()` et routées via `parse()`.
 

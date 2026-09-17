@@ -67,14 +67,14 @@ Le site en ligne est disponible à l'adresse :
 
 | Index | Matière / fiche | Parties | Définitions (dont mot pour mot) | Cartes | Quiz | Défis |
 |---|---|---:|---:|---:|---:|---:|
-| 0-0 | SES — Les sources et les défis de la croissance économique | 6 | 15 (11) | 21 | 20 | 5 formats |
+| 0-0 | SES — Les sources et les défis de la croissance économique | 6 | 15 (11) | 23 | 21 | 5 formats |
 | 1-0 | HGGSP — Faire la guerre, faire la paix : conflits et modes de résolution | 4 | 3 (3) | 12 | 10 | 4 formats |
 | 1-1 | HGGSP — Cartographier les guerres et les conflits : limites et enjeux | 3 | 0 (0) | 6 | 4 | 4 formats |
 | 2-0 | Histoire — La crise de 1929 : le krach boursier et ses mécanismes | 6 | 3 (3) | 11 | 10 | 4 formats |
 | 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 5 | 4 (0) | 19 | 10 | 4 formats |
 | 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 (9) | 12 | 10 | 5 formats |
 
-**Totaux actuels : 29 parties, 81 cartes, 64 questions, 6 récapitulatifs MP3.**
+**Totaux actuels : 29 parties, 83 cartes, 65 questions, 6 récapitulatifs MP3.**
 
 La matière **Philosophie** (index 4) a été ajoutée le 13 septembre 2026 à partir
 des documents sources fournis (audio « Philosophie 1 début » + photos de cours).
