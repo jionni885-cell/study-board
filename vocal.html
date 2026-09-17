@@ -919,8 +919,7 @@ function shareForGo(){
   } else {
     downloadGoJson(payload);
   }
-  // aussi propose téléchargement
-  try{ downloadGoJson(payload, true); }catch{}
+  // plus de téléchargement auto — direct dans le repo via Envoyer, sinon copie manuelle suffit
 }
 function downloadGoJson(payload, silent){
   try{
