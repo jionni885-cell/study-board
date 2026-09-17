@@ -1,5 +1,5 @@
 # Task
 
-Study Board doit être parfait — vocal 30min + GO audio dans GitHub + fiches 6/6 + audit 0 + no-scroll + restart choix + Pages built. Chaque tour, teste tout (vocal.html, index.html, server.py, Pages) via agents/agent-qa.py. Si critique, corrige le fichier fautif (vocal.html, server.py, index.html), commite et push vers main. Log dans agents/critiques.log. Boucle non-stop la plus rapide jusqu'à confirmation parfaite.
+Study Board doit être parfait à 100% — vocal 30 min (MAX_MS 1800000, timer 30:00), CORS et Permissions-Policy, no-scroll strict (preventScroll, 0 scrollIntoView), GO audio direct dans GitHub via XHR (pattern addpipe simple-recorderjs-demo), fiches 6/6, audit complet 0/0, serveurs actifs. Tester téléphone + ordi en continu. Si moindre défaut, corriger immédiatement.
 
-When the task is complete, reply starting with the line DONE: followed by a one-line summary. Otherwise reply with a short status: what you changed and what still fails.
+When the task is complete, reply starting with the line DONE: followed by a one-line summary.
