@@ -14,8 +14,8 @@ function check(name, fn){
 
 console.log('=== AUDIT COMPLET STUDY BOARD ===\n');
 
-// 1. Fichiers requis
-for(const f of ['index.html','vocal.html','server.py','token.json']){
+// 1. Fichiers requis (token.json n'est PLUS requis : il est local uniquement, gitignoré)
+for(const f of ['index.html','vocal.html','server.py','token.json.example']){
   if(fs.existsSync(f)) ok(`Fichier ${f} présent`);
   else fail(`Fichier ${f} manquant`);
 }
@@ -24,7 +24,9 @@ for(const f of ['index.html','vocal.html','server.py','token.json']){
 const vocal = fs.existsSync('vocal.html') ? fs.readFileSync('vocal.html','utf8') : '';
 check('vocal.html timer 30 min', ()=>{ if(!vocal.includes('MAX_MS = 1800000') && !vocal.includes('30:00')) throw new Error('MAX_MS 1800000 manquant'); });
 check('vocal.html 30 min occurrences', ()=>{ const c=(vocal.match(/30 min/g)||[]).length; if(c<5) throw new Error(`seulement ${c} occurrences 30 min`); });
-check('vocal.html token.json 4 URLs', ()=>{ if(!vocal.includes('raw.githubusercontent.com')) throw new Error('raw URL manquante'); });
+check('vocal.html SANS URL de token publique', ()=>{ if(vocal.includes('raw.githubusercontent.com') || vocal.includes('github.io/study-board/token.json')) throw new Error('URL de token publique détectée — interdit (sécurité)'); });
+const deadSandbox = (txt)=> /https:\/\/[^'\"]*e2b\.(app|dev)/i.test(txt); // URL réelle en dur (pas les hostname endsWith())
+check('vocal.html SANS sandbox mort en dur', ()=>{ if(deadSandbox(vocal)) throw new Error('URL e2b en dur détectée (sandbox éphémère mort)'); });
 check('vocal.html 401 retry', ()=>{ if(!vocal.includes('401') || !vocal.includes('removeItem')) throw new Error('retry 401 manquant'); });
 check('vocal.html SB_FALLBACKS', ()=>{ if(!vocal.includes('SB_FALLBACKS')) throw new Error('SB_FALLBACKS manquant'); });
 check('vocal.html Permissions-Policy', ()=>{ if(!vocal.includes('Permissions-Policy')) throw new Error('Permissions-Policy manquant'); });
@@ -33,6 +35,7 @@ check('vocal.html pas de prompt() token', ()=>{ if(vocal.includes('prompt("Pour 
 // 3. Index.html — 30 min cohérent
 const index = fs.existsSync('index.html') ? fs.readFileSync('index.html','utf8') : '';
 check('index.html 30 min partout', ()=>{ if(index.includes('20 min') && index.includes('Timer 20')) throw new Error('encore des 20 min'); });
+check('index.html SANS sandbox mort en dur', ()=>{ if(deadSandbox(index)) throw new Error('URL e2b en dur détectée (sandbox éphémère mort)'); });
 
 // 4. Server.py — 4173, CORS, 30Mo, rebase
 const server = fs.existsSync('server.py') ? fs.readFileSync('server.py','utf8') : '';
@@ -47,14 +50,24 @@ try{
   ok('audit.py 0 problème');
 }catch(e){ fail('audit.py a des problèmes'); }
 
-// 6. Pages — token.json accessible ? (support token ou t base64)
+// 6. Sécurité — token.json JAMAIS suivi par git (le token publié le 17/09/2026 est révélé)
 try{
-  const t = fs.readFileSync('token.json','utf8');
-  const j = JSON.parse(t);
-  let tok = j.token || (j.t ? Buffer.from(j.t, 'base64').toString() : '');
-  if(!tok || !tok.startsWith('ghp_')) throw new Error('token.json invalide');
-  ok(`token.json valide ${tok.slice(0,8)}...`);
-}catch(e){ fail(`token.json — ${e.message}`); }
+  const r = execSync('git ls-files token.json', {stdio:'pipe'});
+  if(r.toString().trim()) throw new Error('token.json est SUIVI PAR GIT — retire-le (git rm --cached token.json)');
+  ok('token.json non suivi par git (sécurité OK)');
+}catch(e){
+  if(e.status===0) throw e; // ne peut pas arriver, mais ne pas masquer les erreurs réelles
+  fail(`sécurité token.json — ${e.message.split('\n')[0]}`);
+}
+// 6b. token.json local optionnel : s'il existe, il doit contenir un champ valide (vérification douce, pas bloquante)
+if(fs.existsSync('token.json')){
+  try{
+    const j = JSON.parse(fs.readFileSync('token.json','utf8'));
+    let tok = j.token || (j.t ? Buffer.from(j.t,'base64').toString() : '');
+    if(!tok || tok === 'REMPLACE-MOI-EN-BASE64' || !tok.startsWith('ghp_')) warn('token.json local présent mais non renseigné (ou placeholder)');
+    else ok(`token.json local présent (ghp_..., jamais commité)`);
+  }catch(e){ warn(`token.json local illisible : ${e.message}`); }
+}
 
 // 7. Vocals — au moins 1
 const vocals = fs.existsSync('vocals') ? fs.readdirSync('vocals').filter(f=>f.endsWith('.json')) : [];

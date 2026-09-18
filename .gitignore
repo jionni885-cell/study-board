@@ -2,3 +2,10 @@ preview.png
 __pycache__/
 *.pyc
 
+# Sécurité : token GitHub JAMAIS dans le dépôt (le token publié le 17/09/2026 est révélé — révoquer)
+token.json
+
+# CI : le workflow est ajouté une fois depuis l'interface GitHub (le jeton
+# GitHub App des sessions Arena n'a pas la permission « workflows ») —
+# le modèle complet est dans tools/audit-workflow.yml
+.github/

@@ -1,6 +1,3 @@
-# Modèle de CI : copier ce fichier dans .github/workflows/audit.yml
-# (le jeton GitHub App de la session Arena n'a pas la permission « workflows »,
-#  l'ajout doit donc être fait à la main une seule fois).
 name: Audit
 
 on:
@@ -10,20 +7,31 @@ on:
 
 jobs:
   audit:
-    name: Structure, contenus et fonctions
+    name: Structure, sécurité, fonctions et serveur
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Audit dépôt (zéro dépendance)
-        run: python3 tools/audit.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Audit fonctionnel (jsdom)
+      - name: Audit dépôt (zéro dépendance)
+        run: python3 tools/audit.py
+
+      - name: Audit complet (sécurité token, timers, serveurs)
+        run: node tools/audit-complet.mjs
+
+      - name: Audit fonctionnel (jsdom) + pipeline QA complet
         working-directory: tools
         run: |
           npm install --no-audit --no-fund
           node audit-dom.mjs
+
+      - name: Pipeline QA v2 (tous les pas, dont smoke test serveur)
+        working-directory: ${{ github.workspace }}
+        run: python3 agents/qa.py --fast

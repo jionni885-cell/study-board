@@ -51,6 +51,34 @@ dans `media/`.
 
 ---
 
+## 🎙️ Studio Vocal (oraux jusqu'à 30 min)
+
+`vocal.html` (accessible depuis l'accueil, bouton **🎙️ Studio Vocal**) enregistre
+un oral de **1 à 30 min** (micro, import audio ou texte collé), l'analyse (mots,
+hésitations, plan chronométré, 5 flashcards) et l'envoie dans le dépôt.
+
+- **Sur ordinateur** : lance `python3 server.py` (port 4173) puis ouvre
+  `http://localhost:4173/vocal.html` — l'envoi passe par `POST /api/vocal` et le
+  serveur committe/pousse le vocal dans ta branche active.
+- **Sur téléphone (site en ligne)** : l'envoi direct dans GitHub demande **une
+  seule fois** un token GitHub personnel (`ghp_…`, droit `repo`) collé dans la
+  petite fenêtre du studio. Il reste **dans ton navigateur uniquement**
+  (localStorage), jamais dans le dépôt.
+- **Sans rien de tout ça** : le vocal est **gardé en local** dans le navigateur
+  (badge 💾), il enrichit ta fiche et reste disponible dans le studio.
+
+> 🔒 **Sécurité — lecture obligatoire (18/09/2026)** : un token GitHub a été
+> **erronément publié** dans ce dépôt public le 17/09/2026 (fichier `token.json`,
+> retiré le 18/09/2026). Il est considéré **révélé** :
+> **révoque-le immédiatement** dans
+> [github.com/settings/tokens](https://github.com/settings/tokens) (ou
+> [github.com/settings/personal-access-tokens](https://github.com/settings/personal-access-tokens)
+> si c'est un token granulaire). N'utilise plus ce token nulle part.
+> Le fichier `token.json` est désormais ignoré par git : s'il est recréé sur ta
+> machine (optionnel, via `token.json.example`), il restera local.
+
+---
+
 ## ☁ Ce dépôt GitHub (public)
 
 Le site en ligne est disponible à l'adresse :
@@ -90,17 +118,23 @@ express et un récapitulatif audio.
 
 ## 🧪 Vérifications automatiques
 
-Deux outils vérifient le dépôt et bloquent toute régression :
+Un seul point d'entrée — le **pipeline QA v2** (7 pas vérifiables, correcteurs
+bornés, smoke test serveur isolé ; le détail est dans [`agents/README.md`](agents/README.md)) :
 
 ```bash
-python3 tools/audit.py          # structure, compteurs, contenus interdits, audios, ZIP, README/REPRISE
-python3 tools/audit.py --fix-zip  # resynchronise StudyBoard-app.zip
-cd tools && npm install && node audit-dom.mjs   # audit fonctionnel (jsdom) : défis, quiz, cartes, robustesse
+python3 agents/qa.py            # TOUT : structure, syntaxe JS, sécurité token,
+                                # audit-complet, audit fonctionnel jsdom,
+                                # smoke test serveur, hygiène git
+python3 agents/qa.py --fast     # idem sans les deux pas lents (~2 min)
+python3 tools/audit.py --fix-zip  # à la main : resynchronise StudyBoard-app.zip
 ```
 
-`tools/audit.py` ne demande rien à installer. Le fichier `tools/audit-workflow.yml`
-est prêt à être copié en `.github/workflows/audit.yml` pour lancer les deux audits
-automatiquement à chaque `push` / `pull request`.
-Les deux audits doivent afficher **0 défaut** avant toute livraison.
+`tools/audit.py` ne demande rien à installer. Le CI est prêt dans
+[`tools/audit-workflow.yml`](tools/audit-workflow.yml) : il faut une **seule
+fois** le copier dans `.github/workflows/audit.yml` depuis l'interface GitHub
+(dépôt → `Add file` → `Create new file`) — les jetons des sessions Arena n'ont
+pas la permission « workflows », d'où ce geste manuel. Il relance alors le
+pipeline à chaque `push` / `pull request`.
+Le code de sortie du pipeline (0) est l'unique autorisation de livraison.
 
 La mémoire de reprise complète et l'historique sont dans [`REPRISE.md`](REPRISE.md).

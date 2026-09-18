@@ -248,7 +248,7 @@ textarea#paste{min-height:180px}
       <li><b>Timer 30 min</b> (1800 s) — au-delà je découpe auto en chapitres</li>
       <li><b>Analyse paliers</b> : &lt;10 trop court · &lt;60 un peu court · &lt;600 parfait 2-5 min · &lt;1500 long 5-12 min · ≥1500 XXL 15-30 min + hésitations &gt;2.5%</li>
       <li><b>Fallback 100%</b> : micro → import audio → coller texte, même résultat</li>
-      <li><b>Envoi</b> : POST /api/vocal (20 Mo) + localStorage, badge serveur/local sur l'accueil</li>
+      <li><b>Envoi</b> : POST /api/vocal (30 Mo) + localStorage, badge serveur/local sur l'accueil</li>
     </ul>
   </div>
 </div>
@@ -305,10 +305,13 @@ let isSecure = location.protocol === 'https:' || location.hostname === 'localhos
 let isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 let lastAudioBlob=null, lastAudioUrl=null;
 let recDiag = ""; // debug
-// API fallback pour Pages (qui n'a pas de serveur) → sandbox public (ID mis à jour auto)
-// Fallback sandbox public — ID change au restart, on tente les 2 connus + détection auto
-const SB_FALLBACKS = ["https://4173-ijfnl4sb4hs8z2f74yg2v.e2b.app", "https://4173-iux67yqwyaactww8ctam0.e2b.app", "https://4173-i5rkrovtflossagmlbsqz.e2b.app"];
-const SB_FALLBACK = SB_FALLBACKS[0];
+// Fallbacks serveur hors origine : AUCUN URL en dur — les sandboxes de session sont éphémères
+// (les anciens IDs E2B sont morts et faisaient échouer l'envoi sur le site public).
+// Le seul serveur de confiance est le même origine (server.py local, port 4173).
+// Sans serveur : le vocal reste en local (localStorage) + envoi GitHub API direct avec un
+// token privé fourni une fois par l'utilisateur (modal, stocké dans son navigateur uniquement).
+const SB_FALLBACKS = [];
+const SB_FALLBACK = null;
 function apiUrl(path){ return path; } // relatif par défaut, fallback géré dans fetchWithFallback
 function updateSupportUI(){
   const phoneHelp = document.getElementById('phoneHelp');
@@ -1004,7 +1007,7 @@ async function fetchWithFallback(url, opts){
     console.log("[vocal] rel fail", rel.status, "→ tente E2B fallbacks");
   }catch(e){
     if(!location.hostname.endsWith("github.io")) throw e;
-    console.log("[vocal] rel error", e, "→ tente E2B fallbacks");
+    console.log("[vocal] rel error", e, "→ tente serveurs fallback");
   }
   // 2) sur Pages, tente chaque sandbox connu (le dernier ID change au restart)
   if(location.hostname.endsWith("github.io")){
@@ -1017,7 +1020,7 @@ async function fetchWithFallback(url, opts){
     }
   }
   // 3) dernier recours → GitHub API direct (copié freecodecamp / paul.kinlan : blobs base64 → tree → commit → updateHead)
-  throw new Error("E2B indisponible, passage GitHub API");
+  throw new Error("Serveur indisponible, passage GitHub API");
 }
 // Fallback GitHub API direct (copié des projets freecodecamp / paul.kinlan : createBlob base64 → createTree → createCommit → updateHead — direct sans serveur)
 function utf8ToB64(str){
@@ -1076,10 +1079,13 @@ function xhrJson(url, method, headers, body){
 }
 async function pushViaGithubAPI(v, audioBase64, audioMime){
   let token = localStorage.getItem('gh_token');
-  // tente token.json auto — 4 URLs pour robustesse max (relatif, Pages, raw) — même si localStorage a un token périmé (401) on retente
+  // tente token.json auto — MÊME ORIGINE UNIQUEMENT (servi par server.py local, fichier gitignoré,
+  // jamais public) — même si le token localStorage a expiré (401) on retente.
+  // IMPORTANT : plus aucun fetch de token sur une URL publique (le token publié le 17/09 dans
+  // token.json est révélé : il DOIT être révoqué — voir REPRISE.md).
   // copie streamproc/MediaStreamRecorder compat mobile : fetch avec cache no-store + XHR fallback si fetch bloque (CORS téléphone)
   const tryTokenJson = async ()=>{
-    const urls = ['token.json', './token.json', 'https://jionni885-cell.github.io/study-board/token.json', 'https://raw.githubusercontent.com/jionni885-cell/study-board/main/token.json'];
+    const urls = ['token.json'];
     for(const u of urls){
       try{
         const tr = await fetch(u, {cache:'no-store'});
