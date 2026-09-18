@@ -1577,9 +1577,9 @@ function getPatches(mi,fi){
 }
 function fetchServerVocals(){
   const tryFetch = (url)=> fetch(url, {cache:'no-store'}).then(r=> r.ok ? r.json() : Promise.reject()).catch(()=>[]);
-  // tente Pages local puis E2B fallback si dispo, sinon localStorage
-  const e2b = 'https://4173-ijfnl4sb4hs8z2f74yg2v.e2b.app';
-  return Promise.any([tryFetch('/api/vocals'), tryFetch(e2b+'/api/vocals')]).catch(()=>[]).then(arr=>{
+  // même origine uniquement (server.py local) — plus d'URL de sandbox éphémère en dur,
+  // sinon repli sur les vocaux localStorage
+  return tryFetch('/api/vocals').then(arr=>{
     if(!Array.isArray(arr)) return [];
     const local=getLocalVocals();
     const map=new Map();

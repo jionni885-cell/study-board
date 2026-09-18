@@ -1,0 +1,4 @@
+{
+  "_comment": "OPTIONNEL — usage local uniquement. Copie ce fichier en token.json DANS TON DOSSIER LOCAL (jamais commité : .gitignore). Servi automatiquement par server.py (port 4173) pour que Studio Vocal envoie sans coller de token. Le token doit être un PAT ghp_... avec le droit repo. Le token publié dans le dépôt le 17/09/2026 EST RÉVÉLÉ : révoque-le immédiatement (github.com/settings/tokens) et utilise un token neuf.",
+  "t": "REMPLACE-MOI-EN-BASE64"
+}

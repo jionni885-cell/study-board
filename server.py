@@ -89,15 +89,12 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         # fichier statique
-        # décode
+        # décode — "/" -> index.html, "/dossier/" -> /dossier/index.html
         rel = urllib.parse.unquote(path).lstrip("/")
-        if rel == "" or rel.endswith("/"):
-            rel = rel + "index.html" if rel == "" else rel + "index.html"
-            # si path = "/" -> index.html
-            if rel.startswith("/"):
-                rel = rel.lstrip("/")
-            if rel == "index.html" or rel == "":
-                rel = "index.html"
+        if rel == "":
+            rel = "index.html"
+        elif rel.endswith("/"):
+            rel = rel + "index.html"
         # sécurité: pas de ..
         target = (ROOT / rel).resolve()
         try:
@@ -142,7 +139,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_response(413)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.end_headers()
-            self.wfile.write(json.dumps({"ok": False, "error": "payload trop volumineux (max 20Mo)"}).encode())
+            self.wfile.write(json.dumps({"ok": False, "error": "payload trop volumineux (max 30 Mo)"}).encode())
             return
         try:
             raw = self.rfile.read(length) if length else b"{}"
@@ -279,10 +276,15 @@ def run():
     mimetypes.add_type("application/javascript", ".js")
     mimetypes.add_type("audio/mpeg", ".mp3")
     mimetypes.add_type("audio/mp4", ".m4a")
-    addr = ("0.0.0.0", 4173)
+    # port par défaut 4173, surchargeable (tests isolés : SB_PORT)
+    try:
+        port = int(os.environ.get("SB_PORT", "4173"))
+    except ValueError:
+        port = 4173
+    addr = ("0.0.0.0", port)
     httpd = ThreadingHTTPServer(addr, Handler)
     httpd.timeout = 30
-    print(f"Study Board server → http://0.0.0.0:4173/  (root={ROOT})")
+    print(f"Study Board server → http://0.0.0.0:{port}/  (root={ROOT})")
     print(f"  POST /api/vocal  (max {MAX_BODY//1024//1024}Mo)  → vocals/*.json")
     print(f"  GET  /api/vocals (50 derniers)")
     print(f"  GET  /api/health")

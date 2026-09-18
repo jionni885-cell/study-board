@@ -256,7 +256,7 @@ ZIP = os.path.join(ROOT, "StudyBoard-app.zip")
 if os.path.exists(ZIP):
     z = zipfile.ZipFile(ZIP)
     noms = {i.filename.replace("\\", "/") for i in z.infolist()}
-    attendus = ["index.html", "README.md"] + sorted(
+    attendus = ["index.html", "vocal.html", "README.md"] + sorted(
         "media/audio/" + f for f in os.listdir(os.path.join(ROOT, "media", "audio")) if f.endswith(".mp3")
     )
     for name in attendus:
