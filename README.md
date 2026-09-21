@@ -47,6 +47,7 @@ tout ce qui gênait :
 | Textes à **10,9 px** illisibles, **contrastes sous la norme** (2,6:1 au lieu de 4,5:1) | Tailles ≥ 12 px sur téléphone, gris secondaire assombri (palette AA), boutons bleus corrigés en thème sombre |
 | En-tête « Study Board » qui se cassait en **4 lignes** sur 320 px | En-tête compact sur petit écran (le libellé du studio se raccourcit, le thème reste accessible) |
 | Tableaux et grilles qui débordaient | Colonnes `minmax(0,1fr)`, tableaux défilables, mots longs non coupés |
+| Studio Vocal : bouton « Retour fiches » énorme, en-tête sur deux lignes, les 3 onglets (Enregistrer / Import / Coller) hors écran | En-tête sur une ligne, bouton normal, onglets en grille de 3 égale |
 
 Rien d'autre à faire de ton côté : ces corrections sont dans le site, et
 l'audit `tools/audit-mobile.mjs` rejoue **20 écrans × 5 tailles** (plus une partie

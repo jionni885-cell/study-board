@@ -417,8 +417,18 @@ contenu si besoin.
   jamais un faux vert), `tools/audit-dom.mjs` gagne les sections 7 (handlers) et
   8 (verrous de non-régression CSS), `tools/audit-complet.mjs` la section 9
   (téléphone), CI (`tools/audit-workflow.yml`) lance l'audit navigateur.
+  (6) **Studio Vocal, 2e passe** : le bouton « Retour fiches » héritait du
+  `width:100%` des boutons (énorme dans l'en-tête, poussait le logo hors ligne),
+  l'en-tête se cassait en deux lignes et les trois onglets (Enregistrer /
+  Import audio / Coller texte) sortaient de l'écran. En-tête mis sur une seule
+  ligne (sous-titre masqué sur petit écran, « Retour » abrégé), boutons pleine
+  largeur réservés aux appels à l'action, onglets en grille de 3 égale.
+  Nouveau contrôle permanent : **hauteur d'en-tête ≤ 84 px** sur chaque écran
+  et chaque taille (c'est ce défaut qu'il fallait détecter).
   Vérifications : `python3 agents/qa.py` **8/8 PASS**, audit mobile **0 erreur /
-  0 avertissement** sur les 5 tailles d'écran, ZIP resynchronisé.
+  0 avertissement** sur les 5 tailles d'écran (2 exécutions consécutives
+  identiques : l'audit attend la fin des transitions avant de mesurer, sinon un
+  contraste lu à mi-course donnait un résultat instable).
 - **18 septembre 2026 (PR #14, session `arena/01a0b584-study-board`)** —
   **Sécurisation + remplacement du swarm par le pipeline QA v2.** (1)
   **Sécurité** : `token.json` (token GitHub réel publié le 17/09) retiré du
