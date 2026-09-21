@@ -2,16 +2,23 @@
   "name": "study-board-audit",
   "version": "1.0.0",
   "private": true,
-  "description": "Audit fonctionnel de Study Board (jsdom) : défis express, quiz, cartes, audio et robustesse.",
+  "description": "Audit fonctionnel de Study Board : jsdom (défis, quiz, cartes) + audit téléphone dans un vrai navigateur.",
   "type": "module",
   "scripts": {
     "audit": "node audit-dom.mjs",
-    "audit:repo": "python3 audit.py"
+    "audit:mobile": "node audit-mobile.mjs",
+    "audit:mobile:json": "node audit-mobile.mjs --json",
+    "audit:repo": "python3 audit.py",
+    "postinstall": "node -e \"console.log('jsdom prêt. Pour le test téléphone : npm i --no-save puppeteer-core@23 @sparticuz/chromium@131 (ou CHROME_PATH=…)')\""
   },
   "devDependencies": {
-    "jsdom": "^24.1.3"
+    "jsdom": "^24.1.3",
+    "puppeteer-core": "^23.11.1"
   },
   "engines": {
     "node": ">=18"
+  },
+  "optionalDependencies": {
+    "@sparticuz/chromium": "^131.0.1"
   }
 }

@@ -1,7 +1,7 @@
 # PROMPT DE REPRISE — STUDY BOARD
 
 > Document de mémoire permanente du dépôt. À lire avant toute modification.
-> Dernière mise à jour : **18 septembre 2026 (PR #14)**.
+> Dernière mise à jour : **21 septembre 2026 (session `arena/01a0c57b-study-board`)**.
 
 ## 🎯 Mission
 
@@ -16,9 +16,13 @@ français.
 - **Studio Vocal** : `vocal.html` (oraux 1 à 30 min, analyse, envoi) + `server.py`
   (serveur local port 4173 : statique + `POST /api/vocal` + auto commit/push vocal
   dans la branche active) + `vocals/` (vocaux enregistrés : 1 JSON au 18/09).
-- **Pipeline QA v2** : `python3 agents/qa.py` — 7 pas vérifiables + correcteurs
+- **Pipeline QA v2** : `python3 agents/qa.py` — **8 pas** vérifiables + correcteurs
   bornés (remplace le swarm multi-agents de la session 17/09, voir Historique).
-- Il n'y a rien à installer (sauf `cd tools && npm install` pour l'audit jsdom).
+  Le 8e pas, `mobile`, ouvre `index.html` et `vocal.html` dans un **vrai
+  navigateur** (Chromium, `tools/audit-mobile.mjs`) en 320/360/390/414/768 px.
+- Il n'y a rien à installer (sauf `cd tools && npm install` pour l'audit jsdom ;
+  l'audit téléphone, lui, propose `npm i --no-save puppeteer-core @sparticuz/chromium`
+  ou accepte `CHROME_PATH=/chemin/chrome`).
 
 **Ne refonds pas l'application.** Elle est volontairement monolithique et déjà
 validée. Ajoute ou modifie le contenu de façon chirurgicale dans les structures
@@ -185,7 +189,24 @@ au dépôt public**. Il est considéré **révélé** (tout le monde a pu le lir
    `overflow-wrap:break-word`, déjà posé sur `body`, `.f-title`, `.pills li`,
    `.list li`, `.table-w td/th`, `.schema .node`, `.tl span`, `.fact span` et
    `.probe .popt`.
-10. **Sécurité** : aucun secret (token, clé, mot de passe) dans le dépôt —
+10. **Téléphone (vérifié au navigateur réel, session 21/09/2026)** :
+    - la page ne doit **jamais** être plus large que l'écran (320 px ⇒ 320 px) ;
+      jamais de `display:flex` sur `ul.pills li` (chaque morceau de phrase devient
+      une colonne et élargit tout le document — défaut majeur constaté) ;
+    - grilles sensibles en `grid-template-columns:minmax(0,1fr)` ; tableaux
+      défilables mais avec retour à la ligne autorisé (`white-space:normal`) ;
+    - cibles tactiles ≥ 44 px (onglets, fil d'Ariane, pastilles de fiche,
+      bouton thème) ; `touch-action:manipulation` partout (pas de délai de 300 ms) ;
+    - `viewport-fit=cover` **impose** `env(safe-area-inset-*)` (encoche + barre
+      d'accueil iPhone) ; hauteur dynamique `dvh` pour les fenêtres plein écran ;
+    - aucun texte < 12 px sur téléphone, contraste ≥ 4,5:1 (AA), champs ≥ 16 px
+      (sinon iOS zoome à la saisie) ;
+    - **tout handler inline généré doit compiler** : `tools/audit-dom.mjs`
+      exécute `new Function(code)` sur chaque `onclick` de chaque écran. Leçon du
+      21/09 : deux boutons (Synchroniser / Effacer locaux) contenaient des
+      caractères Unicode en clair (`‘`) dans une chaîne JS → handler
+      invalide, bouton mort **en silence**.
+11. **Sécurité** : aucun secret (token, clé, mot de passe) dans le dépôt —
     `token.json` reste gitignoré ; jamais d'URL de sandbox éphémère (e2b.app)
     en dur dans `index.html`/`vocal.html` ; jamais de processus infini
     (`while True`) ni d'auto-push depuis un script autonome.
@@ -367,6 +388,37 @@ contenu si besoin.
 
 ## 🕘 Historique des mises à jour
 
+- **21 septembre 2026 (session `arena/01a0c57b-study-board`)** — **Téléphone +
+  environnement de test complet + boutons morts.** (1) **Environnement de test** :
+  nouveau `tools/audit-mobile.mjs` — audit du site dans un **vrai navigateur**
+  (Chromium 131 obtenu via npm : `puppeteer-core` + `@sparticuz/chromium`,
+  bibliothèques NSS extraites automatiquement dans `tools/.browser-cache/`).
+  Il contrôle 20 écrans × 5 largeurs (320/360/390/414/768) : débordement
+  horizontal, éléments hors écran (en tenant compte des conteneurs qui défilent
+  ou qui coupent), cibles tactiles, textes < 12 px, contrastes WCAG calculés
+  (transparences et `color-mix()` composées), fenêtre des défis (`92dvh`,
+  fermeture atteignable), zoom iOS, marges d'encoche, erreurs JS **et il joue
+  réellement une question de quiz et un défi** (compteur de parcours affiché :
+  aucune vérification sautée en silence). (2) **Défaut majeur corrigé** :
+  `ul.pills li` était en `display:flex` → chaque bout de phrase devenait une
+  colonne ; sur un écran de 320 px le document était **élargi à 808 px** (site à
+  tirer sur le côté) et la phrase partait en escalier. Puce passée en position
+  absolue → 320 px = 320 px. (3) **Boutons morts** : « Synchroniser » et
+  « Effacer locaux » (tableau de bord des vocaux) contenaient des caractères
+  `\u2018` littéraux DANS une chaîne JS → handler invalide ; réécrits (plus un
+  contrôle de compilation de **tous** les handlers). (4) **Téléphone** : marges
+  de sécurité `env(safe-area-inset-*)` (encoche/barre d'accueil) sur les deux
+  pages, `dvh` pour la hauteur réelle, cibles tactiles 44 px, en-tête compact
+  sur 320 px (« Study Board » ne se casse plus en 4 lignes), textes ≥ 12 px,
+  contrastes AA (gris secondaire assombri, boutons bleus lisibles en thème
+  sombre), champs du Studio Vocal à 16 px (plus de zoom iOS), grilles en
+  `minmax(0,1fr)`, tableaux qui reviennent à la ligne. (5) **Pipeline** : le pas
+  `mobile` rejoint `agents/qa.py` (8 pas ; navigateur absent ⇒ SKIP explicite,
+  jamais un faux vert), `tools/audit-dom.mjs` gagne les sections 7 (handlers) et
+  8 (verrous de non-régression CSS), `tools/audit-complet.mjs` la section 9
+  (téléphone), CI (`tools/audit-workflow.yml`) lance l'audit navigateur.
+  Vérifications : `python3 agents/qa.py` **8/8 PASS**, audit mobile **0 erreur /
+  0 avertissement** sur les 5 tailles d'écran, ZIP resynchronisé.
 - **18 septembre 2026 (PR #14, session `arena/01a0b584-study-board`)** —
   **Sécurisation + remplacement du swarm par le pipeline QA v2.** (1)
   **Sécurité** : `token.json` (token GitHub réel publié le 17/09) retiré du
