@@ -46,6 +46,18 @@ const DEVICES = [
   { nom: 'Tablette (768 px)', w: 768, h: 1024 },
 ];
 
+/** Attend la fin des transitions CSS et des animations : une mesure prise à
+ *  mi-transition (couleurs qui s'animent) donne un contraste faux. */
+const stable = (page, ms = 1500) => page.evaluate((limite) => new Promise((r) => {
+  const t0 = Date.now();
+  const fini = () => {
+    const a = document.getAnimations ? document.getAnimations() : [];
+    if (!a.length || Date.now() - t0 > limite) return r(a.length);
+    Promise.all(a.map((x) => x.finished.catch(() => { }))).then(() => r(0)).catch(() => r(0));
+  };
+  setTimeout(fini, 30);
+}), ms);
+
 const erreurs = [];
 const avertissements = [];
 const info = [];
@@ -333,9 +345,12 @@ async function main() {
 
     for (const [label, hash] of routes) {
       await page.evaluate((h) => { location.hash = h; window.dispatchEvent(new HashChangeEvent('hashchange')); }, hash);
-      await new Promise((r) => setTimeout(r, 120));
+      await new Promise((r) => setTimeout(r, 140));
+      await stable(page);
       const a = await page.evaluate(ANALYSE);
       const tag = `${dev.nom} · ${label}`;
+      const th = await page.evaluate(() => { const t = document.querySelector('.top-in'); return t ? Math.round(t.getBoundingClientRect().height) : null; });
+      if (th && th > 84) err('en-tête', `${tag} : en-tête de ${th} px (le bandeau se casse en plusieurs lignes)`);
       if (a.overflowPage > 1) err('débordement', `${tag} : la page déborde de ${a.overflowPage} px (scrollWidth ${a.docWidth} > ${a.vw}).`);
       const grosHors = a.horsEcran.filter((e) => (e.right || 0) > dev.w + 6 || (e.left || 0) < -6);
       if (grosHors.length) err('hors-écran', `${tag} : ${grosHors.length} élément(s) hors de l'écran → ` + grosHors.slice(0, 3).map((e) => `${e.sel} (${e.right ? 'right ' + e.right : 'left ' + e.left}) « ${e.txt} »`).join(' ; '));
@@ -344,7 +359,7 @@ async function main() {
       const petites = a.petitesCibles.filter((c) => !c.grave);
       if (petites.length) warn('cible-tactile', `${tag} : ${petites.length} bouton(s) entre 24 et 44 px → ` + petites.slice(0, 3).map((c) => `${c.sel} ${c.w}×${c.h}`).join(' ; '));
       if (a.petitsTextes.length) warn('texte', `${tag} : texte < 12 px → ` + a.petitsTextes.slice(0, 3).map((x) => `${x.sel} ${x.px}px`).join(' ; '));
-      if (a.contrastes.length) warn('contraste', `${tag} : contraste faible → ` + a.contrastes.slice(0, 3).map((c) => `${c.sel} ${c.ratio}:1 (min ${c.mini}) ${c.fg} sur ${c.bg} [couleur ${c.brut}, opacité ${c.op}] « ${c.txt} »`).join(' ; '));
+      if (a.contrastes.length) warn('contraste', `${tag} : contraste faible → ` + a.contrastes.slice(0, 3).map((c) => `${c.sel} ${c.ratio}:1 (min ${c.mini}) ${c.fg} sur ${c.bg} [couleur ${c.brut}, opacité ${c.op}, parent ${c.parent}] « ${c.txt} »`).join(' ; '));
       if (SHOTS && (hash === '#/' || dev.w === 390)) {
         await page.screenshot({ path: path.join(SHOTS, `${dev.w}-${hash.replace(/[#/]/g, '_') || 'accueil'}.png`), fullPage: false });
       }
@@ -421,7 +436,8 @@ async function main() {
       }
       /* thème sombre : même contrôle de débordement */
       await page.evaluate(() => { window.setTheme('dark'); location.hash = '#/f/0/0/quiz'; window.dispatchEvent(new HashChangeEvent('hashchange')); });
-      await new Promise((r) => setTimeout(r, 600));   // fin des transitions de couleur (.25 s)
+      await new Promise((r) => setTimeout(r, 300));
+      await stable(page);
       const dark = await page.evaluate(ANALYSE);
       if (dark.overflowPage > 1) err('débordement', `${dev.nom} · thème sombre : débordement de ${dark.overflowPage} px`);
       if (dark.contrastes.length) warn('contraste', `${dev.nom} · thème sombre : ` + dark.contrastes.slice(0, 3).map((c) => `${c.sel} ${c.ratio}:1 (${c.fg} sur ${c.bg} [couleur ${c.brut}, opacité ${c.op}] « ${c.txt} »)`).join(' ; '));
@@ -431,8 +447,19 @@ async function main() {
     /* --- vocal.html : page prioritaire sur téléphone --- */
     await page.goto(base + '/vocal.html', { waitUntil: 'load' });
     await new Promise((r) => setTimeout(r, 250));
+    await stable(page);
     const av = await page.evaluate(ANALYSE);
     const tag = `${dev.nom} · Studio Vocal`;
+    /* en-tête : s'il tient sur plusieurs lignes, il mange l'écran */
+    const entete = await page.evaluate(() => {
+      const t = document.querySelector('.top-in') || document.querySelector('header');
+      if (!t) return null;
+      const r = t.getBoundingClientRect();
+      const marque = t.querySelector('.brand b');
+      const mr = marque ? marque.getBoundingClientRect() : null;
+      return { h: Math.round(r.height), marqueLignes: mr ? Math.round(mr.height / parseFloat(getComputedStyle(marque).lineHeight || 20)) : null };
+    });
+    if (entete && entete.h > 84) err('en-tête', `${tag} : l'en-tête fait ${entete.h} px de haut (trop : le contenu passe sous la ligne de flottaison)`);
     if (av.overflowPage > 1) err('débordement', `${tag} : débordement de ${av.overflowPage} px`);
     const hz = av.horsEcran.filter((e) => (e.right || 0) > dev.w + 6 || (e.left || 0) < -6);
     if (hz.length) err('hors-écran', `${tag} : ` + hz.slice(0, 3).map((e) => `${e.sel} (${e.right}) « ${e.txt} »`).join(' ; '));

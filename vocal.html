@@ -94,13 +94,26 @@ textarea#paste{min-height:180px}
 button,a,input,select,textarea,label,summary{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .btn{min-height:44px}
 @media(max-width:560px){
-  .top-in{padding:9px max(13px,var(--sal)) 9px max(13px,var(--sar));gap:10px}
+  .top-in{padding:9px max(13px,var(--sal)) 9px max(13px,var(--sar));gap:8px}
   .wrap{padding-left:max(13px,var(--sal));padding-right:max(13px,var(--sar))}
   .card{padding:15px 14px}
   .hero{padding:18px 16px 16px}
-  .btn,.b-white,.b-ghost{width:100%;justify-content:center}
+  /* en-tête : une seule ligne (le sous-titre passe à la trappe sur petit écran) */
+  .brand{min-width:0}
+  .brand small{display:none}
+  .brand b{font-size:.98rem;white-space:nowrap}
+  .top-back .btn{padding:9px 12px;font-size:.82rem;min-width:0}
+  .tb-more{display:none}
+  /* boutons pleine largeur : uniquement dans les appels à l'action */
   .hero .cta{flex-direction:column}
+  .hero .cta .btn{width:100%;justify-content:center}
+  .row{flex-wrap:wrap}
+  .seg{flex:1 1 100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+  .seg button{padding:10px 6px;font-size:.8rem;line-height:1.2;min-height:44px;display:inline-flex;align-items:center;justify-content:center;text-align:center}
+  #supportHelp{display:none}
 }
+.top-back{text-decoration:none;flex:none}
+.top-back .btn{background:var(--card);color:var(--ink);border:1px solid var(--line-2);padding:8px 14px}
 </style>
 </head>
 <body>
@@ -111,7 +124,7 @@ button,a,input,select,textarea,label,summary{touch-action:manipulation;-webkit-t
       <div><b>Study Board</b><small>Studio Vocal</small></div>
     </div>
     <div style="flex:1"></div>
-    <a href="index.html" style="text-decoration:none"><span class="btn b-ghost" style="background:var(--card);color:var(--ink);border:1px solid var(--line-2);padding:8px 14px">← Retour fiches</span></a>
+    <a href="index.html" class="top-back"><span class="btn b-ghost">← <span class="tb-more">Retour </span>fiches</span></a>
   </div>
 </header>
 <div class="wrap">
