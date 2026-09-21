@@ -32,6 +32,12 @@ jobs:
           npm install --no-audit --no-fund
           node audit-dom.mjs
 
-      - name: Pipeline QA v2 (tous les pas, dont smoke test serveur)
+      - name: Audit téléphone (navigateur réel : débordements, cibles tactiles, contrastes)
+        working-directory: tools
+        run: |
+          npm install --no-save --no-audit --no-fund puppeteer-core@23 @sparticuz/chromium@131
+          node audit-mobile.mjs
+
+      - name: Pipeline QA v2 (tous les pas, dont smoke test serveur et téléphone)
         working-directory: ${{ github.workspace }}
         run: python3 agents/qa.py --fast

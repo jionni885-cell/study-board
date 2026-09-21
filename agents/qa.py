@@ -43,7 +43,7 @@ from fixers import STEP_FIXERS  # noqa: E402
 
 MAX_FIX_ATTEMPTS = 2      # par pas
 TOTAL_FIX_BUDGET = 4      # par exécution
-SLOW_STEPS = {"audit_dom", "serveur"}
+SLOW_STEPS = {"audit_dom", "serveur", "mobile"}
 
 PASS, FAIL, FIXED = "PASS", "FAIL", "FIXED"
 
@@ -240,6 +240,32 @@ def check_serveur():
     return False, "erreur interne smoke test serveur"
 
 
+def check_mobile():
+    """Audit « téléphone » dans un VRAI navigateur (Chromium) : 320/360/390/414/768 px,
+    débordements, cibles tactiles, contrastes, défis plein écran, studio vocal.
+    Si aucun navigateur n'est installé, le pas passe en SKIP (jamais en échec) :
+    la livraison reste possible, mais le rapport dit clairement que le téléphone
+    n'a PAS été vérifié."""
+    if not (ROOT / "tools" / "audit-mobile.mjs").exists():
+        return None, "tools/audit-mobile.mjs absent"
+    if not (ROOT / "tools" / "node_modules" / "puppeteer-core").exists():
+        # essai borné : si le réseau bloque, on continue (le pas sera SKIP)
+        sh(["npm", "install", "--no-save", "--no-audit", "--no-fund", "puppeteer-core@23", "@sparticuz/chromium@131"],
+           timeout=900, cwd=ROOT / "tools")
+    r = sh(["node", "tools/audit-mobile.mjs", "--json"], timeout=900)
+    if "IGNORÉ" in r.stdout or '"skip"' in r.stdout:
+        return None, "aucun navigateur réel disponible (CHROME_PATH=… ou npm i puppeteer-core @sparticuz/chromium)"
+    try:
+        data = json.loads(r.stdout)
+    except Exception:
+        return False, "sortie illisible de l'audit mobile : " + (r.stdout or r.stderr)[-400:]
+    errs, warns = data.get("erreurs", []), data.get("avertissements", [])
+    if r.returncode != 0 or errs:
+        lignes = "\n".join("  ✗ " + e["msg"] for e in errs[:8])
+        return False, f"{len(errs)} défaut(s) sur téléphone :\n" + lignes
+    return True, f"téléphone OK (5 tailles d'écran, {len(warns)} avertissement(s))"
+
+
 def check_hygiene_git():
     r = sh(["git", "diff", "--check"])
     if r.returncode != 0 or r.stdout.strip():
@@ -262,6 +288,7 @@ STEPS = [
     ("audit_complet", check_audit_complet, False),
     ("audit_dom", check_audit_dom, True),
     ("serveur", check_serveur, True),
+    ("mobile", check_mobile, True),
     ("hygiene_git", check_hygiene_git, False),
 ]
 
@@ -286,6 +313,10 @@ def run_pipeline(fast=False, allow_fix=True, only=None):
             ok, detail = fn()
         except Exception as e:  # un pas qui crashe ne crashe pas le pipeline
             ok, detail = False, f"exception pendant le pas : {type(e).__name__} : {e}"
+        if ok is None:   # SKIP explicite : le pas n'a pas pu s'exécuter (ex. navigateur absent)
+            results.append({"step": name, "status": "SKIP", "detail": detail, "fixes": []})
+            print(f"⏭  {name:<14} SKIP   {detail}")
+            continue
         if not ok and allow_fix:
             for attempt in range(1, MAX_FIX_ATTEMPTS + 1):
                 if fix_budget <= 0:

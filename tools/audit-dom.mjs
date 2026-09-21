@@ -316,6 +316,67 @@ btn('Écrire').click(); await sleep(50);
   if (!$('#app').innerHTML.trim()) bad('ui', 'page vide après retour au thème clair');
 }
 
+/* ---------------- 7. Handlers inline : compilation réelle ----------------
+   Leçon de la session « téléphone » : deux boutons du studio vocal contenaient
+   des caractères Unicode écrits en clair (\u2018 ... \u2019) DANS une chaîne de
+   caractères : le code généré n'était plus du JavaScript valide et le bouton
+   ne faisait plus rien, silencieusement. On compile donc tous les handlers
+   générés, sur tous les écrans, à chaque audit. */
+{
+  const routes = ['#/', '#/expose/yemen'];
+  for (let mi = 0; mi < D.length; mi++) for (let fi = 0; fi < D[mi].fiches.length; fi++)
+    for (const t of ['lire', 'fc', 'quiz']) routes.push(`#/f/${mi}/${fi}/${t}`);
+  const mauvais = new Map();
+  const attrs = ['onclick', 'oninput', 'onchange', 'onsubmit', 'onkeydown'];
+  for (const r of routes) {
+    await nav(r);
+    for (const el of [...doc.querySelectorAll('[onclick],[oninput],[onchange],[onsubmit],[onkeydown]')]) {
+      for (const a of attrs) {
+        const code = el.getAttribute(a);
+        if (!code) continue;
+        try { new window.Function(code); }
+        catch (e) { mauvais.set(code.slice(0, 70), `${r} · <${el.tagName.toLowerCase()}> ${a} : ${String(e.message).split('\n')[0]}`); }
+      }
+    }
+  }
+  if (mauvais.size) {
+    for (const [code, why] of [...mauvais].slice(0, 6)) bad('handlers', `${why} — code : ${code}`);
+  }
+}
+
+/* ---------------- 8. Verrous de non-régression (défauts réellement constatés) ---------------- */
+{
+  const css = (() => { const m = /<style[^>]*>([\s\S]*?)<\/style>/.exec(html); return m ? m[1] : ''; })();
+  const vocal = fs.readFileSync(path.join(ROOT, 'vocal.html'), 'utf8');
+  const verrous = [
+    /* Défaut 1 (majeur) : les puces en display:flex transformaient chaque bout de
+       phrase en colonne → le document passait de 320 px à 808 px de large. */
+    [/ul\.pills li\{[^}]*display\s*:\s*flex/, 'ul.pills li ne doit pas être en display:flex (la phrase part en colonnes et élargit la page)'],
+    /* Défaut 2 : une grille sans minmax(0,…) s'élargit au mot le plus long. */
+    [/\.expo-list\{[^}]*grid-template-columns:minmax\(0,\s*1fr\)/, '.expo-list doit fixer grid-template-columns:minmax(0,1fr)'],
+    [/\.subj-list\{[^}]*grid-template-columns:minmax\(0,\s*1fr\)/, '.subj-list doit fixer grid-template-columns:minmax(0,1fr)'],
+    /* Défaut 3 : débordement lié aux tableaux sur téléphone. */
+    [/\.table-w td,\.table-w th\{[^}]*white-space:normal/, 'les cellules de tableau doivent pouvoir revenir à la ligne sur téléphone (white-space:normal)'],
+    /* Exigence permanente : ne jamais couper les mots en deux. */
+    [/overflow-wrap:\s*anywhere/, 'overflow-wrap:anywhere est interdit (coupe les mots en deux)'],
+    [/word-break:\s*break-all/, 'word-break:break-all est interdit (coupe les mots en deux)'],
+    /* Encoche / barre d'accueil iPhone : viewport-fit=cover exige les marges. */
+    [/env\(safe-area-inset-top/, 'index.html doit réserver les marges de sécurité (env(safe-area-inset-*))'],
+    [/min\(92vh,92dvh\)|92dvh/, 'la fenêtre des défis doit utiliser une hauteur dynamique (dvh)'],
+  ];
+  for (const [re, msg] of verrous) if (!re.test(css) && !/ne doit pas|est interdit/.test(msg)) bad('verrou', msg + ' (motif absent du CSS)');
+  for (const [re, msg] of verrous) if (/ne doit pas|est interdit/.test(msg) && re.test(css)) bad('verrou', msg);
+  if (!/env\(safe-area-inset-bottom/.test(vocal)) bad('verrou', 'vocal.html doit réserver la marge basse (env(safe-area-inset-bottom))');
+  if (!/dvh/.test(vocal)) bad('verrou', 'vocal.html doit utiliser 100dvh (barre d\'adresse mobile)');
+  /* iOS zoome la page dès qu'un champ fait moins de 16 px. */
+  for (const m of vocal.matchAll(/<input[^>]*id="([^"]+)"[^>]*>/g)) {
+    const tag = m[0];
+    if (/type="(checkbox|radio|range|file|color)"/.test(tag)) continue;
+    if (/font-size:\s*(1rem|16px)/.test(tag)) continue;
+    warn('verrou', `vocal.html : champ #${m[1]} sans font-size 16 px (iOS zoome automatiquement)`);
+  }
+}
+
 /* ---------------- Rapport ---------------- */
 console.log('='.repeat(62));
 console.log('AUDIT FONCTIONNEL STUDY BOARD (jsdom)');

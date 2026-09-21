@@ -77,6 +77,22 @@ else warn('vocals/ vide — pas encore de vocal utilisateur');
 // 8. Headers — Permissions-Policy, CORS
 check('index.html headers', ()=>{ if(!index.includes('Permissions-Policy') && !vocal.includes('Permissions-Policy')) warn('Permissions-Policy à vérifier'); });
 
+
+// 9. Téléphone — l'outil d'audit mobile existe et les verrous CSS sont en place
+check('audit-mobile.mjs présent', ()=>{ if(!fs.existsSync('tools/audit-mobile.mjs')) throw new Error('tools/audit-mobile.mjs manquant (audit téléphone)'); });
+check('index.html marges de sécurité (encoche iPhone)', ()=>{ if(!index.includes('env(safe-area-inset-top')) throw new Error('env(safe-area-inset-*) absent alors que viewport-fit=cover est déclaré'); });
+check('index.html hauteur dynamique des défis (dvh)', ()=>{ if(!/dvh/.test(index)) throw new Error("aucune unité dvh : la fenêtre des défis dépasse sous la barre d'adresse"); });
+check('index.html puces de liste pas en flex (débordement 320 px)', ()=>{ if(/ul\.pills li\{[^}]*display:flex/.test(index)) throw new Error('ul.pills li en display:flex — la phrase part en colonnes et la page dépasse 320 px'); });
+check('vocal.html champs 16 px (zoom iOS)', ()=>{
+  const r = /select,\s*textarea,\s*input\[type=file\]\{[^}]*font-size:([^;]+);/.exec(vocal);
+  const taille = (txt)=>{ if(!txt) return 16; const m=/^\s*([\d.]+)(rem|px|em)\s*$/.exec(txt); if(!m) return 16; return m[2]==='px'?+m[1]:+m[1]*16; };
+  const t = taille(r && r[1]);
+  if(t < 16) throw new Error(`champ à ${t} px (< 16 px) : iOS zoome automatiquement à la saisie`);
+  const tok = /id="tokenInput"[^>]*font-size:([^;"']+)/.exec(vocal);
+  if(tok && taille(tok[1]) < 16) throw new Error('champ token sous 16 px : iOS zoome à la saisie');
+});
+check('server.py + studio : cibles tactiles', ()=>{ if(!index.includes('touch-action:manipulation')) throw new Error('touch-action:manipulation absent (délai de 300 ms au tap)'); });
+
 // Résumé
 console.log(`\n=== RÉSULTAT: ${errors} erreurs, ${warns} avertissements ===`);
 if(errors===0) console.log(`${GREEN}✅ Tout est cohérent — prêt à corriger automatiquement${RESET}`);

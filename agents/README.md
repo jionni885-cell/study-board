@@ -33,6 +33,7 @@ Un seul programme, `python3 agents/qa.py`, qui ne tourne qu'une fois et s'arrêt
 | `audit_complet` | `node tools/audit-complet.mjs` (0 erreur / 0 avertissement) |
 | `audit_dom` | `node tools/audit-dom.mjs` (jsdom : défis, quiz, cartes, robustesse) |
 | `serveur` | smoke test HTTP sur une **copie isolée** : santé, POST vocal, liste, statique, traversal refusé, 413 > 30 Mo, survie après refus |
+| `mobile` | `node tools/audit-mobile.mjs` : **vrai navigateur** (Chromium), 20 écrans × 5 largeurs (320 → 768 px) — débordements, éléments hors écran, cibles tactiles, contrastes WCAG, fenêtre des défis, zoom iOS, marges d'encoche, erreurs JS, + quiz et défi réellement joués |
 | `hygiene_git` | `git diff --check`, pas de `token.json` flottant |
 
 Correspondance avec les techniques avancées (voir l'article « Au-delà des Loops et
@@ -61,6 +62,40 @@ python3 agents/qa.py --step securite
 ```
 
 Rapport machine : `agents/rapport.json`. Code de sortie : 0 = livraison autorisée.
+
+## Le pas `mobile` (navigateur réel)
+
+Depuis le 21/09/2026, le pipeline ne se contente plus de jsdom : le site est fait
+pour être lu **au pouce**. `tools/audit-mobile.mjs` ouvre `index.html` et
+`vocal.html` dans Chromium en 320 / 360 / 390 / 414 / 768 px et mesure ce qu'un
+œil humain verrait :
+
+- **débordement horizontal** (la page qu'on peut tirer sur le côté) : c'est le
+  défaut majeur trouvé le 21/09 — `ul.pills li` en `display:flex` élargissait un
+  écran de 320 px à **808 px**, et la phrase partait en colonnes ;
+- **éléments hors écran** : un élément qui dépasse est un défaut **sauf** si un
+  ancêtre défile (`overflow:auto/scroll`) ou coupe un décor sans texte ;
+- **cibles tactiles** : < 24 px = erreur, < 40 px = avertissement (44 px =
+  seuil Apple/Google) ;
+- **textes** : < 12 px = avertissement ; **contrastes** calculés avec la vraie
+  luminance WCAG (transparences cumulées et `color-mix()` composées) ;
+- **fenêtre des défis** : doit tenir dans l'écran, bouton fermer atteignable,
+  contenu défilable ;
+- **zoom iOS** : tout champ < 16 px fait zoomer la page à la saisie ;
+- **encoche / barre d'accueil** : `viewport-fit=cover` sans
+  `env(safe-area-inset-*)` = erreur ;
+- **erreurs JavaScript** et ressources manquantes pendant la navigation
+  (les `.m4a` privés, absents par conception, sont exclus) ;
+- **parcours réel** : une question de quiz est répondue (l'explication doit
+  s'afficher) et un défi est cliqué (l'écran doit avancer). Le nombre
+  d'interactions jouées est affiché : si une vérification ne peut pas se faire,
+  elle ÉCHOUE au lieu de disparaître en silence.
+
+Navigateur : `CHROME_PATH=/chemin/chrome`, ou l'installation autonome
+`npm i --no-save puppeteer-core@23 @sparticuz/chromium@131`. **Sans navigateur,
+le pas est SKIP (annoncé comme tel)** : le pipeline reste livrable mais le
+rapport dit explicitement que le téléphone n'a pas été vérifié — jamais de faux
+vert.
 
 ## Rôle des humains (et de la session Arena)
 
