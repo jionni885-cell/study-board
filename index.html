@@ -1914,6 +1914,11 @@ function lastFiche(){
 function rememberFiche(mi,fi){ try{ localStorage.setItem(LASTKEY,JSON.stringify({mi:mi,fi:fi})); }catch(e){} }
 function defisDispo(mi,fi){ try{ return typeof DF6!=='undefined'&&!!DF6[mi+'-'+fi]; }catch(e){ return false; } }
 
+/* retour haptique : confirme « je la savais » / « pas encore » sans regarder */
+function vibrer(ms){
+  try{ if(navigator.vibrate) navigator.vibrate(ms||12); }catch(e){}
+}
+
 /* ---------- barre d'action basse ---------- */
 function paintTabbar(p){
   var el=document.getElementById('tabbar'); if(!el) return;
@@ -1954,6 +1959,7 @@ function bindSwipe(){
     if(dt>900||Math.abs(dx)<60||Math.abs(dy)>Math.abs(dx)) return;   /* scroll vertical : on ne juge pas */
     c.dataset.glisse=String(Date.now());
     if(e.cancelable) e.preventDefault();     /* pas de clic de retournement après un balayage */
+    vibrer(14);
     juger(dx>0);
   },{passive:false});
 }

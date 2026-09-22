@@ -479,6 +479,13 @@ async function main() {
         const t = (x, y) => new Touch({ identifier: 1, target: c, clientX: x, clientY: y });
         const env = (type, x, y, garde) => c.dispatchEvent(new TouchEvent(type, { bubbles: true, cancelable: true,
           touches: garde ? [t(x, y)] : [], targetTouches: garde ? [t(x, y)] : [], changedTouches: [t(x, y)] }));
+        /* espion du retour haptique : le geste doit faire vibrer (ou tenter de le faire) */
+        window.__vib = 0;
+        try {
+          if (!navigator.vibrate) Object.defineProperty(navigator, 'vibrate', { configurable: true, value: () => true });
+          const vraie = navigator.vibrate.bind(navigator);
+          navigator.vibrate = (...a) => { window.__vib++; return vraie(...a); };
+        } catch { /* propriété non modifiable : on teste seulement l'avancement de la carte */ }
         const r = c.getBoundingClientRect();
         const y = r.top + r.height / 2;
         env('touchstart', r.left + 24, y, true);
@@ -486,14 +493,18 @@ async function main() {
         env('touchend', r.left + 230, y, false);
         await new Promise((k) => setTimeout(k, 400));
         const apres = (document.querySelector('.study .toprow .pos') || {}).textContent || '';
-        return { hint, avant, apres, change: !!avant && avant !== apres };
+        return { hint, avant, apres, vib: window.__vib, change: !!avant && avant !== apres };
       });
       if (balayage.erreur) err('geste', `${dev.nom} : ${balayage.erreur}`);
       else {
         if (!balayage.hint) err('geste', `${dev.nom} : aucune consigne de balayage affichée sous la carte (.swipehint)`);
         if (balayage.skip) warn('geste', `${dev.nom} : Touch/TouchEvent indisponible dans ce navigateur — geste non testé`);
         else if (!balayage.change) err('geste', `${dev.nom} : le balayage vers la droite ne fait pas avancer la carte (« ${balayage.avant} » → « ${balayage.apres} »)`);
-        else { parcours++; info.push(`balayage de carte joué en ${dev.w} px → ${balayage.apres}`); }
+        else {
+          parcours++;
+          info.push(`balayage de carte joué en ${dev.w} px → ${balayage.apres}`);
+          if (!balayage.vib) warn('geste', `${dev.nom} : le balayage ne déclenche aucun retour haptique (navigator.vibrate)`);
+        }
       }
       /* thème sombre : même contrôle de débordement */
       await page.evaluate(() => { window.setTheme('dark'); location.hash = '#/f/0/0/quiz'; window.dispatchEvent(new HashChangeEvent('hashchange')); });
