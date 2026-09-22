@@ -1,7 +1,7 @@
 # PROMPT DE REPRISE — STUDY BOARD
 
 > Document de mémoire permanente du dépôt. À lire avant toute modification.
-> Dernière mise à jour : **21 septembre 2026 (session `arena/01a0c57b-study-board`)**.
+> Dernière mise à jour : **22 septembre 2026 (session `arena/01a0c9e2-study-board`)**.
 
 ## 🎯 Mission
 
@@ -12,14 +12,24 @@ français.
 - Dépôt GitHub : <https://github.com/jionni885-cell/study-board>
 - Site en ligne : <https://jionni885-cell.github.io/study-board/>
 - Application autonome : `index.html` contient le contenu, la logique et le CSS.
-- Les sept récapitulatifs audio publics sont dans `media/audio/*.mp3` (6 fiches + 1 exposé `hggsp-yemen`).
+- Les huit récapitulatifs audio publics sont dans `media/audio/*.mp3` (7 fiches + 1 exposé `hggsp-yemen`).
 - **Studio Vocal** : `vocal.html` (oraux 1 à 30 min, analyse, envoi) + `server.py`
   (serveur local port 4173 : statique + `POST /api/vocal` + auto commit/push vocal
   dans la branche active) + `vocals/` (vocaux enregistrés : 1 JSON au 18/09).
-- **Pipeline QA v2** : `python3 agents/qa.py` — **8 pas** vérifiables + correcteurs
+- **Pipeline QA v3** : `python3 agents/qa.py` — **9 pas** vérifiables + correcteurs
   bornés (remplace le swarm multi-agents de la session 17/09, voir Historique).
   Le 8e pas, `mobile`, ouvre `index.html` et `vocal.html` dans un **vrai
-  navigateur** (Chromium, `tools/audit-mobile.mjs`) en 320/360/390/414/768 px.
+  navigateur** (Chromium, `tools/audit-mobile.mjs`) en 320/360/390/414/768 px ;
+  le 4e pas, `ecosysteme`, vérifie la carte de l'écosystème
+  (`ecosystem/check.py` : registre, 5 références externes, invariants, secrets).
+- **Écosystème (`ecosystem/`)** : la carte complète du projet — `ecosystem/README.md`
+  (carte humaine), `ecosystem/registry.json` (registre machine : 12 éléments
+  internes + 5 références externes + 6 invariants), `ecosystem/check.py`
+  (contrôle hors ligne, < 1 s, code de sortie 0 = cohérent). Les 5 références
+  externes demandées le 22/09/2026 : `langchain-ai/langgraph` (MIT),
+  `huggingface/open-r1` (Apache-2.0), `huggingface/trl` (Apache-2.0),
+  `stanfordnlp/dspy` (MIT), `kyegomez/swarms` (Apache-2.0) — **documentées,
+  jamais installées** (le site reste hors ligne).
 - Il n'y a rien à installer (sauf `cd tools && npm install` pour l'audit jsdom ;
   l'audit téléphone, lui, propose `npm i --no-save puppeteer-core @sparticuz/chromium`
   ou accepte `CHROME_PATH=/chemin/chrome`).
@@ -63,9 +73,10 @@ Les données vivent dans `const D` dans `index.html`.
 | 1-1 | HGGSP — Cartographier les guerres et les conflits : limites et enjeux | 3 | 0 | 0 | 6 | 4 | `hggsp-cartographier` |
 | 2-0 | Histoire — La crise de 1929 : le krach boursier et ses mécanismes | 6 | 3 | 3 | 11 | 10 | `histoire-1929` |
 | 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 5 | 4 | 0 | 19 | 10 | `anglais-heroes` |
+| 0-1 | SES — Progrès technique, innovation et croissance endogène | 9 | 22 | 21 | 28 | 28 | `ses-progres-technique` |
 | 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 | 9 | 12 | 10 | `philo-intro` |
 
-**Totaux : 5 matières, 6 fiches, 29 parties, 83 cartes, 65 questions, 6 fichiers MP3 pour les fiches + 1 MP3 pour l’exposé → 7 fichiers MP3 au total.**
+**Totaux : 5 matières, 7 fiches, 38 parties, 111 cartes, 93 questions, 7 fichiers MP3 pour les fiches + 1 MP3 pour l’exposé → 8 fichiers MP3 au total.**
 
 **Nouveau : section Exposés (PR #7).** Un exposé **HGGSP — La guerre au Yémen (5 min)** est disponible depuis l’accueil (après Matières) et à l’adresse `#/expose/yemen` : problématique, 3 parties (origines & acteurs, crise humanitaire, impasse diplomatique) + conclusion, chiffres clés (21 M dans le besoin, 4,5 M déplacés…), frise 2011‑2025, définitions (Houthis, coalition, blocus, crise humanitaire, multilatéralisme) et récapitulatif audio `hggsp-yemen.mp3`. Données dans `const EXPOSES` (après `AUD`), rendues par `renderExpose()` et routées via `parse()`.
 
@@ -119,12 +130,23 @@ Lire cette structure avant toute édition :
   `GET /api/health` ; headers `Permissions-Policy` + CORS sur toutes les
   réponses ; auto commit/push du vocal dans la **branche active** (jamais de
   push forcé, rebase sur non-fast-forward).
-- `agents/qa.py` + `agents/fixers.py` : pipeline QA v2 (pas : structure,
-  syntaxe_js, securite, audit_complet, audit_dom, serveur, hygiene_git ;
+- `agents/qa.py` + `agents/fixers.py` : pipeline QA v3 (pas : structure,
+  syntaxe_js, securite, ecosysteme, audit_complet, audit_dom, serveur, mobile,
+  hygiene_git ;
   correcteurs idempotents, budget 2 tentatives/pas + 4 corrections/exécution,
   rapport `agents/rapport.json`, code de sortie 0 = livraison).
 - `token.json` : **gitignoré, jamais commité** (le token publié le 17/09/2026
   est révélé — révoquer, voir section Sécurité). `token.json.example` : modèle.
+- **Téléphone d'abord (3e passe, 22/09/2026)** : `#tabbar` (barre d'action basse
+  Accueil · Lire · Cartes · Quiz · Défis, `paintTabbar()`, visible ≤ 820 px),
+  gestes de balayage sur `#carte` (`bindSwipe()` : → je la savais, ← pas encore,
+  seuil 60 px, geste vertical ignoré pour ne pas gêner le défilement), retour
+  haptique (`navigator.vibrate` dans `avance()`), dernière fiche retenue dans
+  `localStorage['sblast']`, marge basse `calc(150px + var(--sab))`, toast
+  remonté à `calc(80px + var(--sab))`, lecteur MP3 pleine largeur sous 820 px.
+  Le CSS `.tabbar`/`.swipehint` vit à la fin du `<style>` ; le JS de cette passe
+  est le **dernier** à décorer `render()` (bloc 3) pour peindre la barre en
+  dernier.
 - `renderLire()` renvoie `sommaire + parties + extra` : le sommaire cliquable
   `.sommaire > nav.hnav` appelle `goPart(i)`, qui fait défiler jusqu'à la section
   `#part-i` (`#part-x` pour « Pour aller plus loin »). Ces identifiants doivent
@@ -206,22 +228,33 @@ au dépôt public**. Il est considéré **révélé** (tout le monde a pu le lir
       21/09 : deux boutons (Synchroniser / Effacer locaux) contenaient des
       caractères Unicode en clair (`‘`) dans une chaîne JS → handler
       invalide, bouton mort **en silence**.
-11. **Sécurité** : aucun secret (token, clé, mot de passe) dans le dépôt —
+11. **Téléphone d'abord (22/09/2026)** : la barre d'action basse reste sur
+    **tous** les écrans ≤ 820 px (5 actions ≥ 44 px, collée au bas de l'écran),
+    le balayage des cartes fait avancer la carte, et la marge basse du contenu
+    reste **supérieure à la hauteur de la barre** (jamais de contenu caché).
+    Ces points sont vérifiés en permanence par `tools/audit-mobile.mjs` (5 tailles
+    d'écran), pas seulement écrits dans le CSS.
+12. **Écosystème** : `ecosystem/check.py` doit rester vert (registre complet,
+    5 références externes, chemins internes réels, invariants tenus) et rester
+    branché dans `agents/qa.py` (pas `ecosysteme`). Déclarer une référence
+    externe sans la documenter dans `ecosystem/registry.json` fait échouer le
+    contrôle.
+13. **Sécurité** : aucun secret (token, clé, mot de passe) dans le dépôt —
     `token.json` reste gitignoré ; jamais d'URL de sandbox éphémère (e2b.app)
     en dur dans `index.html`/`vocal.html` ; jamais de processus infini
     (`while True`) ni d'auto-push depuis un script autonome.
 
-## 🧪 Pipeline QA v2 — obligatoire avant livraison (remplace le GAUNTLET LOOP)
+## 🧪 Pipeline QA v3 — obligatoire avant livraison (remplace le GAUNTLET LOOP)
 
 Un seul point d'entrée, un seul processus, **toujours terminé** :
 
 ```bash
-python3 agents/qa.py            # 7 pas, ~2 min
+python3 agents/qa.py            # 9 pas, ~3 min
 python3 agents/qa.py --fast     # sans jsdom ni smoke test serveur
 python3 agents/qa.py --no-fix   # rapport seul
 ```
 
-Les 7 pas (chaque pas = un point de contrôle de processus, récompense = code de
+Les 9 pas (chaque pas = un point de contrôle de processus, récompense = code de
 sortie de l'outil — zéro note subjective) :
 
 1. `structure` — `python3 tools/audit.py` : structure `index.html`, 3 blocs
@@ -235,22 +268,31 @@ sortie de l'outil — zéro note subjective) :
 3. `securite` — `token.json` non suivi par git, aucun `.m4a` suivi, aucun
    `ghp_…` dans un fichier texte suivi, aucune URL de sandbox morte en dur,
    `vocal.html` sans URL de token publique.
-4. `audit_complet` — `node tools/audit-complet.mjs` : 0 erreur / 0 avertissement
+4. `ecosysteme` — `python3 ecosystem/check.py` : registre de l'écosystème
+   lisible, **5 références externes** complètes (langgraph, open-r1, trl, dspy,
+   swarms), chemins internes réels, invariants déclarés, aucun secret, et ce
+   contrôle bien branché dans le pipeline.
+5. `audit_complet` — `node tools/audit-complet.mjs` : 0 erreur / 0 avertissement
    (timers 30 min, fallbacks, headers, port 4173, CORS, 30 Mo, rebase, sécurité
    token).
-5. `audit_dom` — `cd tools && npm install && node audit-dom.mjs` : joue **tous**
+6. `audit_dom` — `cd tools && npm install && node audit-dom.mjs` : joue **tous**
    les défis express (5 bonnes réponses + 3 erronées par fiche, transitions
-   animées comprises), les 65 questions de quiz avec reprise, les 4 modes de
-   cartes × 2 filtres × 5 fiches, le mode Écrire, la visibilité des boîtes
+   animées comprises), les 93 questions de quiz avec reprise, les 4 modes de
+   cartes × 2 filtres × 7 fiches, le mode Écrire, la visibilité des boîtes
    `.m4a`, la robustesse (8 états `localStorage` abîmés, 6 adresses invalides,
    thème). Code de sortie 1 en cas de défaut ou d'erreur JS.
-6. `serveur` — smoke test HTTP sur une **copie isolée** de `server.py` (port
+7. `serveur` — smoke test HTTP sur une **copie isolée** de `server.py` (port
    libre via `SB_PORT`, aucun git) : `/api/health`, `POST /api/vocal` (JSON +
    id retourné), `GET /api/vocals` (id présent), racine statique, traversal
    `/../etc/passwd` refusé (403/404, contenu protégé), POST > 30 Mo refusé
    (413 ou pipe cassée au refus — les deux valent « rejeté ») et le serveur
    survit.
-7. `hygiene_git` — `git diff --check`, pas de `token.json` flottant.
+8. `mobile` — `node tools/audit-mobile.mjs --json` : **vrai navigateur** (Chromium),
+   28 écrans × 5 largeurs (320 → 768 px) — débordements, éléments hors écran,
+   cibles tactiles, contrastes WCAG, fenêtre des défis, zoom iOS, marges
+   d'encoche, erreurs JS, **barre d'action basse** mesurée sur chaque écran, et
+   quiz, défi et **geste de balayage** réellement joués.
+9. `hygiene_git` — `git diff --check`, pas de `token.json` flottant.
 
 Correction bornée (LATS-lite) : un pas rouge déclenche un correcteur idempotent
 (`agents/fixers.py` : sync ZIP, meta Permissions-Policy, plafond 30 min,
@@ -388,6 +430,27 @@ contenu si besoin.
 
 ## 🕘 Historique des mises à jour
 
+- **22 septembre 2026 (session `arena/01a0c9e2-study-board`)** — **Fiche SES 0-1,
+  téléphone d'abord et écosystème complet.** (1) **Contenu** : la transcription du
+  cours (facteurs de production, croissance extensive/intensive, PGF, résidu de
+  Solow, Schumpeter, destruction créatrice, externalités, croissance endogène)
+  devient la fiche **0-1 « Progrès technique, innovation et croissance
+  endogène »** (9 parties, 22 définitions dont 21 mot pour mot, 28 cartes,
+  28 questions, 5 formats de défis, 4 astuces/pièges, MP3
+  `ses-progres-technique`), avec une partie **« Lire et interpréter des données
+  économiques »** (taux de variation, coefficient multiplicateur, indice base
+  100, points de pourcentage, points de croissance) et **6 exercices corrigés** ;
+  `vocal.html` connaît la nouvelle fiche (liste + libellé). (2) **Téléphone
+  d'abord** : barre d'action basse (Accueil · Lire · Cartes · Quiz · Défis),
+  balayage des cartes (→ je la savais, ← pas encore) avec consigne sous la carte,
+  retour haptique, lecteur MP3 pleine largeur, marge basse réservée, toast
+  remonté, balises iOS « application web ». Nouveaux contrôles permanents dans
+  `tools/audit-mobile.mjs` : barre basse présente/collée/≥ 44 px/qui ne recouvre
+  rien, une seule action active, et **geste de balayage réellement joué** (la
+  carte doit avancer). (3) **Écosystème** : dossier `ecosystem/` (README +
+  `registry.json` + `check.py`), pas `ecosysteme` ajouté au pipeline QA (9 pas),
+  et les 5 références externes demandées (langgraph, open-r1, trl, dspy, swarms)
+  cartographiées avec ce que chacune apporte réellement au projet.
 - **21 septembre 2026 (session `arena/01a0c57b-study-board`)** — **Téléphone +
   environnement de test complet + boutons morts.** (1) **Environnement de test** :
   nouveau `tools/audit-mobile.mjs` — audit du site dans un **vrai navigateur**

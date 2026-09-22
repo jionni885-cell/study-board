@@ -49,10 +49,22 @@ tout ce qui gênait :
 | Tableaux et grilles qui débordaient | Colonnes `minmax(0,1fr)`, tableaux défilables, mots longs non coupés |
 | Studio Vocal : bouton « Retour fiches » énorme, en-tête sur deux lignes, les 3 onglets (Enregistrer / Import / Coller) hors écran | En-tête sur une ligne, bouton normal, onglets en grille de 3 égale |
 
+**22 septembre 2026 — 3e passe « téléphone d'abord »** (le téléphone est le
+support principal) :
+
+| Ajout | Ce que ça change au quotidien |
+|---|---|
+| **Barre d'action basse** (Accueil · Lire · Cartes · Quiz · Défis) | Tout se pilote au pouce, sans remonter en haut de la page ; l'onglet actif est surligné |
+| **Balayage des cartes** : → je la savais, ← pas encore | On révise d'une seule main, sans viser les boutons (une consigne s'affiche sous la carte) |
+| **Retour haptique** discret | Une petite vibration confirme « je la savais » / « pas encore » |
+| **Lecteur audio plein écran** sur petit écran | Le bouton lecture du récapitulatif MP3 est enfin confortable au doigt |
+| **Marge basse réservée** + toast remonté | La barre basse ne cache jamais la fin d'une fiche ni les messages |
+
 Rien d'autre à faire de ton côté : ces corrections sont dans le site, et
-l'audit `tools/audit-mobile.mjs` rejoue **20 écrans × 5 tailles** (plus une partie
-de quiz et un défi réellement joués) à chaque livraison pour que ces défauts ne
-reviennent jamais.
+l'audit `tools/audit-mobile.mjs` rejoue **28 écrans × 5 tailles** (plus une partie
+de quiz, un défi et un **geste de balayage** réellement joués, et la barre basse
+mesurée sur chaque écran) à chaque livraison pour que ces défauts ne reviennent
+jamais.
 
 ---
 
@@ -67,6 +79,7 @@ clés, mécanismes, pièges et mini auto-test final.
 - `media/audio/hggsp-cartographier.mp3` — Cartographier les guerres
 - `media/audio/histoire-1929.mp3` — La crise de 1929
 - `media/audio/anglais-heroes.mp3` — Heroes & superheroes (vocabulaire anglais)
+- `media/audio/ses-progres-technique.mp3` — Progrès technique, innovation et croissance endogène
 - `media/audio/philo-intro.mp3` — Qu'est-ce que la philosophie ?
 
 ### Notes vocales d'origine (.m4a)
@@ -118,7 +131,7 @@ Le site en ligne est disponible à l'adresse :
 
 ---
 
-## 📚 Contenu (état au 10 septembre 2026)
+## 📚 Contenu (état au 22 septembre 2026)
 
 | Index | Matière / fiche | Parties | Définitions (dont mot pour mot) | Cartes | Quiz | Défis |
 |---|---|---:|---:|---:|---:|---:|
@@ -127,13 +140,23 @@ Le site en ligne est disponible à l'adresse :
 | 1-1 | HGGSP — Cartographier les guerres et les conflits : limites et enjeux | 3 | 0 (0) | 6 | 4 | 4 formats |
 | 2-0 | Histoire — La crise de 1929 : le krach boursier et ses mécanismes | 6 | 3 (3) | 11 | 10 | 4 formats |
 | 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 5 | 4 (0) | 19 | 10 | 4 formats |
+| 0-1 | SES — Progrès technique, innovation et croissance endogène | 9 | 22 (21) | 28 | 28 | 5 formats |
 | 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 (9) | 12 | 10 | 5 formats |
 
-**Totaux actuels : 29 parties, 83 cartes, 65 questions, 6 récapitulatifs MP3.**
+**Totaux actuels : 38 parties, 111 cartes, 93 questions, 7 récapitulatifs MP3.**
 
 La matière **Philosophie** (index 4) a été ajoutée le 13 septembre 2026 à partir
 des documents sources fournis (audio « Philosophie 1 début » + photos de cours).
 La fiche SES a également été complétée avec la voix 3 et les exercices du jour.
+
+La fiche **0-1 — Progrès technique, innovation et croissance endogène** a été
+ajoutée le 22 septembre 2026 à partir de la transcription du cours : rendements
+marginaux décroissants, PGF, Solow (le résidu), Schumpeter (5 innovations,
+entrepreneur, rente de monopole), destruction créatrice, externalités et
+croissance endogène (capital public, capital humain, capital technologique), plus
+une partie **« Lire et interpréter des données économiques »** avec des exercices
+corrigés (taux de variation, coefficient multiplicateur, indice base 100, points
+de pourcentage, points de croissance).
 
 Chaque fiche propose des parties détaillées, une synthèse finale
 **« Ce qu'il faut retenir »**, des définitions « mot pour mot » 🎯, des exemples,
@@ -145,14 +168,14 @@ express et un récapitulatif audio.
 
 ## 🧪 Vérifications automatiques
 
-Un seul point d'entrée — le **pipeline QA v2** (8 pas vérifiables, correcteurs
-bornés, smoke test serveur isolé, audit téléphone au navigateur réel ; le détail
-est dans [`agents/README.md`](agents/README.md)) :
+Un seul point d'entrée — le **pipeline QA v3** (9 pas vérifiables, correcteurs
+bornés, smoke test serveur isolé, audit téléphone au navigateur réel, contrôle de
+l'écosystème ; le détail est dans [`agents/README.md`](agents/README.md)) :
 
 ```bash
 python3 agents/qa.py            # TOUT : structure, syntaxe JS, sécurité token,
-                                # audit-complet, audit fonctionnel jsdom,
-                                # smoke test serveur, audit téléphone,
+                                # écosystème, audit-complet, audit fonctionnel
+                                # jsdom, smoke test serveur, audit téléphone,
                                 # hygiène git
 python3 agents/qa.py --fast     # idem sans les pas lents (jsdom, serveur, téléphone)
 python3 tools/audit.py --fix-zip  # à la main : resynchronise StudyBoard-app.zip
@@ -181,5 +204,22 @@ fois** le copier dans `.github/workflows/audit.yml` depuis l'interface GitHub
 pas la permission « workflows », d'où ce geste manuel. Il relance alors le
 pipeline à chaque `push` / `pull request`.
 Le code de sortie du pipeline (0) est l'unique autorisation de livraison.
+
+---
+
+## 🧩 Écosystème complet (« jiojio »)
+
+La carte complète des pièces du projet — agents, skills, outils, audits — et des
+**5 références externes** demandées le 22/09/2026 (`langgraph`, `open-r1`, `trl`,
+`dspy`, `swarms`) avec ce que chacune a réellement apporté :
+
+- 📄 [`ecosystem/README.md`](ecosystem/README.md) — la carte humaine ;
+- 🤖 [`ecosystem/registry.json`](ecosystem/registry.json) — le registre machine ;
+- ✅ `python3 ecosystem/check.py` — le contrôle hors ligne (pas `ecosysteme` du
+  pipeline) : registre lisible, 5 références complètes, chemins réels, invariants
+  tenus, **aucun secret et aucun `while True`**.
+
+Règle permanente : **un écosystème borné et vérifiable**. Aucun processus qui ne
+se termine pas, aucun push automatique, aucun secret dans le dépôt.
 
 La mémoire de reprise complète et l'historique sont dans [`REPRISE.md`](REPRISE.md).

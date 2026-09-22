@@ -1,4 +1,4 @@
-# Pipeline QA — Study Board (v2)
+# Pipeline QA — Study Board (v3)
 
 > ⚠️ **Ce qui tourne ici a remplacé le « swarm » de 2026-09-17** (hermes-builder /
 > hermes-critic / hermes-fixer / hermes-meta / hermes-tester / agent-qa / agent-reflect /
@@ -23,17 +23,19 @@
 
 ## La v2 : un pipeline fini, déterministe, vérifiable
 
-Un seul programme, `python3 agents/qa.py`, qui ne tourne qu'une fois et s'arrête :
+Un seul programme, `python3 agents/qa.py`, qui ne tourne qu'une **fois** et
+s'arrête (9 pas) :
 
 | Pas | Vérification (récompense = code de sortie) |
 |---|---|
 | `structure` | `python3 tools/audit.py` (données, compteurs, phrases interdites, ZIP, README/REPRISE) |
 | `syntaxe_js` | `node --check` sur les 3 blocs de `index.html` + 1 bloc de `vocal.html` |
 | `securite` | pas de `token.json` suivi par git, pas de `.m4a` privé, pas de `ghp_…` dans un fichier suivi, pas de sandbox mort en dur, pas d'URL de token publique |
+| `ecosysteme` | `python3 ecosystem/check.py` : registre de l'écosystème lisible, **5 références externes** complètes (`langgraph`, `open-r1`, `trl`, `dspy`, `swarms`), chemins internes réels, invariants déclarés, aucun secret, et ce contrôle bien branché dans le pipeline |
 | `audit_complet` | `node tools/audit-complet.mjs` (0 erreur / 0 avertissement) |
 | `audit_dom` | `node tools/audit-dom.mjs` (jsdom : défis, quiz, cartes, robustesse) |
 | `serveur` | smoke test HTTP sur une **copie isolée** : santé, POST vocal, liste, statique, traversal refusé, 413 > 30 Mo, survie après refus |
-| `mobile` | `node tools/audit-mobile.mjs` : **vrai navigateur** (Chromium), 20 écrans × 5 largeurs (320 → 768 px) — débordements, éléments hors écran, cibles tactiles, contrastes WCAG, fenêtre des défis, zoom iOS, marges d'encoche, erreurs JS, + quiz et défi réellement joués |
+| `mobile` | `node tools/audit-mobile.mjs` : **vrai navigateur** (Chromium), 28 écrans × 5 largeurs (320 → 768 px) — débordements, éléments hors écran, cibles tactiles, contrastes WCAG, fenêtre des défis, zoom iOS, marges d'encoche, erreurs JS, **barre d'action basse** mesurée sur chaque écran, + quiz, défi et **geste de balayage** réellement joués |
 | `hygiene_git` | `git diff --check`, pas de `token.json` flottant |
 
 Correspondance avec les techniques avancées (voir l'article « Au-delà des Loops et

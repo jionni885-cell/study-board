@@ -360,6 +360,39 @@ async function main() {
       if (petites.length) warn('cible-tactile', `${tag} : ${petites.length} bouton(s) entre 24 et 44 px → ` + petites.slice(0, 3).map((c) => `${c.sel} ${c.w}×${c.h}`).join(' ; '));
       if (a.petitsTextes.length) warn('texte', `${tag} : texte < 12 px → ` + a.petitsTextes.slice(0, 3).map((x) => `${x.sel} ${x.px}px`).join(' ; '));
       if (a.contrastes.length) warn('contraste', `${tag} : contraste faible → ` + a.contrastes.slice(0, 3).map((c) => `${c.sel} ${c.ratio}:1 (min ${c.mini}) ${c.fg} sur ${c.bg} [couleur ${c.brut}, opacité ${c.op}, parent ${c.parent}] « ${c.txt} »`).join(' ; '));
+      /* ---- barre d'action basse : présente, collée en bas, jamais au-dessus
+             du contenu (sinon la fin de la fiche est inaccessible au pouce) ---- */
+      if (dev.w <= 820) {
+        const tb = await page.evaluate(() => {
+          const b = document.getElementById('tabbar');
+          if (!b) return { absent: true };
+          const st = getComputedStyle(b);
+          const r = b.getBoundingClientRect();
+          const btns = [...b.querySelectorAll('button')].map((x) => {
+            const q = x.getBoundingClientRect();
+            return { lab: x.textContent.trim(), h: Math.round(q.height), w: Math.round(q.width),
+              on: x.classList.contains('on'), dansEcran: q.left >= -0.5 && q.right <= window.innerWidth + 0.5 };
+          });
+          const wrap = document.querySelector('.wrap');
+          return { visible: st.display !== 'none', h: Math.round(r.height), bottom: Math.round(r.bottom),
+            vh: window.innerHeight, vw: window.innerWidth, btns,
+            pad: wrap ? Math.round(parseFloat(getComputedStyle(wrap).paddingBottom)) : 0 };
+        });
+        const tagB = `${dev.nom} · barre basse (${label})`;
+        if (tb.absent) err('barre-basse', `${tagB} : aucune barre d'action basse (#tabbar)`);
+        else if (!tb.visible) err('barre-basse', `${tagB} : la barre basse est masquée sur téléphone`);
+        else {
+          if (tb.btns.length < 5) err('barre-basse', `${tagB} : ${tb.btns.length} action(s) au lieu de 5 (Accueil/Lire/Cartes/Quiz/Défis)`);
+          if (Math.abs(tb.bottom - tb.vh) > 3) err('barre-basse', `${tagB} : la barre n'est pas collée au bas de l'écran (bas ${tb.bottom} / écran ${tb.vh})`);
+          const petit = tb.btns.filter((b) => b.h < 44);
+          if (petit.length) err('cible-tactile', `${tagB} : action(s) < 44 px de haut → ` + petit.map((b) => `${b.lab} ${b.h}px`).join(' ; '));
+          const dehors = tb.btns.filter((b) => !b.dansEcran);
+          if (dehors.length) err('hors-écran', `${tagB} : action(s) hors de l'écran → ` + dehors.map((b) => b.lab).join(' ; '));
+          if (tb.pad < tb.h + 8) err('barre-basse', `${tagB} : marge basse de ${tb.pad} px pour une barre de ${tb.h} px — la fin du contenu passe dessous`);
+          const actifs = tb.btns.filter((b) => b.on).length;
+          if (actifs > 1) err('barre-basse', `${tagB} : ${actifs} actions marquées actives en même temps`);
+        }
+      }
       if (SHOTS && (hash === '#/' || dev.w === 390)) {
         await page.screenshot({ path: path.join(SHOTS, `${dev.w}-${hash.replace(/[#/]/g, '_') || 'accueil'}.png`), fullPage: false });
       }
@@ -433,6 +466,34 @@ async function main() {
         if (!quiz.expVisible) err('parcours', `${dev.nom} : cliquer une réponse n'affiche pas l'explication`);
         if (quiz.explicationVide) err('parcours', `${dev.nom} : explication vide après la réponse`);
         if (quiz.expDeborde) err('parcours', `${dev.nom} : l'explication sort de l'écran`);
+      }
+      /* --- geste de balayage sur une carte (téléphone, 320 px) --- */
+      await page.evaluate(() => { location.hash = '#/f/0/0/fc'; window.dispatchEvent(new HashChangeEvent('hashchange')); });
+      await new Promise((r) => setTimeout(r, 300));
+      const balayage = await page.evaluate(async () => {
+        const c = document.querySelector('#carte');
+        if (!c) return { erreur: 'aucune carte affichée' };
+        const hint = !!document.querySelector('.swipehint');
+        if (typeof Touch !== 'function' || typeof TouchEvent !== 'function') return { hint, skip: true };
+        const avant = (document.querySelector('.study .toprow .pos') || {}).textContent || '';
+        const t = (x, y) => new Touch({ identifier: 1, target: c, clientX: x, clientY: y });
+        const env = (type, x, y, garde) => c.dispatchEvent(new TouchEvent(type, { bubbles: true, cancelable: true,
+          touches: garde ? [t(x, y)] : [], targetTouches: garde ? [t(x, y)] : [], changedTouches: [t(x, y)] }));
+        const r = c.getBoundingClientRect();
+        const y = r.top + r.height / 2;
+        env('touchstart', r.left + 24, y, true);
+        env('touchmove', r.left + 120, y, true);
+        env('touchend', r.left + 230, y, false);
+        await new Promise((k) => setTimeout(k, 400));
+        const apres = (document.querySelector('.study .toprow .pos') || {}).textContent || '';
+        return { hint, avant, apres, change: !!avant && avant !== apres };
+      });
+      if (balayage.erreur) err('geste', `${dev.nom} : ${balayage.erreur}`);
+      else {
+        if (!balayage.hint) err('geste', `${dev.nom} : aucune consigne de balayage affichée sous la carte (.swipehint)`);
+        if (balayage.skip) warn('geste', `${dev.nom} : Touch/TouchEvent indisponible dans ce navigateur — geste non testé`);
+        else if (!balayage.change) err('geste', `${dev.nom} : le balayage vers la droite ne fait pas avancer la carte (« ${balayage.avant} » → « ${balayage.apres} »)`);
+        else { parcours++; info.push(`balayage de carte joué en ${dev.w} px → ${balayage.apres}`); }
       }
       /* thème sombre : même contrôle de débordement */
       await page.evaluate(() => { window.setTheme('dark'); location.hash = '#/f/0/0/quiz'; window.dispatchEvent(new HashChangeEvent('hashchange')); });
