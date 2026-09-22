@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Pipeline QA Study Board — v2 (remplace le swarm multi-agents non borné).
+Pipeline QA Study Board — v3 (remplace le swarm multi-agents non borné).
 
 MÉTHODE — les « techniques avancées » appliquées de façon déterministe :
 - Chaque pas est un POINT DE CONTRÔLE DE PROCESSUS (PRM) : une vérification
@@ -19,7 +19,7 @@ MÉTHODE — les « techniques avancées » appliquées de façon déterministe 
   git rm --cached explicitement tracés dans le rapport).
 
 USAGE
-  python3 agents/qa.py              # tous les pas (dont jsdom ~2 min + serveur)
+  python3 agents/qa.py              # les 9 pas (dont jsdom ~2 min + serveur)
   python3 agents/qa.py --fast       # sans les pas lents (audit_dom, serveur)
   python3 agents/qa.py --no-fix     # rapport uniquement, aucune correction
   python3 agents/qa.py --step securite   # un seul pas
@@ -266,6 +266,19 @@ def check_mobile():
     return True, f"téléphone OK (5 tailles d'écran, {len(warns)} avertissement(s))"
 
 
+def check_ecosysteme():
+    """Carte de l'écosystème : registre machine lisible, 5 références externes
+    complètes (langgraph, open-r1, trl, dspy, swarms), chemins internes réels,
+    invariants déclarés, aucun secret. Aucun accès réseau."""
+    if not (ROOT / "ecosystem" / "check.py").exists():
+        return False, "ecosystem/check.py absent (la carte de l'écosystème a disparu)"
+    r = sh(["python3", "ecosystem/check.py"], timeout=120)
+    ok = r.returncode == 0 and "Problèmes : 0" in r.stdout
+    tail = "\n".join(l for l in r.stdout.splitlines() if "✗" in l)[:600]
+    return ok, ("écosystème cohérent (registre, 5 références externes, invariants, aucun secret)"
+                if ok else "ecosystem/check.py non vert\n" + tail)
+
+
 def check_hygiene_git():
     r = sh(["git", "diff", "--check"])
     if r.returncode != 0 or r.stdout.strip():
@@ -285,6 +298,7 @@ STEPS = [
     ("structure", check_structure, False),
     ("syntaxe_js", check_syntaxe_js, False),
     ("securite", check_securite, False),
+    ("ecosysteme", check_ecosysteme, False),
     ("audit_complet", check_audit_complet, False),
     ("audit_dom", check_audit_dom, True),
     ("serveur", check_serveur, True),

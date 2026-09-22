@@ -1,0 +1,89 @@
+{
+  "version": "1.0.0",
+  "maj": "2026-09-22",
+  "nom": "Écosystème complet Study Board",
+  "principe": "Un seul dépôt, une seule vérité. Tout est local, vérifiable et borné : aucun processus infini, aucun clone automatique, aucun secret, aucun envoi git automatique. Ce registre décrit l'écosystème INTERNE (ce qui tourne dans ce dépôt) et les RÉFÉRENCES EXTERNES demandées par l'utilisateur, avec ce que chacune apporte réellement.",
+  "invariants": [
+    "Aucun processus qui ne se termine pas (jamais de while True, jamais de boucle d'agent autonome).",
+    "Aucun secret dans le dépôt : token.json reste gitignoré et local.",
+    "Aucun push automatique : le pipeline QA ne commit ni ne pousse jamais.",
+    "Rien à installer pour le site : index.html et vocal.html sont autonomes et hors ligne.",
+    "Les dépendances externes sont DOCUMENTÉES et cartographiées, jamais téléchargées automatiquement.",
+    "Toute affirmation vérifiable est vérifiée par un code de sortie : python3 agents/qa.py et python3 ecosystem/check.py."
+  ],
+  "tags_utilisateur": {
+    "jiojio": "Nom donné par l'utilisateur à l'écosystème complet du projet (agents + skills + tools + ecosystem). Ce dossier ecosystem/ en est la carte officielle."
+  },
+  "interne": [
+    { "id": "fiches", "chemin": "index.html", "role": "Application principale : contenu (const D), défis (DF6), astuces (EX6), repères (EXTRA), audios (AUDIOF), exposés (EXPOSES)." },
+    { "id": "studio-vocal", "chemin": "vocal.html", "role": "Studio Vocal 1 à 30 min : enregistrement, import audio, collage de texte." },
+    { "id": "serveur-local", "chemin": "server.py", "role": "Serveur local (port 4173) : statique + POST /api/vocal + GET /api/vocals + GET /api/health." },
+    { "id": "pipeline-qa", "chemin": "agents/qa.py", "role": "Pipeline QA : 9 pas de contrôle finis, correcteurs bornés, rapport agents/rapport.json." },
+    { "id": "correcteurs", "chemin": "agents/fixers.py", "role": "Correcteurs idempotents déclenchés par un pas rouge (LATS-lite), jamais de commit." },
+    { "id": "audit-structure", "chemin": "tools/audit.py", "role": "Structure des données, compteurs, phrases interdites, ZIP hors ligne, tables README/REPRISE." },
+    { "id": "audit-dom", "chemin": "tools/audit-dom.mjs", "role": "Navigateur simulé (jsdom) : défis, quiz, 4 modes de cartes, robustesse, compilation des handlers." },
+    { "id": "audit-mobile", "chemin": "tools/audit-mobile.mjs", "role": "Vrai navigateur (Chromium) : 5 tailles d'écran, barre basse, gestes, contrastes WCAG, erreurs JS." },
+    { "id": "audit-complet", "chemin": "tools/audit-complet.mjs", "role": "Contrôles transverse : sécurité, serveur, téléphone, verrous de non-régression." },
+    { "id": "skills", "chemin": "skills", "role": "7 savoir-faire documentés (audio, audit, déploiement, git, compatibilité média, no-scroll, vocal long)." },
+    { "id": "ecosysteme", "chemin": "ecosystem", "role": "Carte de l'écosystème : registre machine + check hors ligne + ce fichier de documentation." },
+    { "id": "memoire", "chemin": "REPRISE.md", "role": "Mémoire permanente du projet : état réel, règles, historique des sessions." }
+  ],
+  "externe": [
+    {
+      "id": "langgraph",
+      "url": "https://github.com/langchain-ai/langgraph",
+      "licence": "MIT",
+      "etoiles": 42139,
+      "role": "Orchestrateur d'agents sous forme de graphe (nœuds = étapes, arêtes = transitions, état partagé).",
+      "apport": "C'est exactement la forme de notre pipeline QA : un graphe d'étapes finies avec état (PASS/FAIL), transitions conditionnelles et arrêt garanti. La leçon retenue : une étape = un nœud, une récompense = un code de sortie — jamais une boucle sans fin.",
+      "retenu": "La structure « graphe borné d'étapes vérifiables ». Le serveur langgraph-api (Elastic License 2.0) n'est pas concerné : rien n'est installé ici.",
+      "usage_dans_study_board": "agents/qa.py et tools/audit-*.mjs : pas de contrôle chaînés, rapport machine agents/rapport.json."
+    },
+    {
+      "id": "open-r1",
+      "url": "https://github.com/huggingface/open-r1",
+      "licence": "Apache-2.0",
+      "etoiles": 26477,
+      "role": "Reproduction ouverte de DeepSeek-R1 : recettes complètes pour entraîner des modèles de raisonnement.",
+      "apport": "La méthode « jeu de données vérifiable + récompense automatique » : on ne juge pas une réponse à l'œil, on la teste (maths, code, contraintes).",
+      "retenu": "Le principe des récompenses vérifiables (RLVR) appliqué sans modèle : chaque pas du pipeline renvoie vrai/faux par un outil, pas par une note subjective.",
+      "usage_dans_study_board": "Chaque pas de agents/qa.py renvoie un code de sortie : 0 = vert, sinon rouge, sans interprétation."
+    },
+    {
+      "id": "trl",
+      "url": "https://github.com/huggingface/trl",
+      "licence": "Apache-2.0",
+      "etoiles": 19360,
+      "role": "Entraînement de modèles de langage par apprentissage par renforcement (SFT, DPO, GRPO…).",
+      "apport": "La notion de récompense, de pénalité et de budget : on apprend en corrigeant, mais on ne peut pas corriger indéfiniment.",
+      "retenu": "Le budget borné : 2 tentatives de correction par pas et 4 corrections par exécution, puis backtracking propre (aucun demi-état laissé).",
+      "usage_dans_study_board": "agents/qa.py (MAX_FIX_ATTEMPTS, TOTAL_FIX_BUDGET) et agents/fixers.py (correcteurs idempotents)."
+    },
+    {
+      "id": "dspy",
+      "url": "https://github.com/stanfordnlp/dspy",
+      "licence": "MIT",
+      "etoiles": 38207,
+      "role": "Programmer les modèles plutôt que les prompter : modules, signatures et optimisation automatique des invites.",
+      "apport": "Séparer la logique (modules) du texte des invites, et ne garder que ce qui améliore une métrique mesurée.",
+      "retenu": "La discipline « signature claire + mesure » : dans ce dépôt, chaque fonction a une signature explicite (ok, détail) et chaque écran un audit mesuré au navigateur réel.",
+      "usage_dans_study_board": "tools/audit-mobile.mjs (mesures chiffrées : débordement en px, contraste au ratio, hauteur d'en-tête) et les contrôles de tools/audit-dom.mjs."
+    },
+    {
+      "id": "swarms",
+      "url": "https://github.com/kyegomez/swarms",
+      "licence": "Apache-2.0",
+      "etoiles": 7194,
+      "role": "Orchestration multi-agents : plusieurs agents spécialisés (planificateur, critique, exécutant) sur une tâche.",
+      "apport": "L'idée de spécialisation (un agent = un rôle) — mais aussi l'avertissement : un multi-agents sans arrêt explicite tourne sans fin.",
+      "retenu": "La séparation des rôles est gardée (structure, syntaxe, sécurité, DOM, serveur, téléphone, hygiène git) ; en revanche AUCUN processus permanent : c'est précisément ce qui avait échoué le 17/09/2026 avec le swarm « hermes » (6 processus while True, log spam, promesses non vérifiables).",
+      "usage_dans_study_board": "Les 9 pas de agents/qa.py jouent les rôles, en un seul processus fini. Voir agents/README.md (« pourquoi le swarm est mort »)."
+    }
+  ],
+  "memo_externe": {
+    "statut": "documenté, non installé",
+    "prerequis": "aucun",
+    "reseau": "aucun accès réseau n'est requis ni effectué par ecosystem/check.py",
+    "raison": "Le site doit rester autonome et hors ligne ; ces dépôts servent de référence de méthode, pas de dépendance d'exécution."
+  }
+}
