@@ -1,7 +1,7 @@
 # PROMPT DE REPRISE — STUDY BOARD
 
 > Document de mémoire permanente du dépôt. À lire avant toute modification.
-> Dernière mise à jour : **22 septembre 2026 (session `arena/01a0c9e2-study-board`)**.
+> Dernière mise à jour : **23 septembre 2026 (session `arena/01a0ca8a-study-board`)**.
 
 ## 🎯 Mission
 
@@ -144,9 +144,11 @@ Lire cette structure avant toute édition :
   haptique (`navigator.vibrate` dans `avance()`), dernière fiche retenue dans
   `localStorage['sblast']`, marge basse `calc(150px + var(--sab))`, toast
   remonté à `calc(80px + var(--sab))`, lecteur MP3 pleine largeur sous 820 px.
-  Le CSS `.tabbar`/`.swipehint` vit à la fin du `<style>` ; le JS de cette passe
-  est le **dernier** à décorer `render()` (bloc 3) pour peindre la barre en
-  dernier.
+  Le CSS `.tabbar`/`.swipehint` vit à la fin du `<style>` ; le JS V7 décore
+  `render()` dans le **dernier** bloc (3). **V8 (guide de réussite, 23/09/2026)**
+  s'ajoute *après* V7 dans ce même bloc : il habille `renderLire` (question-guide
+  + pied « Je peux l'expliquer ») et repeint la progression (`paintGuideProg`)
+  sans remplacer la barre. Ne pas ajouter de 4e `<script>`.
 - `renderLire()` renvoie `sommaire + parties + extra` : le sommaire cliquable
   `.sommaire > nav.hnav` appelle `goPart(i)`, qui fait défiler jusqu'à la section
   `#part-i` (`#part-x` pour « Pour aller plus loin »). Ces identifiants doivent
@@ -243,6 +245,14 @@ au dépôt public**. Il est considéré **révélé** (tout le monde a pu le lir
     `token.json` reste gitignoré ; jamais d'URL de sandbox éphémère (e2b.app)
     en dur dans `index.html`/`vocal.html` ; jamais de processus infini
     (`while True`) ni d'auto-push depuis un script autonome.
+14. **Lecture active (guide de réussite, 23/09/2026)** : chaque partie de
+    l'onglet Lire a une **question-guide** et un bouton **« Je peux l'expliquer »**
+    (élaboration à voix haute, pas une case à cocher de relecture). La
+    progression vit dans `localStorage['sblire']`, **bornée** aux index de la
+    fiche. Les `onclick` ne portent que des **nombres** (`marquerPartie(mi,fi,i)`).
+    Les puces du guide (`.gok-sauras li`) restent en `display:block` + puce
+    absolue — **jamais** `display:flex` sur un `li` (leçon 320 px). Ne pas
+    remplacer ce habillage par une refonte de `renderLire`.
 
 ## 🧪 Pipeline QA v3 — obligatoire avant livraison (remplace le GAUNTLET LOOP)
 
@@ -430,6 +440,17 @@ contenu si besoin.
 
 ## 🕘 Historique des mises à jour
 
+- **23 septembre 2026 (session `arena/01a0ca8a-study-board`)** — **Guide de
+  réussite (lecture active) sur l'onglet Lire.** Sans refonte : CSS `.lire-guide`
+  / `.gok` / `.part-q` / `.part-foot` / `.part.comprise` avant `</style>` ; IIFE
+  V8 en fin du 3e `<script>` (après V7). Chaque fiche a un encadré « pourquoi
+  cette fiche au bac » + 3 « tu sauras », une **question-guide** sous le titre
+  de chaque partie, un bouton 44 px « Je peux l'expliquer » (élaboration,
+  Weinstein / retrieval), une barre de progression (`sblire`, index bornés) et
+  le sommaire qui coche les parties comprises. Accueil : les 3 étapes disent
+  clairement le parcours (expliquer → cartes → bac). Méthode documentée dans
+  `ecosystem/README.md` §5 et le rôle `fiches` de `registry.json`. Toujours
+  3 blocs `<script>`, pas de flex sur les listes.
 - **22 septembre 2026 (session `arena/01a0c9e2-study-board`)** — **Fiche SES 0-1,
   téléphone d'abord et écosystème complet.** (1) **Contenu** : la transcription du
   cours (facteurs de production, croissance extensive/intensive, PGF, résidu de

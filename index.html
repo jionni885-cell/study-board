@@ -781,6 +781,41 @@ button,a,input,select,textarea,label,summary{touch-action:manipulation;-webkit-t
   .audiobox audio{flex:1 1 100%;max-width:100%;min-width:0}
 }
 
+
+/* =====================================================================
+   GUIDE DE RÉUSSITE — lecture active (science de l'apprentissage)
+   Question-guide, élaboration (« je peux l'expliquer »), progression.
+   Pas de flex sur les listes : puces en absolu, comme .pills (leçon 320 px).
+   ===================================================================== */
+.gok{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px 16px 14px;margin:0 0 14px;box-shadow:var(--sh);min-width:0}
+.gok-k{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--acc-2);background:var(--acc-soft);padding:5px 10px;border-radius:99px}
+.gok-why{margin:10px 0 8px;font-size:.95rem;line-height:1.55;color:var(--ink);font-weight:650;overflow-wrap:break-word}
+.gok-sauras{list-style:none;margin:0;display:grid;gap:6px}
+.gok-sauras li{display:block;position:relative;padding-left:22px;font-size:.9rem;line-height:1.5;color:var(--ink-2);min-width:0;overflow-wrap:break-word}
+.gok-sauras li::before{content:"";position:absolute;left:0;top:.45em;width:12px;height:12px;border-radius:50%;background:var(--ok-soft);box-shadow:inset 0 0 0 2px var(--ok)}
+.gok-path{margin:10px 0 8px;font-size:.82rem;color:var(--ink-3);font-weight:650;line-height:1.45;overflow-wrap:break-word}
+.gok-bar{height:7px;border-radius:99px;background:var(--bg-soft);overflow:hidden;margin:8px 0 6px}
+.gok-bar i{display:block;height:100%;background:var(--ok);border-radius:99px;width:0;transition:width .4s}
+.gok-prog{font-size:.8rem;color:var(--ink-2);font-weight:650}
+.gok-go{margin-top:10px;min-height:44px;padding:8px 14px;border-radius:12px;background:var(--acc-soft);color:var(--acc-2);font-weight:750;font-size:.88rem;border:1px solid transparent}
+.gok-go:hover{border-color:var(--acc)}
+.part p{line-height:1.68}
+.part-q{margin:4px 0 12px;padding:10px 12px;border-radius:0 12px 12px 0;background:var(--acc-soft);border-left:3px solid var(--acc);font-family:var(--fd);font-size:.98rem;font-weight:650;line-height:1.4;color:var(--acc-2);overflow-wrap:break-word;min-width:0}
+.part-q .ql{display:block;font-family:var(--f);font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
+.part-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.part-foot button{min-height:44px;min-width:0;padding:8px 14px;border-radius:12px;font-weight:750;font-size:.88rem;background:var(--card-2);border:1px solid var(--line-2);color:var(--ink)}
+.part-foot button.on{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 40%,transparent);color:var(--ok)}
+.part-foot .phint{font-size:.8rem;color:var(--ink-3);line-height:1.4;min-width:0;flex:1 1 140px;overflow-wrap:break-word}
+.part.comprise{border-color:color-mix(in srgb,var(--ok) 35%,var(--line))}
+.part.comprise .n{background:var(--ok-soft);color:var(--ok)}
+.sommaire .hnav button.ok .sn{background:var(--ok-soft);color:var(--ok)}
+@media(min-width:821px){.part p{font-size:1.02rem;line-height:1.72;max-width:66ch}}
+@media(max-width:560px){
+  .gok{padding:14px 12px}
+  .part-q{padding:9px 11px;font-size:.95rem}
+  .gok-k,.part-q .ql{font-size:.78rem}
+}
+
 </style>
 </head>
 <body>
@@ -1998,6 +2033,156 @@ window.__lastFiche=lastFiche;
 
 /* un rendu final : la barre doit être peinte même si la page a été ouverte
    directement sur une adresse de fiche (les blocs précédents re-rendent). */
+try{ render(); }catch(e){}
+})();
+
+/* ================= V8 — GUIDE DE RÉUSSITE (lecture active) =================
+   Recherche : retrieval + élaboration (Weinstein, Science of Learning) ;
+   notes par questions ; fiches aérées (bac FR). Tout est local, borné,
+   aucun réseau. On HABILLE renderLire : le moteur n'est pas refondu. */
+(function(){
+'use strict';
+var LIREK='sblire';
+var GUIDE={
+  "0-0":{bac:"Au bac SES, c'est LE chapitre : tu dois définir, calculer, et ne jamais confondre extensive et intensive.",sauras:["Définir croissance, PIB et VA mot pour mot","Calculer un taux de variation","Distinguer extensive et intensive"],q:["Qu'est-ce que la croissance — et ce qu'elle n'est pas ?","Comment mesure-t-on vraiment la croissance ?","D'où vient la croissance : extensive ou intensive ?","Quels défis la croissance pose-t-elle ?","Si tu n'avais qu'une minute à l'oral, que dirais-tu ?","Sans relire : es-tu prêt à te tester ?"]},
+  "0-1":{bac:"La suite du chapitre : PGF, Schumpeter, destruction créatrice, rôle de l'État — et la lecture des chiffres, piégée à l'écrit.",sauras:["Expliquer le résidu de Solow et la PGF","Citer les 5 innovations de Schumpeter","Lire un taux, un indice et un point de pourcentage"],q:["Pourquoi accumuler des facteurs ne suffit plus ?","Qu'est-ce que le résidu de Solow, concrètement ?","Comment Schumpeter explique-t-il le moteur de la croissance ?","Qu'est-ce que la destruction créatrice ?","Par quels canaux le progrès technique fait-il croître ?","Pourquoi l'État est-il indispensable (croissance endogène) ?","Comment lire un chiffre économique sans se tromper ?","Si tu n'avais qu'une minute à l'oral, que dirais-tu ?","Sans relire : es-tu prêt à te tester ?"]},
+  "1-0":{bac:"HGGSP : on te demande de distinguer les notions et de connaître les seuils. Un mot faux et la copie bascule.",sauras:["Distinguer conflit, guerre et paix","Citer SIPRI (~1000) et UCDP (~25)","Nommer un mode de résolution"],q:["Comment distinguer conflit, guerre et paix ?","Comment mesure-t-on les guerres ?","Comment résout-on un conflit ?","Si tu n'avais qu'une minute à l'oral, que dirais-tu ?"]},
+  "1-1":{bac:"Une carte n'est jamais neutre : c'est LA phrase attendue. Montre que tu vois les choix du cartographe.",sauras:["Expliquer pourquoi une carte a un parti pris","Relier le seuil choisi à ce que la carte montre","Situer la rupture de 1991"],q:["Pourquoi une carte des conflits n'est jamais neutre ?","Que change 1991 pour la carte du monde ?","Si tu n'avais qu'une minute à l'oral, que dirais-tu ?"]},
+  "2-0":{bac:"Histoire : la chaîne du krach doit être dite dans l'ordre, sans trou. Dates + mécanisme = copie solide.",sauras:["Dater le jeudi noir (24 oct. 1929)","Réciter la chaîne krach → banques → dépression","Distinguer krach et dépression"],q:["Que s'est-il passé à Wall Street en octobre 1929 ?","En quoi le krach a-t-il été brutal ?","Quels signes annonçaient la crise ?","Quelle est la chaîne exacte de la crise ?","Comment le krach gagne-t-il le monde entier ?","Si tu n'avais qu'une minute à l'oral, que dirais-tu ?"]},
+  "3-0":{bac:"Anglais : le piège, c'est story vs History. Vocabulaire exact + une phrase réutilisable à l'oral.",sauras:["Traduire hero, villain, sidekick, suit","Réutiliser 2 phrases à l'oral","Expliquer story vs History"],q:["Quels mots dois-tu savoir dire et écrire ?","Quelles phrases peux-tu réutiliser à l'oral ?","Quelle est la différence entre a story et History ?","Si tu n'avais qu'une minute à l'oral, que dirais-tu ?","Sans relire : es-tu prêt à te tester ?"]},
+  "4-0":{bac:"Philo : 3 formules à connaître mot pour mot, et convaincre ≠ persuader. C'est tout le début du programme.",sauras:["Dire philo + sophia = amour de la sagesse","Citer Socrate (ignorance, examen)","Distinguer convaincre et persuader"],q:["Que signifie vraiment « philosophie » ?","Que nous apprend Socrate ?","Qu'est-ce que l'ironie socratique ?","Convaincre, persuader, conceptualiser : quelle différence ?","Si tu n'avais qu'une minute à l'oral, que dirais-tu ?"]}
+};
+
+function lireMap(){
+  try{ var o=JSON.parse(localStorage.getItem(LIREK)||'{}'); return o&&typeof o==='object'&&!Array.isArray(o)?o:{}; }catch(e){ return {}; }
+}
+function comprisDe(mi,fi){
+  var a=lireMap()[mi+'-'+fi];
+  if(!Array.isArray(a)) return [];
+  var n=(D[mi]&&D[mi].fiches[fi])?D[mi].fiches[fi].parties.length:0;
+  return a.filter(function(i){ return Number.isInteger(i)&&i>=0&&i<n; });
+}
+function sauverCompris(mi,fi,arr){
+  var o=lireMap(); o[mi+'-'+fi]=arr; try{ localStorage.setItem(LIREK,JSON.stringify(o)); }catch(e){}
+}
+function estCompris(mi,fi,i){ return comprisDe(mi,fi).indexOf(i)>=0; }
+function gData(mi,fi){ return GUIDE[mi+'-'+fi]||null; }
+function questionDe(mi,fi,i){
+  var g=gData(mi,fi); var t=(D[mi]&&D[mi].fiches[fi]&&D[mi].fiches[fi].parties[i])?D[mi].fiches[fi].parties[i].titre:'';
+  if(g&&Array.isArray(g.q)&&g.q[i]) return g.q[i];
+  t=String(t||'').trim();
+  if(/\?$/.test(t)) return t;
+  if(/retenir/i.test(t)) return "Si tu n'avais qu'une minute à l'oral, que dirais-tu ?";
+  if(/entra/i.test(t)) return "Sans relire : es-tu prêt à te tester ?";
+  return "Que dois-tu comprendre ici : "+t+" ?";
+}
+function guideHTML(mi,fi){
+  var g=gData(mi,fi)||{}; var f=D[mi].fiches[fi]; var n=f.parties.length;
+  var a=comprisDe(mi,fi); var pct=n?Math.round(a.length/n*100):0;
+  var bac=g.bac||"Lis chaque partie avec une question en tête, puis explique-la sans relire. C'est comme ça qu'on retient.";
+  var sauras=g.sauras&&g.sauras.length?g.sauras:["Expliquer la fiche à voix haute","Retenir les définitions mot pour mot","Te tester ensuite (cartes, quiz, défis)"];
+  var lis=sauras.map(function(s){ return '<li>'+esc(s)+'</li>'; }).join('');
+  return '<div class="gok" id="guide-ok">'+
+    '<span class="gok-k">Guide de réussite</span>'+
+    '<p class="gok-why">'+esc(bac)+'</p>'+
+    '<ul class="gok-sauras">'+lis+'</ul>'+
+    '<div class="gok-path">Le parcours : lire et expliquer chaque partie → cartes → quiz → défis.</div>'+
+    '<div class="gok-bar"><i id="gok-fill" style="width:'+pct+'%"></i></div>'+
+    '<div class="gok-prog" id="gok-prog"><b>'+a.length+' / '+n+'</b> parties que tu peux expliquer</div>'+
+    '<button type="button" class="gok-go" onclick="goPart(0)">Commencer par la première partie</button>'+
+  '</div>';
+}
+function partQHTML(mi,fi,i){
+  return '<div class="part-q"><span class="ql">Question-guide</span>'+esc(questionDe(mi,fi,i))+'</div>';
+}
+function partFootHTML(mi,fi,i){
+  var on=estCompris(mi,fi,i);
+  var t=D[mi].fiches[fi].parties[i].titre||'';
+  var rec=/retenir/i.test(t);
+  var lab=on?(rec?'Je le dis en 1 minute':'Compris — je peux l\'expliquer'):(rec?'Je le dis en 1 minute':'Je peux l\'expliquer');
+  var hint=rec?'Ferme les yeux et dis le plan.':'Dis-le à voix haute, sans relire.';
+  return '<div class="part-foot"><button type="button" class="'+(on?'on':'')+'" onclick="marquerPartie('+mi+','+fi+','+i+')">'+esc(lab)+'</button><span class="phint">'+esc(hint)+'</span></div>';
+}
+function habillerLire(mi,fi,html){
+  if(html.indexOf('id="guide-ok"')<0){
+    if(html.indexOf('<div class="sommaire">')>=0) html=html.replace('<div class="sommaire">', guideHTML(mi,fi)+'<div class="sommaire">');
+    else html=guideHTML(mi,fi)+html;
+  }
+  html=html.replace(/<section id="part-(\d+)" class="part([^"]*)">/g, function(_, i, cls){
+    var n=+i; var ok=estCompris(mi,fi,n);
+    return '<section id="part-'+n+'" class="part'+cls+(ok?' comprise':'')+'">';
+  });
+  html=html.replace(/(<section id="part-(\d+)"[^>]*>\s*<div class="ph">[\s\S]*?<\/h2><\/div>)/g, function(all, _, i){
+    if(all.indexOf('part-q')>=0) return all;
+    return all+partQHTML(mi,fi,+i);
+  });
+  html=html.replace(/<section id="part-(\d+)"[\s\S]*?<\/section>/g, function(all){
+    var m=/id="part-(\d+)"/.exec(all); if(!m) return all;
+    if(all.indexOf('part-foot')>=0) return all;
+    return all.replace(/<\/section>$/, partFootHTML(mi,fi,+m[1])+'</section>');
+  });
+  return html;
+}
+function paintGuideProg(mi,fi){
+  var f=D[mi]&&D[mi].fiches[fi]; if(!f) return;
+  var n=f.parties.length, a=comprisDe(mi,fi);
+  var el=document.getElementById('gok-prog');
+  if(el) el.innerHTML='<b>'+a.length+' / '+n+'</b> parties que tu peux expliquer';
+  var bar=document.getElementById('gok-fill');
+  if(bar) bar.style.width=(n?Math.round(a.length/n*100):0)+'%';
+  var btns=document.querySelectorAll('.sommaire .hnav button');
+  for(var i=0;i<btns.length;i++){
+    if(a.indexOf(i)>=0) btns[i].classList.add('ok'); else btns[i].classList.remove('ok');
+  }
+}
+function marquerPartie(mi,fi,i){
+  var a=comprisDe(mi,fi); var on=a.indexOf(i)>=0;
+  if(on) a=a.filter(function(x){ return x!==i; }); else a.push(i);
+  sauverCompris(mi,fi,a);
+  var sec=document.getElementById('part-'+i);
+  if(sec){
+    sec.classList.toggle('comprise', !on);
+    var b=sec.querySelector('.part-foot button');
+    if(b){
+      b.classList.toggle('on', !on);
+      var t=D[mi].fiches[fi].parties[i].titre||'';
+      var rec=/retenir/i.test(t);
+      b.textContent = !on ? (rec?'Je le dis en 1 minute':'Compris — je peux l\'expliquer') : (rec?'Je le dis en 1 minute':'Je peux l\'expliquer');
+    }
+  }
+  paintGuideProg(mi,fi);
+  if(!on){
+    try{ if(navigator.vibrate) navigator.vibrate(10); }catch(e){}
+    var n=D[mi].fiches[fi].parties.length;
+    if(a.length>=n) toast('Parcours lecture terminé. Passe aux cartes.');
+    else toast('Dis-le maintenant, sans relire.');
+  }
+}
+window.marquerPartie=marquerPartie;
+window.paintGuideProg=paintGuideProg;
+
+var _lire8=renderLire;
+renderLire=function(mi,fi){ return habillerLire(mi,fi,_lire8(mi,fi)); };
+
+var _h8=renderHome;
+renderHome=function(){
+  var html=_h8();
+  html=html.replace('Comprends la fiche de cours','Une question, tu expliques à voix haute');
+  html=html.replace('Retourne les cartes','Jusqu\'à tout retenir sans tricher');
+  html=html.replace('Quiz et défis express','Comme le jour du bac');
+  html=html.replace('lis, mémorise les définitions, retourne les cartes et vérifie-toi avec les quiz.','lis comme un guide : une partie, une question, tu expliques. Puis cartes, quiz, défis.');
+  return html;
+};
+
+function afterLire(){
+  try{
+    var p=parse();
+    if(p&&!p.home&&!p.expose&&p.tab==='lire') paintGuideProg(p.mi,p.fi);
+  }catch(e){}
+}
+var _r8=render;
+render=function(){ _r8(); afterLire(); };
+window.addEventListener('hashchange',function(){ setTimeout(afterLire,0); });
 try{ render(); }catch(e){}
 })();
 

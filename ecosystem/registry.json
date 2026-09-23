@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "maj": "2026-09-22",
+  "maj": "2026-09-23",
   "nom": "Écosystème complet Study Board",
   "principe": "Un seul dépôt, une seule vérité. Tout est local, vérifiable et borné : aucun processus infini, aucun clone automatique, aucun secret, aucun envoi git automatique. Ce registre décrit l'écosystème INTERNE (ce qui tourne dans ce dépôt) et les RÉFÉRENCES EXTERNES demandées par l'utilisateur, avec ce que chacune apporte réellement.",
   "invariants": [
@@ -15,7 +15,7 @@
     "jiojio": "Nom donné par l'utilisateur à l'écosystème complet du projet (agents + skills + tools + ecosystem). Ce dossier ecosystem/ en est la carte officielle."
   },
   "interne": [
-    { "id": "fiches", "chemin": "index.html", "role": "Application principale : contenu (const D), défis (DF6), astuces (EX6), repères (EXTRA), audios (AUDIOF), exposés (EXPOSES)." },
+    { "id": "fiches", "chemin": "index.html", "role": "Application principale : contenu (const D), défis (DF6), astuces (EX6), repères (EXTRA), audios (AUDIOF), exposés (EXPOSES). Guide de réussite (lecture active : question-guide, élaboration « je peux l'expliquer », progression locale sblire) — habillage de renderLire, pas une refonte." },
     { "id": "studio-vocal", "chemin": "vocal.html", "role": "Studio Vocal 1 à 30 min : enregistrement, import audio, collage de texte." },
     { "id": "serveur-local", "chemin": "server.py", "role": "Serveur local (port 4173) : statique + POST /api/vocal + GET /api/vocals + GET /api/health." },
     { "id": "pipeline-qa", "chemin": "agents/qa.py", "role": "Pipeline QA : 9 pas de contrôle finis, correcteurs bornés, rapport agents/rapport.json." },

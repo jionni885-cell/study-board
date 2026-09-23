@@ -7,7 +7,7 @@
 >
 > Contrôle automatique : `python3 ecosystem/check.py` (hors ligne, code de
 > sortie 0 = cohérent). Ce contrôle est aussi le **pas `ecosysteme`** de
-> `python3 agents/qa.py`.
+> `python3 agents/qa.py`. Carte mise à jour le **23/09/2026** (guide de réussite).
 
 ## 1. Pourquoi une carte ?
 
@@ -28,7 +28,7 @@ ecosystem/
 
 | Pièce | Fichier | Rôle |
 |---|---|---|
-| Application | `index.html` | Fiches (`D`), défis (`DF6`), astuces (`EX6`), repères (`EXTRA`), audios (`AUDIOF`), exposés (`EXPOSES`) |
+| Application | `index.html` | Fiches (`D`), défis (`DF6`), astuces (`EX6`), repères (`EXTRA`), audios (`AUDIOF`), exposés (`EXPOSES`), **guide de réussite** (lecture active) |
 | Studio Vocal | `vocal.html` | Oral de 1 à 30 min : micro, import audio, collage de texte |
 | Serveur local | `server.py` | Statique + `/api/vocal`, `/api/vocals`, `/api/health` (port 4173) |
 | Pipeline QA | `agents/qa.py` | **9 pas** de contrôle finis + correcteurs bornés + `agents/rapport.json` |

@@ -164,6 +164,13 @@ repères (faits clés, schémas, frises, tableaux, mini-questions), des astuces 
 pièges, des cartes, les modes Étudier/Écrire/Associer/Grille, un quiz, des défis
 express et un récapitulatif audio.
 
+**Guide de réussite (23 septembre 2026)** — l'onglet Lire n'est plus un mur de
+texte à survoler. En tête de fiche : *pourquoi c'est au bac* et *ce que tu sauras
+expliquer*. Sous chaque titre de partie : une **question-guide**. En bas de
+partie : **« Je peux l'expliquer »** (dis-le à voix haute, sans relire — c'est
+comme ça qu'on retient). Une barre compte les parties que tu peux déjà dire.
+Ensuite seulement : cartes, quiz, défis.
+
 ---
 
 ## 🧪 Vérifications automatiques
