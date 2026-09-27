@@ -131,23 +131,25 @@ Le site en ligne est disponible à l'adresse :
 
 ---
 
-## 📚 Contenu (état au 22 septembre 2026)
+## 📚 Contenu (état au 27 septembre 2026)
 
 | Index | Matière / fiche | Parties | Définitions (dont mot pour mot) | Cartes | Quiz | Défis |
 |---|---|---:|---:|---:|---:|---:|
 | 0-0 | SES — Les sources et les défis de la croissance économique | 6 | 15 (11) | 23 | 21 | 5 formats |
-| 1-0 | HGGSP — Faire la guerre, faire la paix : conflits et modes de résolution | 4 | 3 (3) | 12 | 10 | 4 formats |
-| 1-1 | HGGSP — Cartographier les guerres et les conflits : limites et enjeux | 3 | 0 (0) | 6 | 4 | 4 formats |
+| 1-0 | HGGSP — Faire la guerre, faire la paix : conflits et modes de résolution | 8 | 26 (9) | 25 | 20 | 7 formats |
+| 1-1 | HGGSP — Cartographier les guerres et les conflits : limites et enjeux | 7 | 13 (3) | 20 | 14 | 7 formats |
 | 2-0 | Histoire — La crise de 1929 : le krach boursier et ses mécanismes | 6 | 3 (3) | 11 | 10 | 4 formats |
 | 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 5 | 4 (0) | 19 | 10 | 4 formats |
 | 0-1 | SES — Progrès technique, innovation et croissance endogène | 9 | 22 (21) | 28 | 28 | 5 formats |
 | 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 (9) | 12 | 10 | 5 formats |
 
-**Totaux actuels : 38 parties, 111 cartes, 93 questions, 7 récapitulatifs MP3.**
+**Totaux actuels : 46 parties, 138 cartes, 113 questions, 7 récapitulatifs MP3 + 1 exposé.**
 
 La matière **Philosophie** (index 4) a été ajoutée le 13 septembre 2026 à partir
 des documents sources fournis (audio « Philosophie 1 début » + photos de cours).
 La fiche SES a également été complétée avec la voix 3 et les exercices du jour.
+
+Les fiches **HGGSP 1-0 et 1-1** ont été enrichies le 27 septembre 2026 pour être parfaites : 8 + 7 parties, 26 + 13 définitions dont 9 + 3 mot pour mot, 25 + 20 cartes, 20 + 14 quiz, 7 formats de défis chacune, 10 blocs EXTRA chacune (facts, schémas formes de guerre et acteurs/échelles, tables SIPRI/UCDP/Heidelberg/GPI/ACLED et modes de résolution, frises 1648-2023 et 1991-2023, probes CIJ/CPI, veto P5, OMP), astuces mnémo SIPRI Strict/UCDP Sensible, CIJ États/CPI Personnes, OMP CIP, formule bac carte non neutre, chiffres Yémen 21M/4,5M/80%/377k/6% Bab-el-Mandeb.
 
 La fiche **0-1 — Progrès technique, innovation et croissance endogène** a été
 ajoutée le 22 septembre 2026 à partir de la transcription du cours : rendements

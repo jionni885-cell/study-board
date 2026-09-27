@@ -69,14 +69,14 @@ Les données vivent dans `const D` dans `index.html`.
 | Index | Matière / fiche | Parties | Définitions | Mot pour mot | Cartes | Quiz | MP3 |
 |---|---|---:|---:|---:|---:|---:|---|
 | 0-0 | SES — Les sources et les défis de la croissance économique | 6 | 15 | 11 | 23 | 21 | `ses-croissance` |
-| 1-0 | HGGSP — Faire la guerre, faire la paix : conflits et modes de résolution | 4 | 3 | 3 | 12 | 10 | `hggsp-guerre` |
-| 1-1 | HGGSP — Cartographier les guerres et les conflits : limites et enjeux | 3 | 0 | 0 | 6 | 4 | `hggsp-cartographier` |
+| 1-0 | HGGSP — Faire la guerre, faire la paix : conflits et modes de résolution | 8 | 26 | 9 | 25 | 20 | `hggsp-guerre` |
+| 1-1 | HGGSP — Cartographier les guerres et les conflits : limites et enjeux | 7 | 13 | 3 | 20 | 14 | `hggsp-cartographier` |
 | 2-0 | Histoire — La crise de 1929 : le krach boursier et ses mécanismes | 6 | 3 | 3 | 11 | 10 | `histoire-1929` |
 | 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 5 | 4 | 0 | 19 | 10 | `anglais-heroes` |
 | 0-1 | SES — Progrès technique, innovation et croissance endogène | 9 | 22 | 21 | 28 | 28 | `ses-progres-technique` |
 | 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 | 9 | 12 | 10 | `philo-intro` |
 
-**Totaux : 5 matières, 7 fiches, 38 parties, 111 cartes, 93 questions, 7 fichiers MP3 pour les fiches + 1 MP3 pour l’exposé → 8 fichiers MP3 au total.**
+**Totaux : 5 matières, 7 fiches, 46 parties, 138 cartes, 113 questions, 7 fichiers MP3 pour les fiches + 1 MP3 pour l’exposé → 8 fichiers MP3 au total.**
 
 **Nouveau : section Exposés (PR #7).** Un exposé **HGGSP — La guerre au Yémen (5 min)** est disponible depuis l’accueil (après Matières) et à l’adresse `#/expose/yemen` : problématique, 3 parties (origines & acteurs, crise humanitaire, impasse diplomatique) + conclusion, chiffres clés (21 M dans le besoin, 4,5 M déplacés…), frise 2011‑2025, définitions (Houthis, coalition, blocus, crise humanitaire, multilatéralisme) et récapitulatif audio `hggsp-yemen.mp3`. Données dans `const EXPOSES` (après `AUD`), rendues par `renderExpose()` et routées via `parse()`.
 
@@ -429,6 +429,8 @@ contenu si besoin.
 
 
 ## 🕘 Historique des mises à jour
+
+- **27 septembre 2026 (session `arena/01a0e344-study-board`)** — **HGGSP enrichi complet — parfait, rien ne manque.** (1) **Fiche 1-0 « Faire la guerre, faire la paix »** : passe de 4 à 8 parties, 3 à 26 définitions dont 9 mot pour mot, 12 à 25 cartes, 10 à 20 quiz. Ajouts : formes de guerre (classique → totale WW1/WW2 → froide proxy/dissuasion → civile → asymétrique → hybride cyber/désinfo/drones), acteurs étatiques vs non étatiques (Wagner), 4 échelles (locale/nationale/régionale proxy/mondiale), motivations (territoriale, politique, éco Bab-el-Mandeb, identitaire, sécuritaire), mesure (SIPRI 1000, UCDP 25, Heidelberg 5 niveaux, GPI 23 critères, ACLED temps réel), résolution (négociation, médiation mot pour mot, arbitrage, Conseil sécurité chapitre VII, OMP 3 principes CIP depuis 1948, sanctions, CIJ vs CPI 2002 piège bac, reconstruction justice transitionnelle), enjeux contemporains (terrorisme Daech, cyberguerre Estonie 2007/Ukraine 2022, drones, SMP, veto P5). (2) **Fiche 1-1 « Cartographier »** : passe de 3 à 7 parties, 0 à 13 définitions dont 3 mot pour mot, 6 à 20 cartes, 4 à 14 quiz. Ajouts : pourquoi cartographier (outil géopolitique États/ONU/médias/chercheurs), 4 choix cartographe (échelle grande/petite, seuil 1000 vs 25, indicateurs militaires vs humanitaires OCHA/UNHCR, sémiologie ponctuel/linéaire/surfacique couleurs), durée vie limitée ACLED, rupture 1991 (chute URSS, 56 conflits actifs 2023 record UCDP, 114M déplacés HCR), cartographier paix (GPI 2007 23 critères 163 pays Islande/Afghanistan/France 67e, paix négative vs positive Galtung mot pour mot), étude cas Yémen complète (Houthis Ansar Allah, coalition 9 pays 26 mars 2015, blocus mot pour mot, crise humanitaire fabriquée, frise 2011-2025, chiffres 21M/30M, 4,5M déplacés, Hodeïda 80%, 377k morts 2021 60% indirects, Bab-el-Mandeb 6% commerce 30% conteneurs + attaques nov 2023). (3) **Enrichissements** : EXTRA 1-0 10 blocs (facts, 2 schemas, 2 tables, timeline 1648-2023, 4 probes), EXTRA 1-1 10 blocs (facts, 2 schemas, 2 tables, timeline 1991-2023, 4 probes) ; DF6 1-0 7 défis (vf 6, cloze 5+5, order, intrus, sort 2) et 1-1 7 défis (vf 5, cloze 5+4, order 2, intrus, sort) = 5 formats partout ; EX6 1-0 8 astuces/pièges (SIPRI/UCDP mnémo, CIJ/CPI, OMP CIP, formes guerre, veto P5, casques bleus, paix négative/positive, proxy) et 1-1 8 astuces/pièges (ÉSiS-P, formule bac, seuils, chiffres 21-4,5-80-377-6, carte vérité, GPI/Heidelberg inverse, rupture 1991, limite SIPRI/UCDP Yémen). (4) **Vérifs** : `python3 tools/audit.py` 0 problème, `python3 agents/qa.py` 9/9 PASS (dont jsdom et mobile 5 tailles), ZIP resynchronisé 11 fichiers, README/REPRISE compteurs à jour (46 parties, 138 cartes, 113 questions).
 
 - **22 septembre 2026 (session `arena/01a0c9e2-study-board`)** — **Fiche SES 0-1,
   téléphone d'abord et écosystème complet.** (1) **Contenu** : la transcription du
