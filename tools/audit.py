@@ -118,10 +118,13 @@ if D:
     FORBIDDEN = ["à vérifier", "a verifier", "transcription", "la voix dit", "selon ton professeur",
                  "à confirmer", "l'essentiel à retenir", "todo", "xxx"]
     fiche_keys = set()
+    audio_required = set()
     for mi, m in enumerate(D):
         for fi, f in enumerate(m["fiches"]):
             key = "%d-%d" % (mi, fi)
             fiche_keys.add(key)
+            if f.get("audio_recap") is not False:
+                audio_required.add(key)
             tag = "%s (%s — %s)" % (key, m["nom"], f.get("titre", "?"))
             if not f.get("parties"):
                 bad("%s : aucune partie" % tag)
@@ -230,7 +233,7 @@ if D:
             bad("AUDIOF[%s] → media/audio/%s.mp3 absent" % (key, slug))
         elif os.path.getsize(p) < 20000:
             bad("media/audio/%s.mp3 : fichier suspicieusement petit" % slug)
-    for key in fiche_keys:
+    for key in audio_required:
         if (AUDIOF or {}).get(key) is None:
             bad("fiche %s : aucun récapitulatif MP3 déclaré dans AUDIOF" % key)
 

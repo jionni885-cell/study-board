@@ -3,7 +3,7 @@
 > ♻️ **Agent IA : avant tout travail sur ce dépôt, lis [`REPRISE.md`](REPRISE.md).**
 
 Application de révision **100 % autonome** (un seul fichier : `index.html` + dossier `media`).
-SES · HGGSP · Histoire · Anglais · Philosophie — fiches de cours détaillées, cartes façon Quizlet,
+SES · HGGSP · Histoire · Anglais · Philosophie · Droit — fiches de cours détaillées, cartes façon Quizlet,
 mode Écrire, mode Associer, quiz, **défis express** (vrai/faux, phrases à trous,
 remise en ordre, intrus, classement), **révision audio**, thème clair/sombre,
 responsive mobile.
@@ -142,8 +142,11 @@ Le site en ligne est disponible à l'adresse :
 | 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 5 | 4 (0) | 19 | 10 | 4 formats |
 | 0-1 | SES — Progrès technique, innovation et croissance endogène | 9 | 22 (21) | 28 | 28 | 5 formats |
 | 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 (9) | 12 | 10 | 5 formats |
+| 5-0 | Droit — Comprendre ce qu’est le droit | 5 | 11 (5) | 15 | 12 | 5 formats |
 
-**Totaux actuels : 46 parties, 138 cartes, 113 questions, 7 récapitulatifs MP3 + 1 exposé.**
+**Totaux actuels : 51 parties, 153 cartes, 125 questions, 8 fiches, 7 récapitulatifs MP3 + 1 exposé. La fiche Droit est textuelle (aucun MP3 source fourni).**
+
+La matière **Droit** (index 5) a été ajoutée à partir du texte de vocal fourni (transcription produite par IA) : cinq parties, onze définitions dont cinq à mémoriser mot pour mot, quinze cartes, douze questions de quiz et treize questions de défis réparties en cinq formats. Les formulations issues de la reconnaissance vocale ont été clarifiées ; les notions sur la DDHC, le Code civil et la Constitution sont présentées comme repères introductifs.
 
 La matière **Philosophie** (index 4) a été ajoutée le 13 septembre 2026 à partir
 des documents sources fournis (audio « Philosophie 1 début » + photos de cours).
