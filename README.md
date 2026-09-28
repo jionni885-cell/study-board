@@ -145,8 +145,11 @@ Le site en ligne est disponible à l'adresse :
 | 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 (9) | 12 | 10 | 5 formats |
 | 5-0 | Droit — Comprendre ce qu’est le droit | 5 | 11 (5) | 15 | 12 | 5 formats |
 | 6-0 | Italien — Il fascismo italiano : analyser trois photographies de propagande | 11 | 33 (27) | 30 | 22 | 5 formats |
+| 6-1 | Italien — La simbologia del fascismo : symboles, rites et indottrinamento | 6 | 10 (8) | 14 | 10 | 5 formats |
+| 6-2 | Italien — Il regime fascista di Mussolini : la comprensione orale | 7 | 9 (8) | 20 | 12 | 5 formats |
+| 6-3 | Italien — Grammaire : le présent italien et les articles | 4 | 7 (7) | 26 | 10 | 4 formats |
 
-**Totaux actuels : 62 parties, 183 cartes, 147 questions, 9 fiches, 8 récapitulatifs MP3 + 1 exposé. La fiche Droit est textuelle (aucun MP3 source fourni).**
+**Totaux actuels : 79 parties, 243 cartes, 179 questions, 12 fiches, 8 récapitulatifs MP3 + 1 exposé. La fiche Droit est textuelle (aucun MP3 source fourni).**
 
 La matière **Droit** (index 5) a été ajoutée à partir du texte de vocal fourni (transcription produite par IA) : cinq parties, onze définitions dont cinq à mémoriser mot pour mot, quinze cartes, douze questions de quiz et treize questions de défis réparties en cinq formats. Les formulations issues de la reconnaissance vocale ont été clarifiées ; les notions sur la DDHC, le Code civil et la Constitution sont présentées comme repères introductifs.
 
@@ -155,6 +158,23 @@ La matière **Italien** (index 6) a été ajoutée le 28 septembre 2026 à parti
 La matière **Philosophie** (index 4) a été ajoutée le 13 septembre 2026 à partir
 des documents sources fournis (audio « Philosophie 1 début » + photos de cours).
 La fiche SES a également été complétée avec la voix 3 et les exercices du jour.
+
+### ➕ Mattering italien : trois fiches de plus (28 septembre 2026)
+
+À partir des feuilles de cours photographiées (« La simbologia del FASCISMO »,
+« il regime fascista 1919/1943 », la grille de **comprensione orale**, le QCM
+**Benito / Adolfo**, les 20 verbes au présent et les 20 articles), la matière
+Italien passe de 1 à **4 fiches** :
+
+| Fiche | Ce qu'elle contient | Cartes | Quiz | Défis |
+|---|---|---:|---:|---:|
+| **6-1 — La simbologia del fascismo** | le *fascio littorio* (bastoni + scure) et l'origine du mot, l'*aquila* (force, noblesse), le *saluto romano* et son **origine &#8230; un mythe** (« non vi sono rappresentazioni o menzioni di tale usanza »), les **8 leviers** de l'*indottrinamento* dont l'*Anno I = 1922*, le lexique en 10 entrées et les saluts (*Viva il Duce !* / *A noi !*) | 14 | 10 | 35 questions |
+| **6-2 — Il regime fascista di Mussolini** | la grille de l'oral remplie : nature du régime, Italie de 1919, 1919-1925 et 1936-1945 **phrase par phrase**, les 3 symboles, les 3 valeurs (*la famiglia, la patria, il lavoro*), les moyens de la dictature, et le **tableau Benito/Adolfo des 20 questions** avec la colonne des erreurs | 20 | 12 | 33 questions |
+| **6-3 — Conjuguer et employer les articles** | les 3 terminaisons du présent (-are / -ere / -ire), les **20 verbes du cours conjugués et en phrase**, les irréguliers (*essere, avere, fare, potere, dire, volere*), les **7 articles** (il/lo/la/l'/i/gli/le) et les pluriels à ne pas confondre (*i fascisti* mais *le leggi*) | 26 | 10 | 30 questions |
+
+Chaque partie se termine par un encadré **« Teste-toi »** (4 choix, explication
+après la réponse) et la matière gagne **4 nouveaux défis express** par fiche :
+vrai/faux, phrases à trous, remise en ordre, intrus et classement.
 
 Les fiches **HGGSP 1-0 et 1-1** ont été enrichies le 27 septembre 2026 pour être parfaites : 8 + 7 parties, 26 + 13 définitions dont 9 + 3 mot pour mot, 25 + 20 cartes, 20 + 14 quiz, 7 formats de défis chacune, 10 blocs EXTRA chacune (facts, schémas formes de guerre et acteurs/échelles, tables SIPRI/UCDP/Heidelberg/GPI/ACLED et modes de résolution, frises 1648-2023 et 1991-2023, probes CIJ/CPI, veto P5, OMP), astuces mnémo SIPRI Strict/UCDP Sensible, CIJ États/CPI Personnes, OMP CIP, formule bac carte non neutre, chiffres Yémen 21M/4,5M/80%/377k/6% Bab-el-Mandeb.
 
