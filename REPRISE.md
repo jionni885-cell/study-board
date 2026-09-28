@@ -1,7 +1,7 @@
 # PROMPT DE REPRISE — STUDY BOARD
 
 > Document de mémoire permanente du dépôt. À lire avant toute modification.
-> Dernière mise à jour : **22 septembre 2026 (session `arena/01a0c9e2-study-board`)**.
+> Dernière mise à jour : **28 septembre 2026 (session `arena/01a0e902-study-board`)**.
 
 ## 🎯 Mission
 
@@ -12,7 +12,7 @@ français.
 - Dépôt GitHub : <https://github.com/jionni885-cell/study-board>
 - Site en ligne : <https://jionni885-cell.github.io/study-board/>
 - Application autonome : `index.html` contient le contenu, la logique et le CSS.
-- Les huit récapitulatifs audio publics sont dans `media/audio/*.mp3` (7 fiches + 1 exposé `hggsp-yemen`).
+- Les neuf récapitulatifs audio publics sont dans `media/audio/*.mp3` (8 fiches + 1 exposé `hggsp-yemen`).
 - **Studio Vocal** : `vocal.html` (oraux 1 à 30 min, analyse, envoi) + `server.py`
   (serveur local port 4173 : statique + `POST /api/vocal` + auto commit/push vocal
   dans la branche active) + `vocals/` (vocaux enregistrés : 1 JSON au 18/09).
@@ -76,8 +76,9 @@ Les données vivent dans `const D` dans `index.html`.
 | 0-1 | SES — Progrès technique, innovation et croissance endogène | 9 | 22 | 21 | 28 | 28 | `ses-progres-technique` |
 | 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 | 9 | 12 | 10 | `philo-intro` |
 | 5-0 | Droit — Comprendre ce qu’est le droit | 5 | 11 | 5 | 15 | 12 | — (pas de MP3 fourni) |
+| 6-0 | Italien — Il fascismo italiano : analyser trois photographies de propagande | 11 | 33 | 27 | 30 | 22 | `italien-fascismo` |
 
-**Totaux : 6 matières, 8 fiches, 51 parties, 153 cartes, 125 questions, 7 fichiers MP3 pour les fiches + 1 MP3 pour l’exposé → 8 fichiers MP3 au total. La fiche Droit est textuelle (aucun MP3 source fourni).**
+**Totaux : 7 matières, 9 fiches, 62 parties, 183 cartes, 147 questions, 8 fichiers MP3 pour les fiches + 1 MP3 pour l’exposé → 9 fichiers MP3 au total. La fiche Droit est textuelle (aucun MP3 source fourni).**
 
 **Nouveau : section Exposés (PR #7).** Un exposé **HGGSP — La guerre au Yémen (5 min)** est disponible depuis l’accueil (après Matières) et à l’adresse `#/expose/yemen` : problématique, 3 parties (origines & acteurs, crise humanitaire, impasse diplomatique) + conclusion, chiffres clés (21 M dans le besoin, 4,5 M déplacés…), frise 2011‑2025, définitions (Houthis, coalition, blocus, crise humanitaire, multilatéralisme) et récapitulatif audio `hggsp-yemen.mp3`. Données dans `const EXPOSES` (après `AUD`), rendues par `renderExpose()` et routées via `parse()`.
 
@@ -112,7 +113,15 @@ Lire cette structure avant toute édition :
   - `liste` avec `items` ;
   - `def` avec `terme`, `texte`, `wpw` ;
   - `exemple` avec `texte` ;
-  - `note` avec `texte`.
+  - `note` avec `texte` ;
+  - `doc` avec `num`, `titre`, `legende`, `cadre` (`portrait`/`paysage`), `angle`, `prise`,
+    `zones` (`x`, `y`, `w`, `h`, `l`, `k`), `analyse` (paires `[libellé, texte]`) et `dire`
+    (phrases à dire en italien) — bloc visuel de la fiche 6-0 : schéma de cadrage dessiné en
+    CSS/HTML (aucune image, donc rien à télécharger et un rendu identique hors ligne),
+    rendu par l'extension `_blkDoc` de `blockHTML` (3e bloc `<script>`) et stylé par le CSS
+    `.doc`/`.cadre`/`.doc-grid`/`.doc-dire` en fin de `<style>` ;
+  - `astro` et `piege` sont acceptés **dans les parties** (pas seulement via `EX6`) depuis
+    la fiche 6-0 : `tools/audit.py` les a dans sa liste `TYPES`.
 - Blocs enrichis de `EXTRA["mi-fi"]` : `facts`, `schema`, `timeline`, `table`,
   `probe`.
 - `const EXTRA = {...}` contient les repères, schémas, frises, tableaux et
@@ -120,6 +129,10 @@ Lire cette structure avant toute édition :
 - `const DF6 = {...}` contient les défis express propres à chaque fiche.
 - `const EX6 = {...}` contient les encadrés `astro` et `piege`.
 - `const AUDIOF = {...}` associe chaque clé de fiche au slug MP3.
+- Matière **italien** (index 6) : icône `photo` (ajoutée à `const I`), couleurs
+  `['#BE123C','#FDECEF']` dans `IKEY`/`COL`, source déclarée `Italie_1.m4a` (ajoutée à
+  `AUD`) — le lecteur de prise de notes originale reste masqué tant que le fichier privé
+  n'est pas présent localement ; `vocal.html` propose les fiches 5-0 et 6-0.
 - `const EXPOSES = [...]` contient les exposés (après `AUD`, pour ne pas casser l’extraction `D→AUD` de `audit.py`) : `id`, `titre`, `matiere`, `duree`, `problematique`, `parties`, `chiffres`, `chronologie`, `audio` ; rendu par `renderExpose()` et routé en `#/expose/:id` via `parse()`.
 - `vocal.html` : page autonome (1 bloc `<script>`) ; constantes `MAX_MS = 1800000`,
   `MAX_S = 1800`, `SB_FALLBACKS = []` (VIDE par conception — plus aucun URL de
@@ -430,6 +443,8 @@ contenu si besoin.
 
 
 ## 🕘 Historique des mises à jour
+
+- **28 septembre 2026 (session `arena/01a0e902-study-board`)** — **Matière Italien (index 6), fiche 6-0 et bloc visuel « doc ».** (1) **Contenu** : à partir de l'oral d'analyse de documents fourni, création de la fiche **6-0 « Il fascismo italiano — analizzare tre fotografie di propaganda »** : 11 parties, 33 définitions dont 27 mot pour mot, 30 cartes, 22 questions de quiz, 5 formats de défis (vf 7, cloze 6, order 6 étapes, intrus, sort 3 catégories), 10 blocs EXTRA (facts 12 dates, 2 schémas, 2 tables, timeline 5 étapes, 4 probes) et 9 astuces/pièges ; MP3 `media/audio/italien-fascismo.mp3` (442 Ko) + clé `AUDIOF['6-0']`. Le contenu couvre la méthode d'analyse en 6 étapes, la chronologie 1919-1945 vérifiée (23.03.1919 Fasci, 11.1921 PNF, 28.10.1922 marcia su Roma, 1923 legge Acerbo, 04.1924 elezioni 64,9 %, 10.06.1924 Matteotti, 03.01.1925 dittatura, 1925-26 leggi fascistissime/OVRA, 03.04.1926 ONB, 1929 Lateranensi, 1935-36 Etiopia/Impero 09.05.1936, 10.1936 Asse Roma-Berlino, 09.1937 Berlino, 1938 leggi razziali, 22.05.1939 Patto d'Acciaio, 10.06.1940 guerra, 25.07.1943 caduta, 28.04.1945), la machine de propagande (Istituto LUCE 1924, MinCulPop 1937, ONB→GIL 1937, dopolavoro, EIAR), l'analyse détaillée des trois photographies (Duce et enfant balilla 1926 ; Duce en contre-plongée devant le Colisée ; Mussolini et Hitler à Berlin en septembre 1937), leur mise en série (consenso → grandezza → guerra), le lexique en 4 familles (régime, image, société, verbes et connecteurs), les modèles rédigés d'analyse et les faux-amis. (2) **Nouveau bloc `doc`** : schéma de cadrage en CSS (cadre au ratio 4/5 ou 5/4, zones colorées positionnées en pourcentage, badge d'angle de prise de vue) + grille d'analyse en 8 entrées + encadré « À dire en italien » ; rendu ajouté comme extension de `blockHTML` (aucune modification du moteur existant), CSS en fin de `<style>`, `tools/audit.py` étendu (TYPES += doc, contrôle titre/analyse/zones et zones dans le cadre) et liste blanche élargie à `astro`/`piege` dans les parties. (3) **Méthode de révision fondée sur la recherche** : partie dédiée + tableau qui relie chaque technique à sa preuve (rappel actif : Roediger et Karpicke 2006, ≈ 80 % contre 36 % après une semaine ; pratique espacée : Cepeda et al. 2006, 254 études ; utilité comparée des 10 techniques : Dunlosky et al. 2013 ; mot-clé sonore pour le vocabulaire d'une langue étrangère : Atkinson et Raugh 1975, 88 % contre 28 % ; principes multimédia et double codage : Mayer 2009, Paivio) et calendrier J0/J+1/J+3/J+7/J+15/J+30. (4) **Studio Vocal** : `vocal.html` connaît désormais les fiches 5-0 (Droit) et 6-0 (Italien). (5) **Outil de session** : boîte de réception privée pour envoyer des images à l'agent (`inbox-server.py`, port 4200, fichiers dans `~/uploads`, hors dépôt, jamais commités) — non versionnée volontairement. (6) **Vérifications** : `python3 tools/audit.py` 0 problème (ZIP resynchronisé, 12 fichiers), `node --check` 3/3 blocs de `index.html` + 1/1 de `vocal.html`, compteurs README/REPRISE recalculés depuis les données réelles (62 parties, 183 cartes, 147 questions, 9 fiches, 7 matières).
 
 - **27 septembre 2026 — Fiche Droit 5-0** : à partir du texte fourni issu d’un vocal généré/transcrit par IA, création de cinq parties, 11 définitions (5 mot pour mot), 15 cartes, 12 questions de quiz et 13 questions de défis réparties en cinq formats. Clarification des notions de règle de droit, morale et coutume, fonction pacificatrice, articles 6 DDHC et 4 du Code civil, État de droit, droit objectif et droit subjectif. Aucun fichier audio source n’a été fourni ; le récap MP3 reste désactivé pour cette fiche.
 

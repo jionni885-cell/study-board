@@ -81,6 +81,7 @@ clés, mécanismes, pièges et mini auto-test final.
 - `media/audio/anglais-heroes.mp3` — Heroes & superheroes (vocabulaire anglais)
 - `media/audio/ses-progres-technique.mp3` — Progrès technique, innovation et croissance endogène
 - `media/audio/philo-intro.mp3` — Qu'est-ce que la philosophie ?
+- `media/audio/italien-fascismo.mp3` — Il fascismo italiano : analyser trois photographies de propagande
 
 ### Notes vocales d'origine (.m4a)
 Les enregistrements d'origine (`.m4a`) **ne doivent jamais être ajoutés au dépôt**.
@@ -131,7 +132,7 @@ Le site en ligne est disponible à l'adresse :
 
 ---
 
-## 📚 Contenu (état au 27 septembre 2026)
+## 📚 Contenu (état au 28 septembre 2026)
 
 | Index | Matière / fiche | Parties | Définitions (dont mot pour mot) | Cartes | Quiz | Défis |
 |---|---|---:|---:|---:|---:|---:|
@@ -143,10 +144,13 @@ Le site en ligne est disponible à l'adresse :
 | 0-1 | SES — Progrès technique, innovation et croissance endogène | 9 | 22 (21) | 28 | 28 | 5 formats |
 | 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 (9) | 12 | 10 | 5 formats |
 | 5-0 | Droit — Comprendre ce qu’est le droit | 5 | 11 (5) | 15 | 12 | 5 formats |
+| 6-0 | Italien — Il fascismo italiano : analyser trois photographies de propagande | 11 | 33 (27) | 30 | 22 | 5 formats |
 
-**Totaux actuels : 51 parties, 153 cartes, 125 questions, 8 fiches, 7 récapitulatifs MP3 + 1 exposé. La fiche Droit est textuelle (aucun MP3 source fourni).**
+**Totaux actuels : 62 parties, 183 cartes, 147 questions, 9 fiches, 8 récapitulatifs MP3 + 1 exposé. La fiche Droit est textuelle (aucun MP3 source fourni).**
 
 La matière **Droit** (index 5) a été ajoutée à partir du texte de vocal fourni (transcription produite par IA) : cinq parties, onze définitions dont cinq à mémoriser mot pour mot, quinze cartes, douze questions de quiz et treize questions de défis réparties en cinq formats. Les formulations issues de la reconnaissance vocale ont été clarifiées ; les notions sur la DDHC, le Code civil et la Constitution sont présentées comme repères introductifs.
+
+La matière **Italien** (index 6) a été ajoutée le 28 septembre 2026 à partir de l'oral d'analyse de documents : fiche **6-0 — Il fascismo italiano**, 11 parties, 33 définitions dont 27 mot pour mot, 30 cartes, 22 questions de quiz, 5 formats de défis, 10 blocs de repères et 9 astuces/pièges. La fiche est construite autour d'un nouveau bloc visuel **« doc »** : chaque photographie de propagande est présentée avec son **schéma de cadrage** (zones colorées : premier plan, arrière-plan, angle de prise de vue), une grille d'analyse en 8 entrées (sujet, cadrage, composition, symboles, message, contexte, fonction, limite) et les phrases à dire en italien. La chronologie 1919-1945, la machine de propagande (Istituto LUCE, MinCulPop, ONB, OVRA), le lexique en 4 familles et les modèles rédigés d'analyse sont inclus, ainsi qu'une partie **« Comment réviser cette fiche »** qui applique les techniques mesurées comme les plus efficaces (rappel actif, révisions espacées, entrelacement, double codage, mot-clé sonore pour le vocabulaire).
 
 La matière **Philosophie** (index 4) a été ajoutée le 13 septembre 2026 à partir
 des documents sources fournis (audio « Philosophie 1 début » + photos de cours).
@@ -162,6 +166,8 @@ croissance endogène (capital public, capital humain, capital technologique), pl
 une partie **« Lire et interpréter des données économiques »** avec des exercices
 corrigés (taux de variation, coefficient multiplicateur, indice base 100, points
 de pourcentage, points de croissance).
+
+Les trois photographies étudiées (le Duce et l'enfant balilla de 1926, le Duce devant le Colisée, Mussolini et Hitler à Berlin en septembre 1937) sont mises en série : consentement → grandeur impériale → alliance et guerre.
 
 Chaque fiche propose des parties détaillées, une synthèse finale
 **« Ce qu'il faut retenir »**, des définitions « mot pour mot » 🎯, des exemples,

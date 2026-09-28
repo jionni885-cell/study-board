@@ -114,7 +114,10 @@ process.stdout.write(JSON.stringify(out));
         AUD = data["AUD"]
 
 if D:
-    TYPES = {"texte", "liste", "def", "exemple", "note", "cle", "facts", "schema", "timeline", "table", "probe"}
+    # « astro », « piege » et « cle » sont rendus par l’extension de blockHTML : ils sont
+    # utilisables dans les parties comme dans EXTRA (leçons des fiches 1-0/1-1 et 6-0).
+    TYPES = {"texte", "liste", "def", "exemple", "note", "cle", "facts", "schema", "timeline", "table", "probe", "doc",
+             "astro", "piege"}
     FORBIDDEN = ["à vérifier", "a verifier", "transcription", "la voix dit", "selon ton professeur",
                  "à confirmer", "l'essentiel à retenir", "todo", "xxx"]
     fiche_keys = set()
@@ -140,6 +143,14 @@ if D:
                 for b in p.get("blocs", []):
                     if b["type"] not in TYPES:
                         bad("%s : type de bloc inconnu « %s »" % (tag, b["type"]))
+                    if b["type"] == "doc":
+                        if not b.get("titre") or not b.get("analyse") or not b.get("zones"):
+                            bad("%s : document incomplet (titre / analyse / zones)" % tag)
+                        for z in b.get("zones", []):
+                            if any(k not in z for k in ("x", "y", "w", "h", "l")):
+                                bad("%s : zone de cadrage incomplète" % tag)
+                            elif z["x"] + z["w"] > 100 or z["y"] + z["h"] > 100:
+                                bad("%s : zone de cadrage hors du cadre" % tag)
                     if b["type"] == "def":
                         n_def += 1
                         n_wpw += 1 if b.get("wpw") else 0
