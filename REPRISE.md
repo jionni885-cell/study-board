@@ -1,7 +1,7 @@
 # PROMPT DE REPRISE — STUDY BOARD
 
 > Document de mémoire permanente du dépôt. À lire avant toute modification.
-> Dernière mise à jour : **28 septembre 2026 (session `arena/01a0e902-study-board`)**.
+> Dernière mise à jour : **29 septembre 2026 (session `arena/01a0ee81-study-board`)**.
 
 ## 🎯 Mission
 
@@ -12,7 +12,7 @@ français.
 - Dépôt GitHub : <https://github.com/jionni885-cell/study-board>
 - Site en ligne : <https://jionni885-cell.github.io/study-board/>
 - Application autonome : `index.html` contient le contenu, la logique et le CSS.
-- Les neuf récapitulatifs audio publics sont dans `media/audio/*.mp3` (8 fiches + 1 exposé `hggsp-yemen`).
+- Les récapitulatifs audio publics sont dans `media/audio/*.mp3` (9 fiches + 1 exposé `hggsp-yemen`) : `ses-croissance`, `ses-progres-technique`, `hggsp-guerre`, `hggsp-cartographier`, `histoire-1929`, `anglais-heroes`, `philo-intro`, `philo-desir`, `italien-fascismo` (la fiche Droit 5-0 est textuelle).
 - **Studio Vocal** : `vocal.html` (oraux 1 à 30 min, analyse, envoi) + `server.py`
   (serveur local port 4173 : statique + `POST /api/vocal` + auto commit/push vocal
   dans la branche active) + `vocals/` (vocaux enregistrés : 1 JSON au 18/09).
@@ -75,12 +75,33 @@ Les données vivent dans `const D` dans `index.html`.
 | 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 5 | 4 | 0 | 19 | 10 | `anglais-heroes` |
 | 0-1 | SES — Progrès technique, innovation et croissance endogène | 9 | 22 | 21 | 28 | 28 | `ses-progres-technique` |
 | 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 | 9 | 12 | 10 | `philo-intro` |
+| 4-1 | Philosophie — Le désir et le bonheur — John Stuart Mill | 8 | 19 | 17 | 26 | 14 | `philo-desir` |
 | 5-0 | Droit — Comprendre ce qu’est le droit | 5 | 11 | 5 | 15 | 12 | — (pas de MP3 fourni) |
 | 6-0 | Italien — Il fascismo italiano : analyser trois photographies de propagande | 11 | 33 | 27 | 30 | 22 | `italien-fascismo` |
+| 6-1 | Italien — La simbologia del fascismo : symboles, rites et indottrinamento | 6 | 10 | 8 | 14 | 10 | — (pas de MP3 fourni) |
+| 6-2 | Italien — Il regime fascista di Mussolini : la comprensione orale | 7 | 12 | 12 | 20 | 12 | — (pas de MP3 fourni) |
+| 6-3 | Italien — Grammaire : le présent italien et les articles | 4 | 4 | 3 | 26 | 10 | — (pas de MP3 fourni) |
 
-**Totaux : 7 matières, 9 fiches, 62 parties, 183 cartes, 147 questions, 8 fichiers MP3 pour les fiches + 1 MP3 pour l’exposé → 9 fichiers MP3 au total. La fiche Droit est textuelle (aucun MP3 source fourni).**
+**Totaux : 7 matières, 13 fiches, 87 parties, 269 cartes, 193 questions, 10 fichiers MP3 (9 pour les fiches, 1 pour l’exposé). Les fiches Droit (5-0) et Italien 6-1 à 6-3 sont textuelles (aucun MP3 source fourni).**
 
 **Nouveau : section Exposés (PR #7).** Un exposé **HGGSP — La guerre au Yémen (5 min)** est disponible depuis l’accueil (après Matières) et à l’adresse `#/expose/yemen` : problématique, 3 parties (origines & acteurs, crise humanitaire, impasse diplomatique) + conclusion, chiffres clés (21 M dans le besoin, 4,5 M déplacés…), frise 2011‑2025, définitions (Houthis, coalition, blocus, crise humanitaire, multilatéralisme) et récapitulatif audio `hggsp-yemen.mp3`. Données dans `const EXPOSES` (après `AUD`), rendues par `renderExpose()` et routées via `parse()`.
+
+La fiche **4-1 « Le désir et le bonheur — John Stuart Mill »** a été ajoutée le
+**29 septembre 2026** (veille d'écrit de philosophie) à partir de la vidéo *Dixit 2*
+de Monsieur Phi (`youtu.be/NpUcdhbcmuI`) et du texte source de Mill (*L'utilitarisme*,
+chapitre II, 1861, trad. G. Tanesse) : 8 parties (problème du désir ; tradition de
+l'ataraxie ; Schopenhauer ; thèse de Mill ; juges compétents et leurs limites ; objections
+et prolongements ; **méthode pour l'écrit** ; ce qu'il faut retenir), 19 définitions dont
+17 mot pour mot, 26 cartes, 14 questions de quiz, 5 formats de défis (vf 7, cloze 7, order
+6 étapes, intrus, sort × 2), 8 blocs EXTRA (facts, schéma, 2 tableaux « contentement vs
+Mill » et « thèses par auteur », frise -Ve s. → 1974, 3 mini-questions) et 8 astuces/pièges,
+avec le récapitulatif audio `media/audio/philo-desir.mp3` (clé `AUDIOF['4-1']`). La partie
+7 donne les trois mouvements de l'explication de texte du passage « il vaut mieux être
+Socrate insatisfait qu'un imbécile satisfait » et un plan de dissertation en trois parties
+pour les sujets « Le désir est-il l'ennemi du bonheur ? » et « Peut-on être heureux sans
+être satisfait ? ». Un **kit d'écrit** autonome accompagne la fiche :
+`PHILO-desir-et-bonheur.md` (fiche de révision imprimable + dissertation entièrement
+rédigée).
 
 La matière Philosophie est créée (index 4) à partir de l'audio « Philosophie 1
 début » ; la fiche SES 0-0 est complétée (voix 3, facteurs de production,
@@ -443,6 +464,8 @@ contenu si besoin.
 
 
 ## 🕘 Historique des mises à jour
+
+- **29 septembre 2026 (session `arena/01a0ee81-study-board`)** — **Philosophie : fiche 4-1 « Le désir et le bonheur — John Stuart Mill » (veille d'écrit).** (1) **Contenu** : à partir de la vidéo *Dixit 2* de Monsieur Phi (« Il vaut mieux être Socrate insatisfait qu'un imbécile satisfait », 2018) et du texte source de Mill (*L'Utilitarisme*, chap. II, 1861, trad. Tanesse), création de la fiche **4-1** dans la matière Philosophie (index 4) : 8 parties, 19 définitions dont 17 mot pour mot (désir, bonheur, satisfaction, plaisir, ataraxie, stoïcisme, épicurisme, ascèse, vouloir de Schopenhauer, pessimisme, utilitarisme, bonheur selon Mill, facultés de jouissance supérieures, juges compétents, qualité des plaisirs, hédonisme, eudémonisme, dignité, citations), 26 cartes, 14 questions de quiz, 5 formats de défis (vf 7 items, cloze 7 items, order 6 étapes, intrus, sort × 2), 8 blocs EXTRA (facts, 1 schéma, 2 tableaux, 1 frise, 3 mini-questions) et 8 astuces/pièges ; le cours couvre la tradition de l'ataraxie (Épicure, Épictète, bouddhisme, Descartes), Schopenhauer (vouloir = manque = souffrance, Ixion/Danaïdes/Tantale), la distinction millienne bonheur/satisfaction, l'argument des juges compétents et ses quatre critiques (cercle, élitisme, rechute, glissement perfectionniste), puis Aristote et la machine à expériences de Nozick. (2) **Méthode pour l'écrit** : partie 7 dédiée (les trois mouvements de l'explication de texte du passage de Mill, plan de dissertation en trois parties, phrases à placer, piège à éviter) et kit autonome `PHILO-desir-et-bonheur.md` (essentiel en dix lignes, tableaux, boîte à citations, dissertation rédigée « Le désir est-il un obstacle au bonheur ? », pièges du jour J). (3) **Audio** : `media/audio/philo-desir.mp3` (655 Ko, ≈ 2 min, voix française) + clé `AUDIOF['4-1']`. (4) **Corrections de dette technique** : `DF6['6-2']` défi « Benito o Adolfo ? » utilisait la clé `expl` au lieu de `e` (dernier échec de `tools/audit.py`) ; `audio_recap:false` déclaré sur les fiches italiennes 6-1/6-2/6-3, qui sont textuelles ; `vocal.html` connaît désormais les fiches 4-1, 6-1, 6-2 et 6-3. (5) **Compteurs** : README.md et REPRISE.md recalculés depuis les données réelles (7 matières, 13 fiches, 87 parties, 269 cartes, 193 questions, 10 fichiers MP3) ; `StudyBoard-app.zip` resynchronisé. (6) **Vérifications** : `python3 tools/audit.py` → **0 problème** ; pipeline complet `python3 agents/qa.py` → **9/9 PASS** (structure, syntaxe JS, sécurité, écosystème, audit complet, audit fonctionnel jsdom, serveur, téléphone 5 tailles d'écran, hygiène git).
 
 - **28 septembre 2026 (session `arena/01a0e902-study-board`)** — **Matière Italien (index 6), fiche 6-0 et bloc visuel « doc ».** (1) **Contenu** : à partir de l'oral d'analyse de documents fourni, création de la fiche **6-0 « Il fascismo italiano — analizzare tre fotografie di propaganda »** : 11 parties, 33 définitions dont 27 mot pour mot, 30 cartes, 22 questions de quiz, 5 formats de défis (vf 7, cloze 6, order 6 étapes, intrus, sort 3 catégories), 10 blocs EXTRA (facts 12 dates, 2 schémas, 2 tables, timeline 5 étapes, 4 probes) et 9 astuces/pièges ; MP3 `media/audio/italien-fascismo.mp3` (442 Ko) + clé `AUDIOF['6-0']`. Le contenu couvre la méthode d'analyse en 6 étapes, la chronologie 1919-1945 vérifiée (23.03.1919 Fasci, 11.1921 PNF, 28.10.1922 marcia su Roma, 1923 legge Acerbo, 04.1924 elezioni 64,9 %, 10.06.1924 Matteotti, 03.01.1925 dittatura, 1925-26 leggi fascistissime/OVRA, 03.04.1926 ONB, 1929 Lateranensi, 1935-36 Etiopia/Impero 09.05.1936, 10.1936 Asse Roma-Berlino, 09.1937 Berlino, 1938 leggi razziali, 22.05.1939 Patto d'Acciaio, 10.06.1940 guerra, 25.07.1943 caduta, 28.04.1945), la machine de propagande (Istituto LUCE 1924, MinCulPop 1937, ONB→GIL 1937, dopolavoro, EIAR), l'analyse détaillée des trois photographies (Duce et enfant balilla 1926 ; Duce en contre-plongée devant le Colisée ; Mussolini et Hitler à Berlin en septembre 1937), leur mise en série (consenso → grandezza → guerra), le lexique en 4 familles (régime, image, société, verbes et connecteurs), les modèles rédigés d'analyse et les faux-amis. (2) **Nouveau bloc `doc`** : schéma de cadrage en CSS (cadre au ratio 4/5 ou 5/4, zones colorées positionnées en pourcentage, badge d'angle de prise de vue) + grille d'analyse en 8 entrées + encadré « À dire en italien » ; rendu ajouté comme extension de `blockHTML` (aucune modification du moteur existant), CSS en fin de `<style>`, `tools/audit.py` étendu (TYPES += doc, contrôle titre/analyse/zones et zones dans le cadre) et liste blanche élargie à `astro`/`piege` dans les parties. (3) **Méthode de révision fondée sur la recherche** : partie dédiée + tableau qui relie chaque technique à sa preuve (rappel actif : Roediger et Karpicke 2006, ≈ 80 % contre 36 % après une semaine ; pratique espacée : Cepeda et al. 2006, 254 études ; utilité comparée des 10 techniques : Dunlosky et al. 2013 ; mot-clé sonore pour le vocabulaire d'une langue étrangère : Atkinson et Raugh 1975, 88 % contre 28 % ; principes multimédia et double codage : Mayer 2009, Paivio) et calendrier J0/J+1/J+3/J+7/J+15/J+30. (4) **Studio Vocal** : `vocal.html` connaît désormais les fiches 5-0 (Droit) et 6-0 (Italien). (5) **Outil de session** : boîte de réception privée pour envoyer des images à l'agent (`inbox-server.py`, port 4200, fichiers dans `~/uploads`, hors dépôt, jamais commités) — non versionnée volontairement. (6) **Vérifications** : `python3 tools/audit.py` 0 problème (ZIP resynchronisé, 12 fichiers), `node --check` 3/3 blocs de `index.html` + 1/1 de `vocal.html`, compteurs README/REPRISE recalculés depuis les données réelles (62 parties, 183 cartes, 147 questions, 9 fiches, 7 matières).
 

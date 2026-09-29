@@ -132,7 +132,7 @@ Le site en ligne est disponible à l'adresse :
 
 ---
 
-## 📚 Contenu (état au 28 septembre 2026)
+## 📚 Contenu (état au 29 septembre 2026)
 
 | Index | Matière / fiche | Parties | Définitions (dont mot pour mot) | Cartes | Quiz | Défis |
 |---|---|---:|---:|---:|---:|---:|
@@ -143,17 +143,32 @@ Le site en ligne est disponible à l'adresse :
 | 3-0 | Anglais — Heroes & superheroes : vocabulary + Story vs History | 5 | 4 (0) | 19 | 10 | 4 formats |
 | 0-1 | SES — Progrès technique, innovation et croissance endogène | 9 | 22 (21) | 28 | 28 | 5 formats |
 | 4-0 | Philosophie — Qu'est-ce que la philosophie ? | 5 | 9 (9) | 12 | 10 | 5 formats |
+| 4-1 | Philosophie — Le désir et le bonheur : John Stuart Mill | 8 | 19 (17) | 26 | 14 | 5 formats |
 | 5-0 | Droit — Comprendre ce qu’est le droit | 5 | 11 (5) | 15 | 12 | 5 formats |
 | 6-0 | Italien — Il fascismo italiano : analyser trois photographies de propagande | 11 | 33 (27) | 30 | 22 | 5 formats |
 | 6-1 | Italien — La simbologia del fascismo : symboles, rites et indottrinamento | 6 | 10 (8) | 14 | 10 | 5 formats |
-| 6-2 | Italien — Il regime fascista di Mussolini : la comprensione orale | 7 | 9 (8) | 20 | 12 | 5 formats |
-| 6-3 | Italien — Grammaire : le présent italien et les articles | 4 | 7 (7) | 26 | 10 | 4 formats |
+| 6-2 | Italien — Il regime fascista di Mussolini : la comprensione orale | 7 | 12 (12) | 20 | 12 | 5 formats |
+| 6-3 | Italien — Grammaire : le présent italien et les articles | 4 | 4 (3) | 26 | 10 | 4 formats |
 
-**Totaux actuels : 79 parties, 243 cartes, 179 questions, 12 fiches, 8 récapitulatifs MP3 + 1 exposé. La fiche Droit est textuelle (aucun MP3 source fourni).**
+**Totaux actuels : 87 parties, 269 cartes, 193 questions, 13 fiches, 9 récapitulatifs MP3 + 1 exposé. La fiche Droit est textuelle (aucun MP3 source fourni).**
 
 La matière **Droit** (index 5) a été ajoutée à partir du texte de vocal fourni (transcription produite par IA) : cinq parties, onze définitions dont cinq à mémoriser mot pour mot, quinze cartes, douze questions de quiz et treize questions de défis réparties en cinq formats. Les formulations issues de la reconnaissance vocale ont été clarifiées ; les notions sur la DDHC, le Code civil et la Constitution sont présentées comme repères introductifs.
 
 La matière **Italien** (index 6) a été ajoutée le 28 septembre 2026 à partir de l'oral d'analyse de documents : fiche **6-0 — Il fascismo italiano**, 11 parties, 33 définitions dont 27 mot pour mot, 30 cartes, 22 questions de quiz, 5 formats de défis, 10 blocs de repères et 9 astuces/pièges. La fiche est construite autour d'un nouveau bloc visuel **« doc »** : chaque photographie de propagande est présentée avec son **schéma de cadrage** (zones colorées : premier plan, arrière-plan, angle de prise de vue), une grille d'analyse en 8 entrées (sujet, cadrage, composition, symboles, message, contexte, fonction, limite) et les phrases à dire en italien. La chronologie 1919-1945, la machine de propagande (Istituto LUCE, MinCulPop, ONB, OVRA), le lexique en 4 familles et les modèles rédigés d'analyse sont inclus, ainsi qu'une partie **« Comment réviser cette fiche »** qui applique les techniques mesurées comme les plus efficaces (rappel actif, révisions espacées, entrelacement, double codage, mot-clé sonore pour le vocabulaire).
+
+La fiche **4-1 — Philosophie : Le désir et le bonheur — John Stuart Mill** a été ajoutée le
+29 septembre 2026 à partir de la vidéo *Dixit 2* de Monsieur Phi et du texte de Mill
+(*L'utilitarisme*, chapitre II, 1861). Huit parties : le problème du désir (manque et tension),
+la tradition de l'**ataraxie** (stoïcisme, épicurisme, bouddhisme), Schopenhauer et le vouloir
+comme souffrance, la thèse de Mill (**bonheur ≠ satisfaction**, facultés de jouissance
+supérieures), l'argument des **juges compétents** et ses limites, puis les objections et
+prolongements (hédonisme, eudémonisme d'Aristote, dignité, machine à expériences de Nozick).
+La dernière partie est une **méthode pour l'écrit** : les trois mouvements de l'explication de
+texte du passage (« il vaut mieux être Socrate insatisfait… ») et un plan de dissertation en
+trois parties pour les sujets « Le désir est-il l'ennemi du bonheur ? » et « Peut-on être
+heureux sans être satisfait ? ». 19 définitions dont 17 mot pour mot, 26 cartes, 14 questions
+de quiz, 5 formats de défis, 6 blocs de repères (tableaux, frise, schéma) et 8 astuces/pièges —
+récapitulatif audio `media/audio/philo-desir.mp3`.
 
 La matière **Philosophie** (index 4) a été ajoutée le 13 septembre 2026 à partir
 des documents sources fournis (audio « Philosophie 1 début » + photos de cours).
